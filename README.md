@@ -1,6 +1,5 @@
 # Safe-Path AI 🦯
 ### Sistema de Navegación Aumentada y Asistencia Cognitiva
-**Instituto Tecnológico de León — TecNM | Sistemas Programables 2025**
 
 ---
 
