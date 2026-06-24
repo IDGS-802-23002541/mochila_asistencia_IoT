@@ -1,9 +1,8 @@
 # =============================================================================
-# PROYECTO   : Safe-Path AI — Sistema de Navegación Aumentada
+# PROYECTO   : Vision Guard
 # ARCHIVO    : add_user.py
 # DESCRIPCIÓN: Script de utilidad para crear usuarios en Firestore.
-#              RECICLADO DE: SmartCap/Servidor/add_user.py y
-#              SistemasProgramables/add_user.py (idénticos).
+#             
 #              MEJORAS:
 #                - Función update_user() para cambiar contraseña
 #                - Función list_users() para listar usuarios existentes
