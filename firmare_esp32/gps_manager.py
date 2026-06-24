@@ -1,12 +1,8 @@
 # =============================================================================
-# PROYECTO   : Safe-Path AI — Sistema de Navegación Aumentada
+# PROYECTO   : Vision Guard
 # ARCHIVO    : gps_manager.py
 # DESCRIPCIÓN: Clase GPSManager — encapsula la lectura del módulo GPS
 #              Ublox NEO-6M (o compatible NMEA-0183) via UART.
-#
-#              RECICLADO DE: SistemasProgramables/final.py (función
-#              parse_nmea_sentence + read_gps_once del equipo carrito,
-#              ITL 2024).
 #
 #              MEJORAS RESPECTO AL ORIGINAL:
 #                - Encapsulado en clase (sin variables globales)
@@ -17,8 +13,6 @@
 #                - Historial circular de últimas N posiciones (para traza de ruta)
 #                - Método esta_fijo() para saber si la señal es válida
 #                - Publicación MQTT automática cada N segundos
-#
-# INTEGRANTES: [Nombres del equipo Safe-Path AI]
 # VERSIÓN    : 1.0
 # =============================================================================
 
@@ -118,9 +112,6 @@ class GPSManager:
 
         Ejemplo NMEA:  2106.5517  N
         Resultado:     21 + 6.5517/60 = 21.10919...
-
-        RECICLADO de parse_nmea_sentence() en final_carrito.py.
-        Extraído a método estático para reutilización y prueba unitaria.
         """
         if not valor_nmea:
             return None
@@ -316,8 +307,6 @@ class GPSManager:
 
         Devuelve: True si obtuvo fix, False si se agotó el tiempo.
 
-        RECICLADO de read_gps_once() en final_carrito.py, convertido
-        a método de instancia con timeout configurable.
         """
         if not self._uart_ok:
             print("[GPSManager] UART no disponible. Usando coordenadas de defecto.")
