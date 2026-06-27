@@ -1,12 +1,8 @@
 # =============================================================================
-# PROYECTO   : Safe-Path AI — Sistema de Navegación Aumentada
+# PROYECTO   : Vision Guard
 # ARCHIVO    : firebase_init.py
 # DESCRIPCIÓN: Inicialización única de Firebase Admin SDK y exposición del
 #              cliente Firestore para toda la aplicación.
-#              RECICLADO DE: SmartCap/Servidor/firebase_init.py y
-#              SistemasProgramables/firebase_init.py (idénticos).
-#              Sin cambios funcionales; se añade documentación y manejo
-#              de excepción más descriptivo.
 # =============================================================================
 import firebase_admin
 from firebase_admin import credentials, firestore

@@ -1,5 +1,5 @@
 # =============================================================================
-# PROYECTO   : Safe-Path AI — Sistema de Navegación Aumentada
+# PROYECTO   : Vision Guard
 # ARCHIVO    : app.py  (Servidor Python — E3/E4)
 # DESCRIPCIÓN: Servidor FastAPI + SocketIO que integra:
 #                - Autenticación JWT con cookies (reciclado SmartCap)
@@ -11,18 +11,6 @@
 #                - Gestión de patrones de reconocimiento (CRUD + reentrenamiento)
 #                - Dashboard GPS en tiempo real vía SocketIO
 #                - Historial de sensores del carrito y mochila
-#
-#              RECICLADO DE:
-#                - SmartCap/Servidor/app.py    (base completa)
-#                - SistemasProgramables/app.py (carrito: motor, GPS, línea, fuego)
-#              MEJORAS:
-#                - Tópicos MQTT separados por dispositivo
-#                - Clases FaceRecognizer/ObjectDetector desde recognition.py
-#                - Endpoint /upload_frame_mochila (Safe-Path) además de /gorra
-#                - Endpoint /safepath_event para recibir alertas de la mochila
-#                - Endpoint /gps_data para recibir coordenadas del carrito
-#                - Clase Historial extendida con GPS y eventos Safe-Path
-#                - add_user.py reutilizable como script independiente
 # =============================================================================
 
 import os
@@ -196,7 +184,7 @@ T_GORRA_ROSTROS = 'cap/faces'
 T_SP_SENSORES   = 'safepath/sensores'    # telemetría mochila → servidor
 T_SP_ALERTAS    = 'safepath/alertas'     # alertas críticas mochila → servidor
 T_SP_CMDS       = 'safepath/comandos'    # servidor → mochila
-T_SP_RECONOCIDO = 'safepath/reconocido'  # servidor → mochila (nombre persona)
+# T_SP_RECONOCIDO = 'safepath/reconocido'  # servidor → mochila (nombre persona) No se utiliza por la ESP32 CAM
 T_SP_GPS        = 'safepath/gps'         # mochila → servidor (posición GPS)
 
 # ── Tópicos del GPS CARRITO ───────────────────────────────────────────────────
@@ -691,342 +679,342 @@ async def set_power(power: dict, u=Depends(get_current_user)):
     return {"status": "success"}
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ENDPOINTS DE DATOS DE SENSORES (reciclados de SmartCap)
-# ─────────────────────────────────────────────────────────────────────────────
-@fastapi_app.post("/sensor_data",    response_class=JSONResponse)
-async def post_sensor_data(data: dict, u=Depends(get_current_user)):
-    """Recibe datos del carrito vía HTTP POST (alternativo a MQTT)."""
-    if not data:
-        raise HTTPException(400, "Sin datos.")
-    procesar_datos_sensor(json.dumps(data))
-    return {"status": "success"}
+# # ─────────────────────────────────────────────────────────────────────────────
+# # ENDPOINTS DE DATOS DE SENSORES (reciclados de SmartCap)
+# # ─────────────────────────────────────────────────────────────────────────────
+# @fastapi_app.post("/sensor_data",    response_class=JSONResponse)
+# async def post_sensor_data(data: dict, u=Depends(get_current_user)):
+#     """Recibe datos del carrito vía HTTP POST (alternativo a MQTT)."""
+#     if not data:
+#         raise HTTPException(400, "Sin datos.")
+#     procesar_datos_sensor(json.dumps(data))
+#     return {"status": "success"}
 
 
-@fastapi_app.get("/get_sensor_data",   response_class=JSONResponse)
-async def get_sensor_data(u=Depends(get_current_user)):
-    return Historial(db).obtener_datos_sensor()
+# @fastapi_app.get("/get_sensor_data",   response_class=JSONResponse)
+# async def get_sensor_data(u=Depends(get_current_user)):
+#     return Historial(db).obtener_datos_sensor()
 
 
-@fastapi_app.post("/cap_sensor_data",  response_class=JSONResponse)
-async def post_cap_sensor(data: dict,  u=Depends(get_current_user)):
-    if not data:
-        raise HTTPException(400, "Sin datos.")
-    procesar_cap_sensor(json.dumps(data))
-    return {"status": "success"}
+# @fastapi_app.post("/cap_sensor_data",  response_class=JSONResponse)
+# async def post_cap_sensor(data: dict,  u=Depends(get_current_user)):
+#     if not data:
+#         raise HTTPException(400, "Sin datos.")
+#     procesar_cap_sensor(json.dumps(data))
+#     return {"status": "success"}
 
 
-@fastapi_app.get("/get_cap_sensor_data", response_class=JSONResponse)
-async def get_cap_sensor_data(u=Depends(get_current_user)):
-    return Historial(db).obtener_datos_cap_sensors()
+# @fastapi_app.get("/get_cap_sensor_data", response_class=JSONResponse)
+# async def get_cap_sensor_data(u=Depends(get_current_user)):
+#     return Historial(db).obtener_datos_cap_sensors()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ENDPOINTS GPS (NUEVO)
-# ─────────────────────────────────────────────────────────────────────────────
-@fastapi_app.post("/gps_data", response_class=JSONResponse)
-async def post_gps_data(data: dict, u=Depends(get_current_user)):
-    """Recibe coordenadas GPS de cualquier dispositivo vía HTTP."""
-    fuente = data.pop('fuente', 'mochila')
-    procesar_gps(json.dumps({**data, 'fuente': fuente}), fuente=fuente)
-    return {"status": "success"}
+# # ─────────────────────────────────────────────────────────────────────────────
+# # ENDPOINTS GPS (NUEVO)
+# # ─────────────────────────────────────────────────────────────────────────────
+# @fastapi_app.post("/gps_data", response_class=JSONResponse)
+# async def post_gps_data(data: dict, u=Depends(get_current_user)):
+#     """Recibe coordenadas GPS de cualquier dispositivo vía HTTP."""
+#     fuente = data.pop('fuente', 'mochila')
+#     procesar_gps(json.dumps({**data, 'fuente': fuente}), fuente=fuente)
+#     return {"status": "success"}
 
 
-@fastapi_app.get("/get_gps_data", response_class=JSONResponse)
-async def get_gps_data(fuente: str = "mochila", u=Depends(get_current_user)):
-    """Historial de posiciones GPS filtrado por dispositivo."""
-    return Historial(db).obtener_gps_data(fuente=fuente)
+# @fastapi_app.get("/get_gps_data", response_class=JSONResponse)
+# async def get_gps_data(fuente: str = "mochila", u=Depends(get_current_user)):
+#     """Historial de posiciones GPS filtrado por dispositivo."""
+#     return Historial(db).obtener_gps_data(fuente=fuente)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ENDPOINTS SAFE-PATH (NUEVOS)
-# ─────────────────────────────────────────────────────────────────────────────
-@fastapi_app.post("/safepath_event", response_class=JSONResponse)
-async def post_safepath_event(data: dict, u=Depends(get_current_user)):
-    """Recibe eventos de la mochila Safe-Path vía HTTP (alternativo a MQTT)."""
-    tipo = data.get('tipo', 'telemetria')
-    if tipo == 'telemetria':
-        procesar_safepath_sensores(json.dumps(data))
-    else:
-        procesar_safepath_alerta(tipo)
-    return {"status": "success"}
+# # ─────────────────────────────────────────────────────────────────────────────
+# # ENDPOINTS SAFE-PATH (NUEVOS)
+# # ─────────────────────────────────────────────────────────────────────────────
+# @fastapi_app.post("/safepath_event", response_class=JSONResponse)
+# async def post_safepath_event(data: dict, u=Depends(get_current_user)):
+#     """Recibe eventos de la mochila Safe-Path vía HTTP (alternativo a MQTT)."""
+#     tipo = data.get('tipo', 'telemetria')
+#     if tipo == 'telemetria':
+#         procesar_safepath_sensores(json.dumps(data))
+#     else:
+#         procesar_safepath_alerta(tipo)
+#     return {"status": "success"}
 
 
-@fastapi_app.get("/get_safepath_events", response_class=JSONResponse)
-async def get_safepath_events(u=Depends(get_current_user)):
-    return Historial(db).obtener_safepath_events()
+# @fastapi_app.get("/get_safepath_events", response_class=JSONResponse)
+# async def get_safepath_events(u=Depends(get_current_user)):
+#     return Historial(db).obtener_safepath_events()
 
 
-@fastapi_app.post("/safepath_command", response_class=JSONResponse)
-async def safepath_command(data: dict, u=Depends(get_current_user)):
-    """Envía un comando directamente a la mochila Safe-Path."""
-    cmd = data.get("command", "")
-    if not cmd:
-        raise HTTPException(400, "Comando requerido.")
-    _publicar(T_SP_CMDS, cmd)
-    return {"status": "success", "publicado_en": T_SP_CMDS}
+# @fastapi_app.post("/safepath_command", response_class=JSONResponse)
+# async def safepath_command(data: dict, u=Depends(get_current_user)):
+#     """Envía un comando directamente a la mochila Safe-Path."""
+#     cmd = data.get("command", "")
+#     if not cmd:
+#         raise HTTPException(400, "Comando requerido.")
+#     _publicar(T_SP_CMDS, cmd)
+#     return {"status": "success", "publicado_en": T_SP_CMDS}
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ENDPOINTS DE STREAMING VIDEO (reciclados de SmartCap + Safe-Path mochila)
-# ─────────────────────────────────────────────────────────────────────────────
-frame_lock_carro   = asyncio.Lock()
-frame_lock_gorra   = asyncio.Lock()
-frame_lock_mochila = asyncio.Lock()   # NUEVO: mochila Safe-Path
+# # ─────────────────────────────────────────────────────────────────────────────
+# # ENDPOINTS DE STREAMING VIDEO (reciclados de SmartCap + Safe-Path mochila)
+# # ─────────────────────────────────────────────────────────────────────────────
+# frame_lock_carro   = asyncio.Lock()
+# frame_lock_gorra   = asyncio.Lock()
+# frame_lock_mochila = asyncio.Lock()   # NUEVO: mochila Safe-Path
 
-latest_frame_carro   = None
-latest_frame_gorra   = None
-latest_frame_mochila = None
-
-
-@fastapi_app.post("/upload_frame_carro")
-async def upload_frame_carro(request: Request):
-    """
-    RECICLADO de SmartCap: recibe frames del carrito, aplica detección
-    de objetos SSD MobileNet y los hace disponibles para streaming.
-    """
-    global latest_frame_carro
-    img_data = await request.body()
-    async with frame_lock_carro:
-        nparr = np.frombuffer(img_data, np.uint8)
-        img   = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        img_procesada, etiquetas = detector_objetos.procesar_frame(img)
-        _, buf = cv2.imencode('.jpg', img_procesada)
-        latest_frame_carro = buf.tobytes()
-        if etiquetas:
-            logger.info(f"[Carrito] Objetos detectados: {etiquetas}")
-    return {"status": "success"}
+# latest_frame_carro   = None
+# latest_frame_gorra   = None
+# latest_frame_mochila = None
 
 
-@fastapi_app.post("/upload_frame_gorra")
-async def upload_frame_gorra(request: Request):
-    """
-    RECICLADO de SmartCap: recibe frames de la gorra, aplica reconocimiento
-    facial y publica el nombre detectado en MQTT.
-    """
-    global latest_frame_gorra
-    img_data = await request.body()
-    async with frame_lock_gorra:
-        nparr = np.frombuffer(img_data, np.uint8)
-        img   = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        img_procesada, nombres = reconocedor_facial.procesar_frame(img)
-        _, buf = cv2.imencode('.jpg', img_procesada)
-        latest_frame_gorra = buf.tobytes()
-        for nombre in nombres:
-            _publicar(T_GORRA_ROSTROS, nombre)
-            logger.info(f"[Gorra] Rostro: {nombre}")
-    return {"status": "success"}
+# @fastapi_app.post("/upload_frame_carro")
+# async def upload_frame_carro(request: Request):
+#     """
+#     RECICLADO de SmartCap: recibe frames del carrito, aplica detección
+#     de objetos SSD MobileNet y los hace disponibles para streaming.
+#     """
+#     global latest_frame_carro
+#     img_data = await request.body()
+#     async with frame_lock_carro:
+#         nparr = np.frombuffer(img_data, np.uint8)
+#         img   = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+#         img_procesada, etiquetas = detector_objetos.procesar_frame(img)
+#         _, buf = cv2.imencode('.jpg', img_procesada)
+#         latest_frame_carro = buf.tobytes()
+#         if etiquetas:
+#             logger.info(f"[Carrito] Objetos detectados: {etiquetas}")
+#     return {"status": "success"}
 
 
-@fastapi_app.post("/upload_frame_mochila")
-async def upload_frame_mochila(request: Request):
-    """
-    NUEVO: endpoint para la ESP32-CAM de la mochila Safe-Path AI.
-    Aplica reconocimiento facial (YOLOv8 en versión futura) y
-    publica resultado en safepath/reconocido.
-    """
-    global latest_frame_mochila
-    img_data = await request.body()
-    async with frame_lock_mochila:
-        nparr = np.frombuffer(img_data, np.uint8)
-        img   = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        img_procesada, nombres = reconocedor_facial.procesar_frame(img)
-        _, buf = cv2.imencode('.jpg', img_procesada)
-        latest_frame_mochila = buf.tobytes()
-        for nombre in nombres:
-            _publicar(T_SP_RECONOCIDO, nombre)
-            logger.info(f"[Mochila] Persona: {nombre}")
-    return {"status": "success"}
+# @fastapi_app.post("/upload_frame_gorra")
+# async def upload_frame_gorra(request: Request):
+#     """
+#     RECICLADO de SmartCap: recibe frames de la gorra, aplica reconocimiento
+#     facial y publica el nombre detectado en MQTT.
+#     """
+#     global latest_frame_gorra
+#     img_data = await request.body()
+#     async with frame_lock_gorra:
+#         nparr = np.frombuffer(img_data, np.uint8)
+#         img   = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+#         img_procesada, nombres = reconocedor_facial.procesar_frame(img)
+#         _, buf = cv2.imencode('.jpg', img_procesada)
+#         latest_frame_gorra = buf.tobytes()
+#         for nombre in nombres:
+#             _publicar(T_GORRA_ROSTROS, nombre)
+#             logger.info(f"[Gorra] Rostro: {nombre}")
+#     return {"status": "success"}
 
 
-def _stream_generator(get_frame, lock):
-    """Generador genérico de MJPEG para los tres endpoints de video."""
-    async def stream():
-        while True:
-            async with lock:
-                frame = get_frame()
-            if frame:
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            await asyncio.sleep(0.05)
-    return stream
+# @fastapi_app.post("/upload_frame_mochila")
+# async def upload_frame_mochila(request: Request):
+#     """
+#     NUEVO: endpoint para la ESP32-CAM de la mochila Safe-Path AI.
+#     Aplica reconocimiento facial (YOLOv8 en versión futura) y
+#     publica resultado en safepath/reconocido.
+#     """
+#     global latest_frame_mochila
+#     img_data = await request.body()
+#     async with frame_lock_mochila:
+#         nparr = np.frombuffer(img_data, np.uint8)
+#         img   = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+#         img_procesada, nombres = reconocedor_facial.procesar_frame(img)
+#         _, buf = cv2.imencode('.jpg', img_procesada)
+#         latest_frame_mochila = buf.tobytes()
+#         for nombre in nombres:
+#             _publicar(T_SP_RECONOCIDO, nombre)
+#             logger.info(f"[Mochila] Persona: {nombre}")
+#     return {"status": "success"}
 
 
-@fastapi_app.get("/video_feed_carro")
-async def video_feed_carro():
-    return StreamingResponse(
-        _stream_generator(lambda: latest_frame_carro, frame_lock_carro)(),
-        media_type='multipart/x-mixed-replace; boundary=frame')
+# def _stream_generator(get_frame, lock):
+#     """Generador genérico de MJPEG para los tres endpoints de video."""
+#     async def stream():
+#         while True:
+#             async with lock:
+#                 frame = get_frame()
+#             if frame:
+#                 yield (b'--frame\r\n'
+#                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+#             await asyncio.sleep(0.05)
+#     return stream
 
 
-@fastapi_app.get("/video_feed_gorra")
-async def video_feed_gorra():
-    return StreamingResponse(
-        _stream_generator(lambda: latest_frame_gorra, frame_lock_gorra)(),
-        media_type='multipart/x-mixed-replace; boundary=frame')
+# @fastapi_app.get("/video_feed_carro")
+# async def video_feed_carro():
+#     return StreamingResponse(
+#         _stream_generator(lambda: latest_frame_carro, frame_lock_carro)(),
+#         media_type='multipart/x-mixed-replace; boundary=frame')
 
 
-@fastapi_app.get("/video_feed_mochila")
-async def video_feed_mochila():
-    """NUEVO: streaming de la cámara de la mochila Safe-Path."""
-    return StreamingResponse(
-        _stream_generator(lambda: latest_frame_mochila, frame_lock_mochila)(),
-        media_type='multipart/x-mixed-replace; boundary=frame')
+# @fastapi_app.get("/video_feed_gorra")
+# async def video_feed_gorra():
+#     return StreamingResponse(
+#         _stream_generator(lambda: latest_frame_gorra, frame_lock_gorra)(),
+#         media_type='multipart/x-mixed-replace; boundary=frame')
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ENDPOINTS CRUD DE RECONOCIMIENTO (reciclados de SmartCap + gestión de modelos)
-# ─────────────────────────────────────────────────────────────────────────────
-@fastapi_app.get("/get_recognized_objects", response_class=JSONResponse)
-async def get_recognized_objects(u=Depends(get_current_user)):
-    """RECICLADO de SmartCap: lista patrones de reconocimiento registrados."""
-    try:
-        docs = (db.collection('recognition_patterns')
-                .order_by('created_at', direction=firestore.Query.DESCENDING)
-                .limit(100).stream())
-        resultado = []
-        for doc in docs:
-            obj  = doc.to_dict()
-            dpath = obj.get('directory_path', '')
-            imgs  = sorted(glob.glob(os.path.join(dpath, '*'))) if dpath else []
-            primera_url = (f"/patterns/{os.path.relpath(imgs[0], 'patterns').replace(os.sep, '/')}"
-                           if imgs else None)
-            resultado.append({
-                "id"         : doc.id,
-                "object_name": obj.get('name', 'Desconocido'),
-                "description": obj.get('type', ''),
-                "image_url"  : primera_url,
-            })
-        return resultado
-    except Exception as e:
-        logger.exception(f"get_recognized_objects: {e}")
-        raise HTTPException(500, "Error interno.")
+# @fastapi_app.get("/video_feed_mochila")
+# async def video_feed_mochila():
+#     """NUEVO: streaming de la cámara de la mochila Safe-Path."""
+#     return StreamingResponse(
+#         _stream_generator(lambda: latest_frame_mochila, frame_lock_mochila)(),
+#         media_type='multipart/x-mixed-replace; boundary=frame')
 
 
-@fastapi_app.post("/create_recognition_pattern", response_class=JSONResponse)
-async def create_recognition_pattern(request: Request,
-                                     background_tasks: BackgroundTasks,
-                                     u=Depends(get_current_user)):
-    """
-    NUEVO endpoint unificado para crear patrones.
-    Acepta multipart/form-data con campos: type, name, images[].
-    Equivale al /create_face_pattern del recognition.py original,
-    movido aquí para centralizar la lógica en app.py.
-    """
-    from fastapi import UploadFile, File
-    form   = await request.form()
-    tipo   = str(form.get('type', '')).lower()
-    nombre = str(form.get('name', ''))
-    imagenes = form.getlist('images')
-
-    if tipo not in ('persona', 'objeto'):
-        raise HTTPException(400, "type debe ser 'persona' o 'objeto'.")
-    if len(imagenes) < 20:
-        raise HTTPException(400, "Se requieren al menos 20 imágenes.")
-
-    nombre_seguro = sanitizar_nombre(nombre)
-    if not nombre_seguro:
-        raise HTTPException(400, "Nombre inválido.")
-
-    dir_base  = FACES_DIR if tipo == 'persona' else OBJECTS_DIR
-    dir_usuario = os.path.join(dir_base, nombre_seguro)
-    os.makedirs(dir_usuario, exist_ok=True)
-
-    archivos_guardados = []
-    for img in imagenes:
-        nombre_arch = sanitizar_nombre_archivo(img.filename)
-        if not nombre_arch:
-            continue
-        ruta = os.path.join(dir_usuario, nombre_arch)
-        with open(ruta, 'wb') as f:
-            shutil.copyfileobj(img.file, f)
-        archivos_guardados.append(ruta)
-
-    if len(archivos_guardados) < 20:
-        raise HTTPException(400, "No se guardaron suficientes imágenes.")
-
-    # Entrenar en background
-    if tipo == 'persona':
-        background_tasks.add_task(entrenar_modelo_facial, reconocedor_facial)
-    else:
-        background_tasks.add_task(entrenar_modelo_objetos, reconocedor_objetos)
-
-    guardar_patron_en_firebase(nombre, tipo, dir_usuario, len(archivos_guardados))
-
-    await sio.emit('new_recognized_object', {
-        'object_name': nombre,
-        'description': tipo,
-        'image_url'  : None,
-    })
-    return {"status": "success",
-            "message": f"Patrón de {tipo} '{nombre}' creado con "
-                       f"{len(archivos_guardados)} imágenes."}
+# # ─────────────────────────────────────────────────────────────────────────────
+# # ENDPOINTS CRUD DE RECONOCIMIENTO (reciclados de SmartCap + gestión de modelos)
+# # ─────────────────────────────────────────────────────────────────────────────
+# @fastapi_app.get("/get_recognized_objects", response_class=JSONResponse)
+# async def get_recognized_objects(u=Depends(get_current_user)):
+#     """RECICLADO de SmartCap: lista patrones de reconocimiento registrados."""
+#     try:
+#         docs = (db.collection('recognition_patterns')
+#                 .order_by('created_at', direction=firestore.Query.DESCENDING)
+#                 .limit(100).stream())
+#         resultado = []
+#         for doc in docs:
+#             obj  = doc.to_dict()
+#             dpath = obj.get('directory_path', '')
+#             imgs  = sorted(glob.glob(os.path.join(dpath, '*'))) if dpath else []
+#             primera_url = (f"/patterns/{os.path.relpath(imgs[0], 'patterns').replace(os.sep, '/')}"
+#                            if imgs else None)
+#             resultado.append({
+#                 "id"         : doc.id,
+#                 "object_name": obj.get('name', 'Desconocido'),
+#                 "description": obj.get('type', ''),
+#                 "image_url"  : primera_url,
+#             })
+#         return resultado
+#     except Exception as e:
+#         logger.exception(f"get_recognized_objects: {e}")
+#         raise HTTPException(500, "Error interno.")
 
 
-@fastapi_app.delete("/recognized_object/{id}", response_class=JSONResponse)
-async def delete_recognized_object(id: str,
-                                   background_tasks: BackgroundTasks,
-                                   u=Depends(get_current_user)):
-    """RECICLADO de SmartCap: elimina patrón + imágenes + reentrenamiento."""
-    doc_ref = db.collection('recognition_patterns').document(id)
-    doc     = doc_ref.get()
-    if not doc.exists:
-        raise HTTPException(404, "Registro no encontrado.")
+# @fastapi_app.post("/create_recognition_pattern", response_class=JSONResponse)
+# async def create_recognition_pattern(request: Request,
+#                                      background_tasks: BackgroundTasks,
+#                                      u=Depends(get_current_user)):
+#     """
+#     NUEVO endpoint unificado para crear patrones.
+#     Acepta multipart/form-data con campos: type, name, images[].
+#     Equivale al /create_face_pattern del recognition.py original,
+#     movido aquí para centralizar la lógica en app.py.
+#     """
+#     from fastapi import UploadFile, File
+#     form   = await request.form()
+#     tipo   = str(form.get('type', '')).lower()
+#     nombre = str(form.get('name', ''))
+#     imagenes = form.getlist('images')
 
-    obj   = doc.to_dict()
-    dpath = obj.get('directory_path', '')
-    tipo  = obj.get('type', '').lower()
+#     if tipo not in ('persona', 'objeto'):
+#         raise HTTPException(400, "type debe ser 'persona' o 'objeto'.")
+#     if len(imagenes) < 20:
+#         raise HTTPException(400, "Se requieren al menos 20 imágenes.")
 
-    # Eliminar imágenes y directorio
-    if dpath and os.path.isdir(dpath):
-        shutil.rmtree(dpath, ignore_errors=True)
+#     nombre_seguro = sanitizar_nombre(nombre)
+#     if not nombre_seguro:
+#         raise HTTPException(400, "Nombre inválido.")
 
-    doc_ref.delete()
+#     dir_base  = FACES_DIR if tipo == 'persona' else OBJECTS_DIR
+#     dir_usuario = os.path.join(dir_base, nombre_seguro)
+#     os.makedirs(dir_usuario, exist_ok=True)
 
-    # Reentrenamiento en background
-    if tipo == 'persona':
-        background_tasks.add_task(_gestionar_modelo_facial)
-    elif tipo == 'objeto':
-        background_tasks.add_task(_gestionar_modelo_objetos)
+#     archivos_guardados = []
+#     for img in imagenes:
+#         nombre_arch = sanitizar_nombre_archivo(img.filename)
+#         if not nombre_arch:
+#             continue
+#         ruta = os.path.join(dir_usuario, nombre_arch)
+#         with open(ruta, 'wb') as f:
+#             shutil.copyfileobj(img.file, f)
+#         archivos_guardados.append(ruta)
 
-    await sio.emit('delete_recognized_object', {'id': id})
-    return {"status": "success"}
+#     if len(archivos_guardados) < 20:
+#         raise HTTPException(400, "No se guardaron suficientes imágenes.")
+
+#     # Entrenar en background
+#     if tipo == 'persona':
+#         background_tasks.add_task(entrenar_modelo_facial, reconocedor_facial)
+#     else:
+#         background_tasks.add_task(entrenar_modelo_objetos, reconocedor_objetos)
+
+#     guardar_patron_en_firebase(nombre, tipo, dir_usuario, len(archivos_guardados))
+
+#     await sio.emit('new_recognized_object', {
+#         'object_name': nombre,
+#         'description': tipo,
+#         'image_url'  : None,
+#     })
+#     return {"status": "success",
+#             "message": f"Patrón de {tipo} '{nombre}' creado con "
+#                        f"{len(archivos_guardados)} imágenes."}
 
 
-def _gestionar_modelo_facial():
-    """RECICLADO de gestionar_modelo_facial() del SmartCap."""
-    restantes = list(
-        db.collection('recognition_patterns')
-          .where('type', '==', 'persona').stream()
-    )
-    if restantes:
-        try:
-            entrenar_modelo_facial(reconocedor_facial)
-        except Exception as e:
-            logger.error(f"[gestionar_modelo_facial] {e}")
-    else:
-        pkl = os.path.join(PATTERNS_DIR, 'face_encodings.pkl')
-        if os.path.exists(pkl):
-            os.remove(pkl)
-        reconocedor_facial.recargar()
+# @fastapi_app.delete("/recognized_object/{id}", response_class=JSONResponse)
+# async def delete_recognized_object(id: str,
+#                                    background_tasks: BackgroundTasks,
+#                                    u=Depends(get_current_user)):
+#     """RECICLADO de SmartCap: elimina patrón + imágenes + reentrenamiento."""
+#     doc_ref = db.collection('recognition_patterns').document(id)
+#     doc     = doc_ref.get()
+#     if not doc.exists:
+#         raise HTTPException(404, "Registro no encontrado.")
+
+#     obj   = doc.to_dict()
+#     dpath = obj.get('directory_path', '')
+#     tipo  = obj.get('type', '').lower()
+
+#     # Eliminar imágenes y directorio
+#     if dpath and os.path.isdir(dpath):
+#         shutil.rmtree(dpath, ignore_errors=True)
+
+#     doc_ref.delete()
+
+#     # Reentrenamiento en background
+#     if tipo == 'persona':
+#         background_tasks.add_task(_gestionar_modelo_facial)
+#     elif tipo == 'objeto':
+#         background_tasks.add_task(_gestionar_modelo_objetos)
+
+#     await sio.emit('delete_recognized_object', {'id': id})
+#     return {"status": "success"}
 
 
-def _gestionar_modelo_objetos():
-    """RECICLADO de gestionar_modelo_objetos() del SmartCap."""
-    restantes = list(
-        db.collection('recognition_patterns')
-          .where('type', '==', 'objeto').stream()
-    )
-    if restantes:
-        try:
-            entrenar_modelo_objetos(reconocedor_objetos)
-        except Exception as e:
-            logger.error(f"[gestionar_modelo_objetos] {e}")
-    else:
-        pkl = os.path.join(PATTERNS_DIR, 'object_encodings.pkl')
-        if os.path.exists(pkl):
-            os.remove(pkl)
-        reconocedor_objetos.recargar()
+# def _gestionar_modelo_facial():
+#     """RECICLADO de gestionar_modelo_facial() del SmartCap."""
+#     restantes = list(
+#         db.collection('recognition_patterns')
+#           .where('type', '==', 'persona').stream()
+#     )
+#     if restantes:
+#         try:
+#             entrenar_modelo_facial(reconocedor_facial)
+#         except Exception as e:
+#             logger.error(f"[gestionar_modelo_facial] {e}")
+#     else:
+#         pkl = os.path.join(PATTERNS_DIR, 'face_encodings.pkl')
+#         if os.path.exists(pkl):
+#             os.remove(pkl)
+#         reconocedor_facial.recargar()
+
+
+# def _gestionar_modelo_objetos():
+#     """RECICLADO de gestionar_modelo_objetos() del SmartCap."""
+#     restantes = list(
+#         db.collection('recognition_patterns')
+#           .where('type', '==', 'objeto').stream()
+#     )
+#     if restantes:
+#         try:
+#             entrenar_modelo_objetos(reconocedor_objetos)
+#         except Exception as e:
+#             logger.error(f"[gestionar_modelo_objetos] {e}")
+#     else:
+#         pkl = os.path.join(PATTERNS_DIR, 'object_encodings.pkl')
+#         if os.path.exists(pkl):
+#             os.remove(pkl)
+#         reconocedor_objetos.recargar()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
