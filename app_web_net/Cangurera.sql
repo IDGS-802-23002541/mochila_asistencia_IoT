@@ -120,7 +120,7 @@ CREATE TABLE Analitico.Hechos_Eventos (
     TipoEvento      VARCHAR(50),
     Discapacidad    NVARCHAR(50),
     Latitud         DECIMAL(10,8) NULL,
-    Longitud        DECIMAL(10,8) NULL,
+    Longitud        DECIMAL(11,8) NULL,
     Geo_Es_Estimado BIT,
     FuerzaImpactoG  DECIMAL(5,2)
 );
