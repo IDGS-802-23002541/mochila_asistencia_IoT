@@ -5,19 +5,11 @@
         android:icon="@drawable/documento"
         android:title="" />
     <item
-        android:id="@+id/nav_mapa"
-        android:icon="@drawable/mapa"
-        android:title="" />
-    <item
         android:id="@+id/nav_home"
         android:icon="@drawable/hogar"
         android:title="" />
     <item
-        android:id="@+id/nav_monitoreo"
-        android:icon="@drawable/grafico"
-        android:title="" />
-    <item
-        android:id="@+id/nav_perfil"
-        android:icon="@drawable/usuario"
+        android:id="@+id/nav_mapa"
+        android:icon="@drawable/mapa"
         android:title="" />
 </menu>

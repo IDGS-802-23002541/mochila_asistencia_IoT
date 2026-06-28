@@ -156,13 +156,12 @@
 
     </LinearLayout>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnContinuar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="32dp"
-        android:backgroundTint="@color/vg_dark_blue"
         android:background="@drawable/btn_primary"
         android:text="Continuar"
         android:textAllCaps="false"

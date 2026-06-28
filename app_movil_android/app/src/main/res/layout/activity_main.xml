@@ -75,7 +75,8 @@
             android:inputType="textPersonName"
             android:paddingHorizontal="12dp"
             android:textSize="14sp"
-            android:textColorHint="@color/vg_text_muted"/>
+            android:textColorHint="@color/vg_dark_blue"
+            android:textColor="#000000" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -96,28 +97,20 @@
             android:inputType="textPassword"
             android:paddingHorizontal="12dp"
             android:textSize="14sp"
-            android:textColorHint="@color/vg_text_muted"/>
+            android:textColorHint="@color/vg_dark_blue"
+            android:textColor="#000000" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnIniciarSesion"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:backgroundTint="@color/vg_dark_blue"
             android:background="@drawable/btn_primary"
             android:text="Iniciar Sesión"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/txtOlvidaste"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:text="¿Olvidaste tu contraseña?"
-            android:textColor="@color/vg_text_muted"
-            android:textSize="14sp" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

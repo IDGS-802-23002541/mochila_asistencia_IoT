@@ -34,6 +34,19 @@
             android:name=".Controllers.HomeActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".Controllers.MonitoreoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".Controllers.HistorialActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".Controllers.DetallesRutaActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>
