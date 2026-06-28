@@ -49,6 +49,10 @@ CREATE TABLE Operativo.Organizaciones (
     Sector             NVARCHAR(50)  NOT NULL,
     Contacto_Principal NVARCHAR(100) NULL,
     Email_Contacto     VARCHAR(100)  NULL,
+    Contrasena_Hash    VARCHAR(255)  NULL,
+    Rol                VARCHAR(20)   NOT NULL DEFAULT 'usuario'
+        CONSTRAINT chk_organizaciones_rol CHECK (Rol IN ('usuario', 'admin')),
+    Es_Interna         BIT           NOT NULL DEFAULT 0,
     FechaCreacion      DATETIME2(3)  NOT NULL DEFAULT SYSUTCDATETIME(),
     Estado_Activo      BIT           NOT NULL DEFAULT 1
 );
@@ -100,6 +104,9 @@ CREATE INDEX IX_Eventos_RecorridoId ON Operativo.Eventos_Detectados(RecorridoId)
 CREATE INDEX IX_Eventos_Timestamp   ON Operativo.Eventos_Detectados(TimestampEvento);
 CREATE INDEX IX_Dispositivos_OrganizacionId ON Operativo.Dispositivos(OrganizacionId);
 CREATE INDEX IX_Recorridos_DispositivoId ON Operativo.Recorridos(DispositivoId);
+CREATE UNIQUE INDEX UX_Organizaciones_Email_Contacto
+    ON Operativo.Organizaciones(Email_Contacto)
+    WHERE Email_Contacto IS NOT NULL;
 GO
 
 -- =====================================================================
