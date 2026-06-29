@@ -276,12 +276,20 @@ class MQTTManager:
             
             # LÓGICA DE DETECCIÓN DE SSL: Si el puerto es 8883 (HiveMQ Cloud), activamos el cifrado SSL/TLS obligatorio
             utilizar_ssl = (self._puerto == 8883)
+            config_ssl = {}
+            
+            if utilizar_ssl:
+                # El parámetro "server_hostname" es indispensable para verificar certificados.
+                # Al pasar un diccionario vacío, le decimos a MicroPython que use SSL en modo '--insecure',
+                # permitiendo la conexión cifrada sin verificar las claves criptográficas locales.
+                config_ssl = {"server_hostname": self._broker}
             
             self._cliente = MQTTClient(
                 self._client_id, self._broker,
                 user=self._usuario, password=self._contrasena,
                 port=self._puerto,
-                ssl=utilizar_ssl
+                ssl=utilizar_ssl,
+                ssl_params=config_ssl
             )
             self._cliente.set_callback(self._dispatcher)
             self._cliente.connect()

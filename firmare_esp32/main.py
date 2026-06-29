@@ -4,7 +4,7 @@
 # DESCRIPCIÓN: Controlador asíncrono que orquesta en paralelo la telemetría,
 #              actualización de alertas físicas, geolocalización GPS,
 #              comunicación por MQTT y sincronización periódica en Firebase.
-# VERSIÓN    : 2.3 (Soporte de Infrarrojos, Alertas por Voz, Motor y Buzzer)
+# VERSIÓN    : 2.4 (Sincronizado con HiveMQ Cloud SSL en puerto 8883)
 # =============================================================================
 
 import uasyncio as asyncio
@@ -21,12 +21,12 @@ from gps_manager  import GPSManager
 # CONFIGURACIÓN OPERATIVA (Ajustar credenciales de red local)
 # ─────────────────────────────────────────────────────────────────────────────
 REDES_WIFI = [
-    ("INFINITUM8536_5", "4696601711"), # <-- Agrega la red de tu casa/escuela
-    ("CATA", "papantla"),    # Red del campus
+    ("INFINITUM8536_2.4", "4696601711"), 
+    ("CATA", "papantla"),    
 ]
 
 # Broker MQTT central de Diego
-MQTT_BROKER    = "34.30.116.129"
+MQTT_BROKER    = "4ff222212d4746d0a5541cb27f96f5aa.s1.eu.hivemq.cloud"
 MQTT_PUERTO    = 8883
 MQTT_USUARIO   = "diegosa9_"
 MQTT_PASSWORD  = "Diegosa9"
@@ -40,15 +40,15 @@ TOPICO_GPS        = "safepath/gps"
 
 # Parámetros de la Base de Datos Firebase Firestore (Sincronización histórica)
 FIREBASE_API_KEY   = "TU_API_KEY_AQUI"
-FIREBASE_PROJECT   = "safe-path-ai"
-FIREBASE_COLECCION = "safepath_events"
+FIREBASE_PROJECT   = "vision-guard"
+FIREBASE_COLECCION = "visionguard-events"
 
-# Configuración del Puerto Serial de Hardware (UART2) - ¡VALIDADO A 115200 BPS!
+# Configuración del Puerto Serial de Hardware (UART2)
 GPS_UART_ID = 2
 GPS_PIN_TX  = 17
 GPS_PIN_RX  = 16
-GPS_LAT_DEF = 21.155614  # <-- Actualizado a tus coordenadas reales obtenidas
-GPS_LON_DEF = -101.680390 # <-- Actualizado a tus coordenadas reales obtenidas
+GPS_LAT_DEF = 21.155614  
+GPS_LON_DEF = -101.680390
 
 # Tiempos de ciclo y umbrales operacionales
 DISTANCIA_ALERTA_FRONTAL_CM = 100.0  # Alerta de voz por debajo de 1 metro
@@ -193,14 +193,15 @@ async def loop_publicar_mqtt():
                 "lon"   : pos_gps.get("lon"),
             })
             if mqtt.publicar(TOPICO_SENSORES, payload):
-                print(f"[MQTT] Telemetría enviada: {payload}")
+                print(f"[MQTT] Telemetría enviada a HiveMQ:: {payload}")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CORUTINA 3 — Escucha Activa de Mensajes MQTT
 # ─────────────────────────────────────────────────────────────────────────────
 async def loop_mqtt_recv():
     while True:
-        mqtt.verificar_mensajes()
+        if estado["mqtt_ok"]:
+            mqtt.verificar_mensajes()
         await asyncio.sleep(0.1)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -268,7 +269,7 @@ async def main():
     global sensores, actuadores, mqtt, firebase, gps
 
     print("=" * 60)
-    print("      VISION GUARD — FIRMWARE DE CONTROL CENTRAL v2.3")
+    print("      VISION GUARD — FIRMWARE DE CONTROL CENTRAL v2.4")
     print("      CONFIG: HC-SR04 | MPU6050 | 2x INFRARROJOS | MOTOR | BUZZER")
     print("=" * 60)
 
@@ -311,7 +312,7 @@ async def main():
     asyncio.create_task(loop_firebase())
     asyncio.create_task(loop_gps_wrapper())
 
-    print("[Boot] Safe-Path funcionando al 100%.\n")
+    print("[Boot] Vision Guard funcionando al 100%.\n")
 
     # Bucle infinito para monitoreo de estado y reconexión activa de MQTT
     while True:
