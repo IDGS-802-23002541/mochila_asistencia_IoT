@@ -10,11 +10,18 @@ using MQTTnet.Protocol;
 namespace CangureraInteligente.Services;
 
 /// <summary>
-/// Servicio en segundo plano que escucha el topic MQTT cangurera/telemetria.
+/// Servicio en segundo plano que escucha los topics MQTT publicados por el ESP32:
+///   - cangurera/telemetria           : telemetría periódica (heartbeat / última conexión).
+///   - cangurera/eventos              : registro de un evento puntual (caída, impacto, etc.).
+///   - cangurera/recorrido/finalizar  : cierre de un recorrido + ruta de coordenadas.
 /// </summary>
 public class MqttListenerService : BackgroundService
 {
-    private const string TelemetryTopic = "cangurera/telemetria";
+    private const string TopicTelemetria = "cangurera/telemetria";
+    private const string TopicEventos    = "cangurera/eventos";
+    private const string TopicFinalizar  = "cangurera/recorrido/finalizar";
+
+    private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<MqttListenerService> _log;
@@ -40,12 +47,16 @@ public class MqttListenerService : BackgroundService
         {
             _log.LogInformation("MQTT conectado a {Host}:{Port}", _cfg.Host, _cfg.Port);
 
-            await _client.SubscribeAsync(new MqttTopicFilterBuilder()
-                .WithTopic(TelemetryTopic)
-                .WithAtLeastOnceQoS()
-                .Build(), stoppingToken);
+            foreach (var topic in new[] { TopicTelemetria, TopicEventos, TopicFinalizar })
+            {
+                await _client.SubscribeAsync(new MqttTopicFilterBuilder()
+                    .WithTopic(topic)
+                    .WithAtLeastOnceQoS()
+                    .Build(), stoppingToken);
+            }
 
-            _log.LogInformation("Suscripción MQTT activa: {Topic}", TelemetryTopic);
+            _log.LogInformation("Suscripción MQTT activa: {T1}, {T2}, {T3}",
+                TopicTelemetria, TopicEventos, TopicFinalizar);
         };
 
         _client.DisconnectedAsync += async args =>
@@ -98,28 +109,65 @@ public class MqttListenerService : BackgroundService
 
         _log.LogDebug("MQTT recibido [{Topic}]: {Payload}", topic, payload);
 
-        if (!string.Equals(topic, TelemetryTopic, StringComparison.OrdinalIgnoreCase))
-        {
-            _log.LogWarning("Topic MQTT no manejado: {Topic}", topic);
-            return;
-        }
-
-        var telemetry = JsonSerializer.Deserialize<MqttTelemetryPayload>(payload,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-        if (telemetry is null)
-        {
-            _log.LogWarning("Payload de telemetría inválido: {Payload}", payload);
-            return;
-        }
-
         using var scope = _scopeFactory.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<IMqttTelemetryProcessor>();
 
-        var success = await processor.ProcessAsync(telemetry);
+        bool success;
+
+        try
+        {
+            switch (topic)
+            {
+                case TopicTelemetria:
+                {
+                    var telemetria = JsonSerializer.Deserialize<MqttTelemetryPayload>(payload, JsonOpts);
+                    if (telemetria is null)
+                    {
+                        _log.LogWarning("Payload de telemetría inválido: {Payload}", payload);
+                        return;
+                    }
+                    success = await processor.ProcesarTelemetriaAsync(telemetria);
+                    break;
+                }
+
+                case TopicEventos:
+                {
+                    var evento = JsonSerializer.Deserialize<MqttEventoPayload>(payload, JsonOpts);
+                    if (evento is null)
+                    {
+                        _log.LogWarning("Payload de evento inválido: {Payload}", payload);
+                        return;
+                    }
+                    success = await processor.RegistrarEventoAsync(evento);
+                    break;
+                }
+
+                case TopicFinalizar:
+                {
+                    var finalizar = JsonSerializer.Deserialize<MqttFinalizarRecorridoPayload>(payload, JsonOpts);
+                    if (finalizar is null)
+                    {
+                        _log.LogWarning("Payload de finalización inválido: {Payload}", payload);
+                        return;
+                    }
+                    success = await processor.FinalizarRecorridoAsync(finalizar);
+                    break;
+                }
+
+                default:
+                    _log.LogWarning("Topic MQTT no manejado: {Topic}", topic);
+                    return;
+            }
+        }
+        catch (JsonException ex)
+        {
+            _log.LogWarning(ex, "No se pudo deserializar el payload MQTT [{Topic}]: {Payload}", topic, payload);
+            return;
+        }
+
         if (!success)
         {
-            _log.LogWarning("El mensaje MQTT fue recibido pero no se procesó correctamente.");
+            _log.LogWarning("El mensaje MQTT [{Topic}] fue recibido pero no se procesó correctamente.", topic);
         }
     }
 
@@ -169,7 +217,7 @@ public class MqttListenerService : BackgroundService
 }
 
 /// <summary>
-/// Configuración del broker MQTT (leída desde appsettings.json → sección "MQTT").
+/// Configuración del broker MQTT (leída desde appsettings.json → sección "MQTT" o "Mqtt").
 /// Soporta TCP directo y WebSocket en puertos 80/443.
 /// </summary>
 public class MqttSettings

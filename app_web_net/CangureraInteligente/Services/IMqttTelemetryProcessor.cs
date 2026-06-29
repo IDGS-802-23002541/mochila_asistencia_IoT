@@ -1,15 +1,19 @@
-using System.Threading;
-using System.Threading.Tasks;
 using CangureraInteligente.DTOs;
 
 namespace CangureraInteligente.Services;
 
 /// <summary>
-/// Procesador de mensajes de telemetría recibidos por MQTT.
-/// Implementaciones deben reutilizar la lógica de negocio existente
-/// (servicios/patrones de la aplicación) y no acceder directamente al DbContext.
+/// Procesador de los mensajes MQTT enviados por el ESP32. Cada topic tiene su
+/// propio método porque cada uno representa un caso de negocio distinto.
 /// </summary>
 public interface IMqttTelemetryProcessor
 {
-    Task<bool> ProcessAsync(MqttTelemetryPayload payload, CancellationToken ct = default);
+    /// <summary>Procesa telemetría periódica (topic cangurera/telemetria).</summary>
+    Task<bool> ProcesarTelemetriaAsync(MqttTelemetryPayload payload, CancellationToken ct = default);
+
+    /// <summary>Procesa el registro de un evento puntual (topic cangurera/eventos).</summary>
+    Task<bool> RegistrarEventoAsync(MqttEventoPayload payload, CancellationToken ct = default);
+
+    /// <summary>Procesa el cierre de un recorrido (topic cangurera/recorrido/finalizar).</summary>
+    Task<bool> FinalizarRecorridoAsync(MqttFinalizarRecorridoPayload payload, CancellationToken ct = default);
 }

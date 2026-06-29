@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CangureraInteligente.DTOs;
@@ -71,6 +72,15 @@ public record MqttEventoPayload
     [JsonPropertyName("tipoEventoId")]
     public int TipoEventoId { get; init; }
 
+    /// <summary>
+    /// NUEVO: timestamp del evento. Acepta epoch Unix en segundos o
+    /// milisegundos, o una cadena ISO-8601 (ver FlexibleUnixDateTimeConverter
+    /// más abajo). Si el ESP32 no lo manda, se usa la hora del servidor.
+    /// </summary>
+    [JsonPropertyName("timestamp")]
+    [JsonConverter(typeof(FlexibleUnixDateTimeConverter))]
+    public DateTime? Timestamp { get; init; }
+
     /// <summary>Latitud GPS. Null si no hay señal.</summary>
     [JsonPropertyName("latitud")]
     public decimal? Latitud { get; init; }
@@ -99,14 +109,22 @@ public record MqttFinalizarRecorridoPayload
     public int RecorridoId { get; init; }
 
     /// <summary>
-    /// Array JSON de coordenadas GPS grabadas durante el recorrido.
+    /// Array JSON de coordenadas GPS grabadas durante el recorrido, ya
+    /// serializado como string por el ESP32.
     /// Formato: [{"lat":21.1234,"lon":-101.5678,"ts":"2025-06-25T10:00:00Z"}, ...]
     /// </summary>
     [JsonPropertyName("rutaCoordenadas")]
     public string RutaCoordenadas { get; init; } = "[]";
 
-    /// <summary>Timestamp UTC del momento en que el usuario devolvió la mochila.</summary>
+    /// <summary>
+    /// AJUSTADO: timestamp del momento en que el usuario devolvió la mochila.
+    /// Acepta epoch Unix en segundos/milisegundos (lo más probable según el
+    /// firmware) o cadena ISO-8601, gracias a FlexibleUnixDateTimeConverter.
+    /// Antes este campo esperaba forzosamente un string ISO-8601 y hubiera
+    /// tronado al deserializar un número.
+    /// </summary>
     [JsonPropertyName("fechaFin")]
+    [JsonConverter(typeof(FlexibleUnixDateTimeConverter))]
     public DateTime FechaFin { get; init; } = DateTime.UtcNow;
 }
 
@@ -132,5 +150,55 @@ public record MqttTelemetryPayload
     public int? Bateria { get; init; }
 
     [JsonPropertyName("fecha")]
+    [JsonConverter(typeof(FlexibleUnixDateTimeConverter))]
     public DateTime Fecha { get; init; } = DateTime.UtcNow;
+}
+
+/// <summary>
+/// NUEVO: convierte un timestamp enviado por el ESP32 a DateTime UTC. Acepta:
+///   - epoch Unix en segundos (ej. 1719526529)
+///   - epoch Unix en milisegundos (ej. 1719526529000)
+///   - cadena ISO-8601 (ej. "2025-06-25T10:00:00Z")
+/// El formato exacto que usa el firmware no está confirmado, así que se
+/// detecta automáticamente: si el token es numérico, por su magnitud; si es
+/// string, primero se intenta como número y luego como fecha ISO-8601.
+/// </summary>
+public class FlexibleUnixDateTimeConverter : JsonConverter<DateTime>
+{
+    private const long MillisecondsThreshold = 100_000_000_000; // ~año 5138 en segundos
+
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            return FromUnix(reader.GetInt64());
+        }
+
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            var text = reader.GetString();
+
+            if (long.TryParse(text, out var asLong))
+                return FromUnix(asLong);
+
+            if (DateTime.TryParse(text, System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal,
+                    out var parsed))
+            {
+                return parsed;
+            }
+        }
+
+        throw new JsonException($"No se pudo interpretar el valor de fecha/hora (token: {reader.TokenType}).");
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+    {
+        writer.WriteNumberValue(new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc)).ToUnixTimeSeconds());
+    }
+
+    private static DateTime FromUnix(long value) =>
+        value >= MillisecondsThreshold
+            ? DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime
+            : DateTimeOffset.FromUnixTimeSeconds(value).UtcDateTime;
 }

@@ -1,65 +1,136 @@
-using System.Text.Json;
+using CangureraInteligente.Data;
 using CangureraInteligente.DTOs;
-using Microsoft.Extensions.DependencyInjection;
+using CangureraInteligente.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CangureraInteligente.Services;
 
 /// <summary>
-/// Implementación por defecto del procesador de telemetría.
-/// Intenta resolver un servicio de dominio conocido (p. ej. `IRecorridoService`) y delegar.
-/// Si no existe una implementación concreta, registra el mensaje y devuelve true para evitar reintentos infinitos.
+/// Implementación del procesador de mensajes MQTT del ESP32.
+/// Trabaja directamente sobre el DbContext (mismo patrón que RecorridosController),
+/// ya que el proyecto no tiene un servicio de dominio separado para Recorridos/Eventos.
 /// </summary>
 public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 {
-    private readonly IServiceProvider _provider;
+    private readonly CangureraDbContext _db;
     private readonly ILogger<MqttTelemetryProcessor> _log;
 
-    public MqttTelemetryProcessor(IServiceProvider provider, ILogger<MqttTelemetryProcessor> log)
+    public MqttTelemetryProcessor(CangureraDbContext db, ILogger<MqttTelemetryProcessor> log)
     {
-        _provider = provider;
+        _db = db;
         _log = log;
     }
 
-    public async Task<bool> ProcessAsync(MqttTelemetryPayload payload, CancellationToken ct = default)
+    public async Task<bool> ProcesarTelemetriaAsync(MqttTelemetryPayload payload, CancellationToken ct = default)
     {
-        _log.LogInformation("Procesando telemetría: dispositivo={Id} lat={Lat} lon={Lon} bat={Bat} vel={Vel} ts={Ts}",
-            payload.DispositivoId, payload.Latitud, payload.Longitud, payload.Bateria, payload.Velocidad, payload.Fecha);
-
-        // Intenta delegar a un servicio de dominio existente si está registrado.
-        // Ejemplo esperado (opcional) de servicio: IRecorridoService o ITelemetriaService.
         try
         {
-            using var scope = _provider.CreateScope();
-            var sp = scope.ServiceProvider;
+            var dispositivo = await _db.Dispositivos
+                .FirstOrDefaultAsync(d => d.Id == payload.DispositivoId, ct);
 
-            // Intentar resolver dinámicamente un servicio de dominio por nombre
-            var telemInterface = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(a => a.GetTypes())
-                .FirstOrDefault(t => t.IsInterface && (t.Name == "ITelemetriaService" || t.Name == "IRecorridoService"));
-
-            if (telemInterface is not null)
+            if (dispositivo is null)
             {
-                var telemSvc = sp.GetService(telemInterface);
-                if (telemSvc is not null)
-                {
-                    var method = telemSvc.GetType().GetMethod("HandleTelemetryAsync")
-                              ?? telemSvc.GetType().GetMethod("ProcessTelemetryAsync");
-                    if (method is not null)
-                    {
-                        var task = (Task)method.Invoke(telemSvc, new object[] { payload, ct })!;
-                        await task.ConfigureAwait(false);
-                        return true;
-                    }
-                }
+                _log.LogWarning("Telemetría: el dispositivo {Id} no existe.", payload.DispositivoId);
+                return false;
             }
 
-            // No se encontró servicio específico; registrar payload en debug y continuar.
-            _log.LogDebug("No se encontró servicio de dominio para telemetría; payload: {Payload}", JsonSerializer.Serialize(payload));
+            dispositivo.UltimaConexion = payload.Fecha;
+            await _db.SaveChangesAsync(ct);
+
             return true;
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Error al procesar telemetría MQTT");
+            _log.LogError(ex, "Error al procesar telemetría del dispositivo {Id}", payload.DispositivoId);
+            return false;
+        }
+    }
+
+    public async Task<bool> RegistrarEventoAsync(MqttEventoPayload payload, CancellationToken ct = default)
+    {
+        try
+        {
+            var recorrido = await _db.Recorridos
+                .FirstOrDefaultAsync(r => r.Id == payload.RecorridoId, ct);
+
+            if (recorrido is null)
+            {
+                _log.LogWarning("Registrar evento: el recorrido {Id} no existe.", payload.RecorridoId);
+                return false;
+            }
+
+            if (recorrido.FechaFin is not null)
+            {
+                _log.LogWarning("Registrar evento: el recorrido {Id} ya está cerrado; se descarta el evento.", payload.RecorridoId);
+                return false;
+            }
+
+            bool tipoExiste = await _db.TiposEvento.AnyAsync(t => t.Id == payload.TipoEventoId, ct);
+            if (!tipoExiste)
+            {
+                _log.LogWarning("Registrar evento: TipoEventoId {Id} no existe en el catálogo.", payload.TipoEventoId);
+                return false;
+            }
+
+            var evento = new EventoDetectado
+            {
+                RecorridoId     = payload.RecorridoId,
+                TipoEventoId    = payload.TipoEventoId,
+                TimestampEvento = payload.Timestamp ?? DateTime.UtcNow,
+                Latitud         = payload.Latitud,
+                Longitud        = payload.Longitud,
+                Geo_Es_Estimado = payload.GeoEsEstimado,
+                FuerzaImpactoG  = payload.FuerzaImpactoG
+            };
+
+            _db.EventosDetectados.Add(evento);
+            await _db.SaveChangesAsync(ct);
+
+            _log.LogInformation("Evento (tipo {TipoId}) registrado para recorrido {RecId}",
+                payload.TipoEventoId, payload.RecorridoId);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Error al registrar evento para recorrido {Id}", payload.RecorridoId);
+            return false;
+        }
+    }
+
+    public async Task<bool> FinalizarRecorridoAsync(MqttFinalizarRecorridoPayload payload, CancellationToken ct = default)
+    {
+        try
+        {
+            var recorrido = await _db.Recorridos
+                .FirstOrDefaultAsync(r => r.Id == payload.RecorridoId, ct);
+
+            if (recorrido is null)
+            {
+                _log.LogWarning("Finalizar recorrido: el recorrido {Id} no existe.", payload.RecorridoId);
+                return false;
+            }
+
+            if (recorrido.FechaFin is not null)
+            {
+                // Idempotente: evita reprocesar si el broker reentrega el mensaje (QoS 1).
+                _log.LogInformation("Finalizar recorrido: el recorrido {Id} ya estaba cerrado; se ignora.", payload.RecorridoId);
+                return true;
+            }
+
+            recorrido.FechaFin = payload.FechaFin;
+            recorrido.Ruta_Coordenadas = payload.RutaCoordenadas;
+
+            await _db.SaveChangesAsync(ct);
+
+            _log.LogInformation("Recorrido {Id} finalizado.", payload.RecorridoId);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Si Ruta_Coordenadas no es JSON válido, el CHECK ISJSON de la BD rechaza el SaveChanges.
+            _log.LogError(ex, "Error al finalizar recorrido {Id}", payload.RecorridoId);
             return false;
         }
     }
