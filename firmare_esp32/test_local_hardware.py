@@ -11,7 +11,7 @@
 #   3. Ejecuta este script desde Thonny (F5) y abre el monitor serial.
 # =============================================================================
 
-from dispositivos import SensorBox, ActuatorBoxs
+from dispositivos import SensorBox, ActuatorBox
 import time
 
 def ejecutar_pruebas():
