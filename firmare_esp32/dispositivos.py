@@ -273,17 +273,22 @@ class MQTTManager:
     def conectar(self):
         try:
             from umqtt.simple import MQTTClient
+            
+            # LÓGICA DE DETECCIÓN DE SSL: Si el puerto es 8883 (HiveMQ Cloud), activamos el cifrado SSL/TLS obligatorio
+            utilizar_ssl = (self._puerto == 8883)
+            
             self._cliente = MQTTClient(
                 self._client_id, self._broker,
                 user=self._usuario, password=self._contrasena,
-                port=self._puerto
+                port=self._puerto,
+                ssl=utilizar_ssl
             )
             self._cliente.set_callback(self._dispatcher)
             self._cliente.connect()
             for topico in self._callbacks:
                 self._cliente.subscribe(topico.encode())
             self._conectado = True
-            print(f"[MQTTManager] Conexión establecida con {self._broker}")
+            print(f"[MQTTManager] Conexión SSL exitosa con HiveMQ: {self._broker}")
             return True
         except Exception as e:
             print("[MQTTManager] Fallo de conexión:", e)
