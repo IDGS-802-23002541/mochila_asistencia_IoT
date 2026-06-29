@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="12dp"
+    android:paddingHorizontal="4dp">
+
+    <View
+        android:id="@+id/viewIndicadorColor"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="@android:drawable/presence_online"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/lblTextoEvento"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="16dp"
+        android:text="Obstáculo detectado"
+        android:textColor="#222222"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/lblHoraEvento"
+        app:layout_constraintStart_toEndOf="@+id/viewIndicadorColor"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/lblHoraEvento"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10:12 am"
+        android:textColor="#8E8E93"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#EAEAEA"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/lblTextoEvento" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
