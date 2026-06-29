@@ -1,0 +1,131 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f5f6f8;
+}
+
+/* Encabezado de sección */
+.section-header {
+  text-align: center;
+  padding: 2.5rem 2rem 1.5rem;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0d1f4e;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.section-divider {
+  width: 40px;
+  height: 3px;
+  background: #2563eb;
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+/* Grid de productos */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 0 2rem 2.5rem;
+}
+
+/* Tarjeta de producto */
+.product-card {
+  background: #ffffff;
+  border: 1px solid #e2e6ef;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 16px rgba(13, 31, 78, 0.1);
+}
+
+/* Imagen */
+.product-img {
+  width: 100%;
+  height: 140px;
+  background: #e8edf5;
+  overflow: hidden;
+}
+
+.product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Info */
+.product-info {
+  padding: 12px 14px 8px;
+  flex: 1;
+}
+
+.product-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0d1f4e;
+}
+
+.product-price {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0d1f4e;
+  margin: 5px 0 6px;
+}
+
+.product-desc {
+  font-size: 11px;
+  color: #7a8499;
+  line-height: 1.6;
+}
+
+/* Botón */
+.product-actions {
+  padding: 0 14px 14px;
+}
+
+.btn-add {
+  width: 100%;
+  background: #0d1f4e;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-add:hover {
+  background: #162a6a;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    padding: 0 1rem 2rem;
+  }
+}

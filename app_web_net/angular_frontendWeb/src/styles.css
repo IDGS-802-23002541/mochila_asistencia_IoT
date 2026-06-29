@@ -1,0 +1,37 @@
+/* You can add global styles to this file, and also import other style files */
+:root {
+
+  /* Colores principales */
+  --color-primary: #233B67;
+  --color-primary-light: #2E4F82;
+  --color-background: #F8F9FC;
+  --color-white: #FFFFFF;
+  --color-text: #2F2F2F;
+  --color-border: #E5E7EB;
+
+  /* Tamaños */
+  --navbar-height: 70px;
+  --max-width: 1200px;
+
+  /* Sombras */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
+
+  /* Bordes */
+  --radius: 10px;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:'Poppins',sans-serif;
+  background:var(--color-background);
+  color:var(--color-text);
+}

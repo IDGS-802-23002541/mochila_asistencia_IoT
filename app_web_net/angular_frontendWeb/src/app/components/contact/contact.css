@@ -1,0 +1,154 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f5f6f8;
+}
+
+/* Contenedor principal */
+.contact-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 400px;
+}
+
+/* Lado izquierdo — imagen */
+.contact-left {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  gap: 16px;
+}
+
+.contact-left img {
+  max-width: 200px;
+  width: 100%;
+}
+
+.contact-left p {
+  font-size: 13px;
+  color: #7a8499;
+  text-align: center;
+  max-width: 220px;
+  line-height: 1.7;
+}
+
+/* Lado derecho — formulario */
+.contact-right {
+  background: #0d1f4e;
+  padding: 2.5rem 2rem;
+  position: relative;
+}
+
+.contact-right h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Formulario */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-field label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.02em;
+}
+
+.form-field input,
+.form-field textarea {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  padding: 9px 12px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: rgba(91, 156, 246, 0.7);
+}
+
+.form-field textarea {
+  resize: none;
+  height: 75px;
+}
+
+/* Botón enviar */
+.btn-submit {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.btn-submit:hover {
+  background: #1d4ed8;
+}
+
+/* Toast de confirmación */
+.form-toast {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.0);
+  text-align: center;
+  margin-top: 10px;
+  transition: color 0.3s;
+}
+
+.form-toast.show {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .contact-wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-left {
+    padding: 2rem 1.5rem;
+  }
+
+  .contact-right {
+    padding: 2rem 1.5rem;
+  }
+}
