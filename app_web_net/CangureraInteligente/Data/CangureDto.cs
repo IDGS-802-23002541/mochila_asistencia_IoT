@@ -96,6 +96,15 @@ public record MqttEventoPayload
     /// <summary>Fuerza del impacto en G (solo eventos de caída). Null si no aplica.</summary>
     [JsonPropertyName("fuerzaImpactoG")]
     public decimal? FuerzaImpactoG { get; init; }
+
+    [JsonPropertyName("ir_izq")]
+    public bool? IrIzquierdo {get; init;}
+
+    [JsonPropertyName("ir_der")]
+    public bool? IrDerecho {get; init;}
+
+    [JsonPropertyName("dist")]
+    public decimal? Dist {get; init;}
 }
 
 /// <summary>
@@ -134,26 +143,35 @@ public record MqttFinalizarRecorridoPayload
 /// </summary>
 public record MqttTelemetryPayload
 {
-    [JsonPropertyName("dispositivoId")]
-    public int DispositivoId { get; init; }
-
+    [JsonPropertyName("MacAddress")]
+    public string MacAddress {get; init;} = string.Empty;
     [JsonPropertyName("latitud")]
-    public decimal? Latitud { get; init; }
 
+    public decimal? Latitud {get; init;}
     [JsonPropertyName("longitud")]
-    public decimal? Longitud { get; init; }
-
-    [JsonPropertyName("velocidad")]
-    public decimal? Velocidad { get; init; }
-
-    [JsonPropertyName("bateria")]
-    public int? Bateria { get; init; }
-
+    public decimal? longitud {get; init;}
+    
     [JsonPropertyName("fecha")]
     [JsonConverter(typeof(FlexibleUnixDateTimeConverter))]
     public DateTime Fecha { get; init; } = DateTime.UtcNow;
 }
 
+public record ZonaCalienteAlertaPayload
+{
+    [JsonPropertyName("MacAddress")]
+    public string MacAddress {get; init;} = string.Empty;
+    [JsonPropertyName("mensaje")]
+    public string Mensaje {get; init;} = "acercandose_zona_caliente";
+    [JsonPropertyName("tipoEventoId")]
+    public int TipoEventoId {get; init;} 
+    [JsonPropertyName("latitud")]
+    public decimal Latitud {get; init;}
+    [JsonPropertyName("longitud")]
+    public decimal Longitud {get; init;}
+    [JsonPropertyName("distanciaMetros")]
+    public double DistanciaMetros {get; init;}
+    
+}
 /// <summary>
 /// NUEVO: convierte un timestamp enviado por el ESP32 a DateTime UTC. Acepta:
 ///   - epoch Unix en segundos (ej. 1719526529)

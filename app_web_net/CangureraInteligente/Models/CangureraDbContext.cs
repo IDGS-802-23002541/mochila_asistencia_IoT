@@ -11,9 +11,21 @@ public class CangureraDbContext(DbContextOptions<CangureraDbContext> options) : 
     public DbSet<CatTipoDiscapacidad> TiposDiscapacidad { get; set; }
     public DbSet<Recorrido>          Recorridos        { get; set; }
     public DbSet<EventoDetectado>    EventosDetectados { get; set; }
+    public DbSet<ZonaCaliente>       ZonasCalientes    { get; set; }
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
+        mb.Entity<ZonaCaliente>()
+            .Property(z => z.Latitud)
+            .HasPrecision(9,6);
+
+        mb.Entity<ZonaCaliente>()
+            .Property(z => z.Longitud)
+            .HasPrecision(9,6); 
+        mb.Entity<EventoDetectado>()
+            .Property(e =>e.DistanciaCm)
+            .HasPrecision(7,2);
+            
         // Índices únicos
         mb.Entity<Dispositivo>()
             .HasIndex(d => d.MacAddress)

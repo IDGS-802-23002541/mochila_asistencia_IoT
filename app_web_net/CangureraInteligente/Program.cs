@@ -19,7 +19,9 @@ var mqttSettings = builder.Configuration
 builder.Services.AddSingleton(mqttSettings);
 builder.Services.AddScoped<IMqttTelemetryProcessor, MqttTelemetryProcessor>();
 builder.Services.AddHostedService<MqttListenerService>();
-
+builder.Services.AddSingleton<MqttConnectionManager>();
+builder.Services.AddSingleton<IMqttPublisherService, MqttPublisherService>();
+builder.Services.AddSingleton<ZonaCalienteAlertState>();
 // ── Controllers / Swagger ──────────────────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

@@ -14,11 +14,19 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 {
     private readonly CangureraDbContext _db;
     private readonly ILogger<MqttTelemetryProcessor> _log;
+    private readonly IMqttPublisherService _publisher;
+    private readonly ZonaCalienteAlertState _alertState;
 
-    public MqttTelemetryProcessor(CangureraDbContext db, ILogger<MqttTelemetryProcessor> log)
+    public MqttTelemetryProcessor(
+        CangureraDbContext db,
+        ILogger<MqttTelemetryProcessor> log,
+        IMqttPublisherService publisher,
+        ZonaCalienteAlertState alertState)
     {
         _db = db;
         _log = log;
+        _publisher = publisher;
+        _alertState = alertState;
     }
 
     public async Task<bool> ProcesarTelemetriaAsync(MqttTelemetryPayload payload, CancellationToken ct = default)
@@ -26,11 +34,11 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
         try
         {
             var dispositivo = await _db.Dispositivos
-                .FirstOrDefaultAsync(d => d.Id == payload.DispositivoId, ct);
+                .FirstOrDefaultAsync(d => d.MacAddress == payload.MacAddress, ct);
 
             if (dispositivo is null)
             {
-                _log.LogWarning("Telemetría: el dispositivo {Id} no existe.", payload.DispositivoId);
+                _log.LogWarning("Telemetría: el dispositivo {Id} no existe.", payload.MacAddress);
                 return false;
             }
 
@@ -41,7 +49,7 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Error al procesar telemetría del dispositivo {Id}", payload.DispositivoId);
+            _log.LogError(ex, "Error al procesar telemetría del dispositivo {Mac}", payload.MacAddress);
             return false;
         }
     }
@@ -76,11 +84,14 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
             {
                 RecorridoId     = payload.RecorridoId,
                 TipoEventoId    = payload.TipoEventoId,
-                TimestampEvento = payload.Timestamp ?? DateTime.UtcNow,
+                TimeStampEvento = payload.Timestamp ?? DateTime.UtcNow,
                 Latitud         = payload.Latitud,
                 Longitud        = payload.Longitud,
                 Geo_Es_Estimado = payload.GeoEsEstimado,
-                FuerzaImpactoG  = payload.FuerzaImpactoG
+                FuerzaImpactoG  = payload.FuerzaImpactoG,
+                IrIzquierdo     = payload.IrIzquierdo,
+                IrDerecho       = payload.IrDerecho,
+                DistanciaCm     = payload.Dist
             };
 
             _db.EventosDetectados.Add(evento);
@@ -134,4 +145,35 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
             return false;
         }
     }
+
+private async Task EvaluarZonasCalientesAsync(int dispositivoId, decimal lat, decimal lon, CancellationToken ct)
+{
+    var zonas = await _db.ZonasCalientes.Where(z => z.Activa).ToListAsync(ct);
+    var zonasDentroAhora = new List<int>();
+
+    foreach (var zona in zonas)
+    {
+        var distancia = GeoUtil.DistanciaMetros((double)lat, (double)lon, (double)zona.Latitud, (double)zona.Longitud);
+        if (distancia > zona.RadioMetros) continue;
+
+        zonasDentroAhora.Add(zona.Id);
+
+        if (!_alertState.YaAlertado(dispositivoId, zona.Id))
+        {
+            var alerta = new ZonaCalienteAlertaPayload
+            {
+                DispositivoId   = dispositivoId,
+                TipoEventoId    = zona.TipoEventoId,
+                Latitud         = lat,
+                Longitud        = lon,
+                DistanciaMetros = Math.Round(distancia, 1)
+            };
+
+            await _publisher.PublicarAlertaZonaCalienteAsync(alerta, ct);
+        }
+    }
+
+    _alertState.ActualizarZonasActuales(dispositivoId, zonasDentroAhora);
+}
+
 }

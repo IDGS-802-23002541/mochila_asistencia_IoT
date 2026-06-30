@@ -25,23 +25,25 @@ public class MqttListenerService : BackgroundService
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<MqttListenerService> _log;
+    private readonly MqttConnectionManager _conn;
     private readonly MqttSettings _cfg;
     private IMqttClient? _client;
 
     public MqttListenerService(
         IServiceScopeFactory scopeFactory,
         ILogger<MqttListenerService> log,
+        MqttConnectionManager conn,
         MqttSettings cfg)
     {
         _scopeFactory = scopeFactory;
         _log = log;
+        _conn = conn;
         _cfg = cfg;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var factory = new MqttFactory();
-        _client = factory.CreateMqttClient();
+        _client = _conn.Client;
 
         _client.ConnectedAsync += async _ =>
         {
@@ -171,50 +173,17 @@ public class MqttListenerService : BackgroundService
         }
     }
 
-    private async Task ConnectAsync(CancellationToken ct)
+    private Task ConnectAsync(CancellationToken ct)
     {
-        var builder = new MqttClientOptionsBuilder()
-            .WithClientId(string.IsNullOrWhiteSpace(_cfg.ClientId)
-                ? $"CangureraInteligente-{Guid.NewGuid():N}"
-                : _cfg.ClientId)
-            .WithCleanSession();
-
-        if (!string.IsNullOrWhiteSpace(_cfg.Username) && !string.IsNullOrWhiteSpace(_cfg.Password))
-        {
-            builder.WithCredentials(_cfg.Username, _cfg.Password);
-        }
-
-        if (_cfg.UseWebSocket)
-        {
-            var scheme = _cfg.UseTls ? "wss" : "ws";
-            var wsUri = $"{scheme}://{_cfg.Host}:{_cfg.Port}/mqtt";
-            _log.LogInformation("Conectando MQTT por WebSocket: {Uri}", wsUri);
-            builder.WithWebSocketServer(wsUri);
-        }
-        else
-        {
-            _log.LogInformation("Conectando MQTT por TCP: {Host}:{Port}", _cfg.Host, _cfg.Port);
-            builder.WithTcpServer(_cfg.Host, _cfg.Port);
-            if (_cfg.UseTls)
-            {
-                builder.WithTls();
-            }
-        }
-
-        var options = builder.Build();
-        await _client!.ConnectAsync(options, ct);
+        _log.LogInformation("Conectando MQTT usando MqttConnectionManager.");
+        return _conn.ConnectAsync(ct);
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_client?.IsConnected == true)
-        {
-            await _client.DisconnectAsync(cancellationToken: cancellationToken);
-        }
-
+        await _conn.DisconnectAsync(cancellationToken);
         await base.StopAsync(cancellationToken);
     }
-}
 
 /// <summary>
 /// Configuración del broker MQTT (leída desde appsettings.json → sección "MQTT" o "Mqtt").
@@ -229,4 +198,5 @@ public class MqttSettings
     public string ClientId { get; set; } = string.Empty;
     public bool UseWebSocket { get; set; } = true;
     public bool UseTls { get; set; } = true;
+}
 }
