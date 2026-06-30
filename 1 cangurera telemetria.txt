@@ -1,0 +1,55 @@
+1. cangurera/telemetria — periódico (heartbeat + posición)
+json{
+  "MacAdress": "IEES3-DASD-DASD",
+  "latitud": 21.123456,
+  "longitud": -101.567890,
+  "fecha": 1719526529
+}
+
+dispositivoId: int, obligatorio, ya debe existir registrado en la BD.
+latitud/longitud: opcionales (si no hay fix GPS, mandar null u omitir), pero si se omiten no se evalúan zonas calientes.
+velocidad: opcional.
+bateria: opcional, porcentaje entero 0–100.
+fecha: epoch Unix en segundos o milisegundos (el backend detecta cuál es por la magnitud), o un string ISO-8601 como alternativa.
+
+2. cangurera/eventos — cuando detecta caída/trafico/(obstaculo?)
+json{
+  "recorridoId": 45,
+  "tipoEventoId": 2,
+  "timestamp": 1719526529,
+  "latitud": 21.123456,
+  "longitud": -101.567890,
+  "geoEsEstimado": false,
+  "fuerzaImpactoG": 3.2
+  ""ir_izq": true, 
+  "ir_der": true,
+  "dist": 123.23
+}
+
+recorridoId: int, obligatorio — el que el móvil le pasó por Bluetooth al iniciar.
+tipoEventoId: int, obligatorio — debe existir en el catálogo TiposEvento.
+timestamp: opcional (si lo omite, el backend usa la hora del servidor); mismo formato flexible que arriba.
+latitud/longitud: opcionales.
+geoEsEstimado: bool, true si la posición no viene de GPS real (ej. última conocida).
+fuerzaImpactoG: opcional, solo aplica a eventos de caída, igual mandarlo no pasa nada.
+
+3. cangurera/recorrido/finalizar — al terminar/devolver la mochila
+json{
+  "recorridoId": 45,
+  "rutaCoordenadas": "[{\"lat\":21.1234,\"lon\":-101.5678,\"ts\":1719526500},{\"lat\":21.1240,\"lon\":-101.5690,\"ts\":1719526560}]",
+  "fechaFin": 1719526600
+}
+
+recorridoId: int, obligatorio.
+rutaCoordenadas: string (no array directo) con el JSON del arreglo de puntos ya serializado. Cada punto: lat, lon, ts (epoch opcional).
+fechaFin: epoch Unix segundos/milisegundos o ISO-8601.
+
+4. cangurera/pull — este lo publica el backend, el ESP32 solo lo escucha (no le toca enviar nada aquí, solo suscribirse y reaccionar):
+json{
+  "MacAddress": "IEE2-DASD-DASD",
+  "mensaje": "acercandose_zona_caliente",
+  "tipoEventoId": 3,
+  "latitud": 21.123456,
+  "longitud": -101.567890,
+  "distanciaMetros": 42.5
+}
