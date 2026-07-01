@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://tools.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true">
+
+    <TextView
+        android:id="@+id/lblTituloVentana"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Cargando..."
+        android:textColor="#000000"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/btnRegresar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?android:attr/selectableItemBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblTituloVentana">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="‹ Regresar"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/containerResumen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/bg_tarjeta_detalles"
+        android:padding="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/btnRegresar">
+
+        <TextView
+            android:id="@+id/lblFechaTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fecha"
+            android:textColor="#9E9E9E"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lblDetalleFecha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            tools:text="27 de junio"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lblFechaTitulo" />
+
+        <TextView
+            android:id="@+id/lblDuracionTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Duración"
+            android:textColor="#9E9E9E"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@id/guidelineMitad"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lblDetalleDuracion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            tools:text="00:07"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/lblDuracionTitulo"
+            app:layout_constraintTop_toBottomOf="@+id/lblDuracionTitulo" />
+
+        <TextView
+            android:id="@+id/lblDistanciaTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Distancia"
+            android:textColor="#9E9E9E"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lblDetalleFecha" />
+
+        <TextView
+            android:id="@+id/lblDetalleDistancia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            tools:text="1.2 km"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lblDistanciaTitulo" />
+
+        <TextView
+            android:id="@+id/lblEventosTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Eventos"
+            android:textColor="#9E9E9E"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@id/guidelineMitad"
+            app:layout_constraintTop_toBottomOf="@+id/lblDetalleDuracion" />
+
+        <TextView
+            android:id="@+id/lblDetalleEventos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            tools:text="0"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/lblEventosTitulo"
+            app:layout_constraintTop_toBottomOf="@+id/lblEventosTitulo" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineMitad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.55" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/lblSeccionEventos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:text="Eventos en la ruta"
+        android:textColor="#555555"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/containerResumen" />
+
+    <FrameLayout
+        android:id="@+id/containerEventos"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_tarjeta_detalles"
+        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@+id/lblSeccionEventos">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvEventosInternos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@android:layout/simple_list_item_1" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/lblSeccionMapa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:text="Recorrido de la ruta"
+        android:textColor="#555555"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/containerEventos" />
+
+    <FrameLayout
+        android:id="@+id/containerMapa"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_tarjeta_detalles"
+        android:clipToOutline="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblSeccionMapa">
+
+        <ImageView
+            android:id="@+id/imgMapaRecorrido"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/mapaprueba"
+            tools:ignore="UseAppTint" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
