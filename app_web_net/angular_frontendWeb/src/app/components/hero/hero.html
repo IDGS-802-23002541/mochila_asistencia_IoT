@@ -1,0 +1,130 @@
+<section id="inicio" class="hero">
+
+  <div class="hero-content">
+
+    <div class="hero-tag">
+      <span class="hero-tag-dot"></span>
+      Plataforma de seguridad
+    </div>
+
+    <h1>Protege lo que más importa con <span>Vision Guard</span></h1>
+
+    <p class="hero-desc">
+      Solución inteligente de monitoreo en tiempo real, ubicación GPS y alertas
+      automáticas diseñada para brindar tranquilidad a familias e instituciones.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Solicitar información</a>
+      <a href="#services" class="btn-outline">Ver servicios</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num" data-target="500" data-prefix="+">0</span>
+        <span class="stat-label">Clientes activos</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" data-target="24" data-suffix="/7">0</span>
+        <span class="stat-label">Monitoreo continuo</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" data-target="99.9" data-suffix="%" data-decimal="1">0</span>
+        <span class="stat-label">Disponibilidad</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hero-visual">
+
+    <div class="hero-ring r1"></div>
+    <div class="hero-ring r2"></div>
+
+    <div class="hero-circle">
+      <img src="images/logo.png" alt="Vision Guard">
+    </div>
+
+    <div class="hero-badge b-top">
+      <div class="badge-icon">&#128752;</div>
+      <div class="badge-info">
+        <span class="badge-title">GPS activo</span>
+        <span class="badge-sub">12 unidades en ruta</span>
+      </div>
+    </div>
+
+    <div class="hero-badge b-bottom">
+      <div class="badge-icon">&#128276;</div>
+      <div class="badge-info">
+        <span class="badge-title">Sin alertas</span>
+        <span class="badge-sub">Sistema estable</span>
+      </div>
+      <span class="badge-dot"></span>
+    </div>
+
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  function animateCounter(el) {
+    const target = parseFloat(el.getAttribute("data-target"));
+    const prefix = el.getAttribute("data-prefix") || "";
+    const suffix = el.getAttribute("data-suffix") || "";
+    const decimal = parseInt(el.getAttribute("data-decimal")) || 0;
+
+    const duration = 2000;
+    const steps = 60;
+    const increment = target / steps;
+
+    let current = 0;
+    let step = 0;
+
+    const timer = setInterval(() => {
+      step++;
+      current += increment;
+
+      if (step >= steps) {
+        current = target;
+        clearInterval(timer);
+      }
+
+      el.textContent =
+        prefix +
+        (decimal ? current.toFixed(decimal) : Math.floor(current)) +
+        suffix;
+
+    }, duration / steps);
+  }
+
+  // 👇 Detecta cuando entra en pantalla
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+
+        const counters = entry.target.querySelectorAll(".stat-num");
+
+        counters.forEach(el => {
+          // evita repetir animación
+          if (!el.classList.contains("done")) {
+            el.classList.add("done");
+            animateCounter(el);
+          }
+        });
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.5
+  });
+
+  const statsSection = document.querySelector(".hero-stats");
+  if (statsSection) {
+    observer.observe(statsSection);
+  }
+
+});
+</script>
+
+</section>
