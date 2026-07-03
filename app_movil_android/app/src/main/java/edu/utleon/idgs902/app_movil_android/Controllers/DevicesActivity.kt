@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -20,11 +21,14 @@ class DevicesActivity : AppCompatActivity() {
     private lateinit var bleManager: VisionGuardBleManager
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var btnVincular: Button
+    private lateinit var btnContinuarSinVincular: Button
+
+    private lateinit var itemMochila1: LinearLayout
+    private lateinit var itemMochila2: LinearLayout
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 101
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,25 +36,31 @@ class DevicesActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("VisionGuardPrefs", Context.MODE_PRIVATE)
         btnVincular = findViewById(R.id.btnVincular)
+        btnContinuarSinVincular = findViewById(R.id.btnContinuarSinVincular)
 
-        // Inicializar nuestro gestor de Bluetooth BLE
+        itemMochila1 = findViewById(R.id.itemMochila1)
+        itemMochila2 = findViewById(R.id.itemMochila2)
+
         bleManager = VisionGuardBleManager(this, object : VisionGuardBleManager.BleStateListener {
             override fun onConectado() {
                 Toast.makeText(this@DevicesActivity, "¡Mochila Conectada con Éxito!", Toast.LENGTH_SHORT).show()
-                // Una vez conectados de forma física, pasamos a la pantalla de Verificación
-                val intent = Intent(this@DevicesActivity, VerificationActivity::class.java)
+
+                sharedPreferences.edit().putBoolean("dispositivo_vinculado", true).apply()
+
+                val intent = Intent(this@DevicesActivity, HomeActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
+                finish()
             }
 
             override fun onDesconectado() {
                 btnVincular.text = "Vincular dispositivo"
                 btnVincular.isEnabled = true
+                sharedPreferences.edit().putBoolean("dispositivo_vinculado", false).apply()
             }
 
             override fun onDispositivoEncontrado(nombre: String, mac: String) {
-                // Guardar la dirección MAC para auto-conexión futura
                 sharedPreferences.edit().putString("dispositivo_mac", mac).apply()
-                // Conectar al ESP32 por su dirección de hardware
                 bleManager.conectar(mac)
             }
 
@@ -61,13 +71,21 @@ class DevicesActivity : AppCompatActivity() {
             }
         })
 
-        // Programar la lógica del botón de vinculación con permisos
         btnVincular.setOnClickListener {
             if (verificarPermisosBluetooth()) {
                 iniciarConexionMochila()
             } else {
                 solicitarPermisosBluetooth()
             }
+        }
+
+        btnContinuarSinVincular.setOnClickListener {
+            sharedPreferences.edit().putBoolean("dispositivo_vinculado", false).apply()
+
+            val intent = Intent(this@DevicesActivity, HomeActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
         }
 
         setupListInteractions()
@@ -90,10 +108,7 @@ class DevicesActivity : AppCompatActivity() {
 
     private fun solicitarPermisosBluetooth() {
         val permisos = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            arrayOf(
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT
-            )
+            arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
         } else {
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
         }
@@ -110,7 +125,20 @@ class DevicesActivity : AppCompatActivity() {
             }
         }
     }
+
+    /**
+     * 🛠️ Lógica visual modificada para usar fondos con bordes redondeados
+     */
     private fun setupListInteractions() {
-        //back
+        itemMochila1.setOnClickListener {
+            // Asigna el XML del recurso redondeado
+            itemMochila1.setBackgroundResource(R.drawable.bg_item_device_selector)
+            itemMochila2.setBackgroundColor(0) // Remueve el fondo por completo
+        }
+
+        itemMochila2.setOnClickListener {
+            itemMochila2.setBackgroundResource(R.drawable.bg_item_device_selector)
+            itemMochila1.setBackgroundColor(0) // Remueve el fondo por completo
+        }
     }
 }

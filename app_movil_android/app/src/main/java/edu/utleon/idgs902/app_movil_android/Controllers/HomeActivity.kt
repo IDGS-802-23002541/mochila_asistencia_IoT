@@ -3,6 +3,7 @@ package edu.utleon.idgs902.app_movil_android.Controllers
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -27,7 +28,6 @@ import kotlin.concurrent.thread
 
 class HomeActivity : AppCompatActivity() {
 
-    // Variables para el cronómetro (Modificadas para persistencia)
     private var corriendo = false
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var sharedPreferences: SharedPreferences
@@ -37,27 +37,27 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var txtTiempo: TextView
     private lateinit var btnIniciarRecorrido: Button
     private lateinit var btnDetalles: Button
+    private lateinit var btnDetalles2: Button
 
-    // Gestor Bluetooth para mandar START/STOP
+    // Componentes de la tarjeta dinámica
+    private lateinit var lblNombreMochilaHome: TextView
+    private lateinit var lblStatusSenalHome: TextView
+    private lateinit var lblBadgeStatusTexto: TextView
+    private lateinit var badgeStatusContainer: android.view.View
+
     private lateinit var bleManager: VisionGuardBleManager
 
     private val runnableCronometro = object : Runnable {
         override fun run() {
             if (corriendo) {
-                // Obtener el tiempo de inicio guardado
                 val tiempoInicio = sharedPreferences.getLong("tiempo_inicio", 0L)
                 if (tiempoInicio != 0L) {
-                    // Calcular la diferencia real con la hora actual
                     val diferenciaMilis = System.currentTimeMillis() - tiempoInicio
                     val segundosTotales = (diferenciaMilis / 1000).toInt()
-
                     val minutosVisuales = segundosTotales / 60
                     val segundosVisuales = segundosTotales % 60
-
-                    // Formato 00:00
                     txtTiempo.text = String.format("%02d:%02d", minutosVisuales, segundosVisuales)
                 }
-                // Vuelve a ejecutar este bloque en 1 segundo
                 handler.postDelayed(this, 1000)
             }
         }
@@ -67,7 +67,6 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        // Inicializar almacenamiento interno para persistir el estado del cronómetro
         sharedPreferences = getSharedPreferences("CronometroPrefs", Context.MODE_PRIVATE)
         globalPreferences = getSharedPreferences("VisionGuardPrefs", Context.MODE_PRIVATE)
 
@@ -76,11 +75,8 @@ class HomeActivity : AppCompatActivity() {
 
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    true
-                }
+                R.id.nav_home -> true
                 R.id.nav_historial -> {
-                    // Redireccionar a la pantalla de Historial
                     val intent = Intent(this, HistorialActivity::class.java)
                     startActivity(intent)
                     overridePendingTransition(0, 0)
@@ -91,46 +87,43 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        // Enlazar componentes del XML
         txtTiempo = findViewById(R.id.txtTiempo)
         btnIniciarRecorrido = findViewById(R.id.btnIniciarRecorrido)
         btnDetalles = findViewById(R.id.btnDetallesHome)
+        btnDetalles2 = findViewById(R.id.btnDetallesHome2)
 
-        // Inicializar el Bluetooth en segundo plano para mandar los comandos seriales
+        lblNombreMochilaHome = findViewById(R.id.lblNombreMochilaHome)
+        lblStatusSenalHome = findViewById(R.id.lblStatusSenalHome)
+        lblBadgeStatusTexto = findViewById(R.id.lblBadgeStatusTexto)
+        badgeStatusContainer = findViewById(R.id.badgeStatusContainer)
+
         bleManager = VisionGuardBleManager(this, object : VisionGuardBleManager.BleStateListener {
             override fun onConectado() {
-                Log.d("HomeActivity", "Mochila enlazada por Bluetooth en segundo plano.")
+                Log.d("HomeActivity", "Mochila enlazada por Bluetooth.")
             }
-
             override fun onDesconectado() {
                 Log.d("HomeActivity", "Mochila desconectada.")
             }
-
             override fun onDispositivoEncontrado(nombre: String, mac: String) {}
-
             override fun onError(mensaje: String) {
                 Log.e("HomeActivity", "Error BLE: $mensaje")
             }
         })
 
-        // Conectar automáticamente a la mochila enlazada anteriormente
-        val macMochila = globalPreferences.getString("dispositivo_mac", null)
-        if (!macMochila.isNullOrEmpty()) {
-            bleManager.conectar(macMochila)
-        }
+        verificarEstatusDispositivo()
 
-        // Verificar si ya había un recorrido activo al entrar/abrir de nuevo la app
         corriendo = sharedPreferences.getBoolean("cronometro_corriendo", false)
         if (corriendo) {
-            btnIniciarRecorrido.text = "Detener"
-            btnIniciarRecorrido.setTextColor(resources.getColor(android.R.color.holo_red_dark, theme))
-            btnIniciarRecorrido.setBackgroundResource(R.drawable.bg_button_outline_red)
+            establecerVistaDetener()
             handler.post(runnableCronometro)
         }
 
         btnIniciarRecorrido.setOnClickListener {
+            val dispositivoVinculado = globalPreferences.getBoolean("dispositivo_vinculado", false)
+            val macMochila = globalPreferences.getString("dispositivo_mac", null)
+
             if (!corriendo) {
-                if (macMochila.isNullOrEmpty()) {
+                if (!dispositivoVinculado || macMochila.isNullOrEmpty()) {
                     Toast.makeText(this, "Por favor vincula la mochila por Bluetooth primero.", Toast.LENGTH_LONG).show()
                     val intent = Intent(this, DevicesActivity::class.java)
                     startActivity(intent)
@@ -142,31 +135,49 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        // Navegación directa hacia la pantalla de Monitoreo / Detalles
-        btnDetalles.setOnClickListener {
+        val navegarDetalles = android.view.View.OnClickListener {
             val intent = Intent(this, MonitoreoActivity::class.java)
             startActivity(intent)
         }
+        btnDetalles.setOnClickListener(navegarDetalles)
+        btnDetalles2.setOnClickListener(navegarDetalles)
     }
 
-    /**
-     * Paso A: Petición HTTP POST al backend de Diego para iniciar el viaje y generar el RecorridoId
-     */
+    private fun verificarEstatusDispositivo() {
+        val dispositivoVinculado = globalPreferences.getBoolean("dispositivo_vinculado", false)
+        val macMochila = globalPreferences.getString("dispositivo_mac", null)
+
+        if (dispositivoVinculado && !macMochila.isNullOrEmpty()) {
+            lblNombreMochilaHome.text = "Mochila enlazada"
+            lblStatusSenalHome.text = "📶 Señal buena"
+            lblStatusSenalHome.setTextColor(Color.parseColor("#2E7D32"))
+            lblBadgeStatusTexto.text = "● Conectado"
+            lblBadgeStatusTexto.setTextColor(Color.parseColor("#2E7D32"))
+            badgeStatusContainer.background.setTintList(null)
+            bleManager.conectar(macMochila)
+        } else {
+            lblNombreMochilaHome.text = "Sin dispositivo"
+            lblStatusSenalHome.text = "⚠ Requiere vinculación"
+            lblStatusSenalHome.setTextColor(Color.parseColor("#C62828"))
+            lblBadgeStatusTexto.text = "🚫 Off-line"
+            lblBadgeStatusTexto.setTextColor(Color.parseColor("#C62828"))
+            badgeStatusContainer.background.setTint(Color.parseColor("#FFEBEE"))
+        }
+    }
+
     private fun iniciarRecorridoServidor(macAddress: String) {
         thread {
             try {
-                // Endpoint proporcionado por Diego
                 val url = URL("http://34.30.116.129/api/recorridos/iniciar")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json; utf-8")
                 conn.doOutput = true
 
-                // Body del Payload
                 val jsonInputString = JSONObject().apply {
                     put("dispositivoMac", macAddress)
-                    put("usuarioEdad", 35)      // Datos demográficos de prueba
-                    put("discapacidadId", 2)    // Baja visión
+                    put("usuarioEdad", 35)
+                    put("discapacidadId", 2)
                 }.toString()
 
                 conn.outputStream.use { os ->
@@ -181,7 +192,6 @@ class HomeActivity : AppCompatActivity() {
                     val jsonResponse = JSONObject(respuesta)
                     val recorridoId = jsonResponse.getInt("recorridoId")
 
-                    // Volvemos al hilo principal para actualizar las UI e iniciar Bluetooth
                     runOnUiThread {
                         iniciarRecorridoLocal(recorridoId)
                     }
@@ -194,16 +204,12 @@ class HomeActivity : AppCompatActivity() {
                 Log.e("HomeActivity", "Fallo HTTP", e)
                 runOnUiThread {
                     Toast.makeText(this, "No se pudo contactar al Backend. Iniciando offline.", Toast.LENGTH_LONG).show()
-                    // Si el backend falla, iniciamos offline con un ID simulado
                     iniciarRecorridoLocal((System.currentTimeMillis() % 100000).toInt())
                 }
             }
         }
     }
 
-    /**
-     * Paso B: Mandar comando por Bluetooth e iniciar interfaz de cronómetro
-     */
     private fun iniciarRecorridoLocal(recorridoId: Int) {
         corriendo = true
         sharedPreferences.edit().apply {
@@ -213,29 +219,24 @@ class HomeActivity : AppCompatActivity() {
             apply()
         }
         handler.post(runnableCronometro)
-
-        // Enviar el comando serial "START:<ID>" por Bluetooth al ESP32
         bleManager.enviarInicioRecorrido(recorridoId)
-
         establecerVistaDetener()
         Toast.makeText(this, "¡Recorrido #$recorridoId iniciado!", Toast.LENGTH_SHORT).show()
     }
 
     private fun detenerRecorridoLocal() {
-        // Enviar señal "STOP" por Bluetooth para que la mochila envíe su batch JSON a HiveMQTT
         bleManager.enviarDetenerRecorrido()
 
         val tiempoFinal = txtTiempo.text.toString()
         val sdf = SimpleDateFormat("dd 'de' MMMM", Locale("es", "MX"))
         val fechaHoy = sdf.format(Date())
-
         val idRecorrido = sharedPreferences.getInt("ultimo_recorrido_id", 0)
 
         val nuevaRuta = RutaModels(
             id = idRecorrido.toString(),
             fecha = fechaHoy,
             duracion = tiempoFinal,
-            obstaculos = "0", // Se actualizarán mediante el broker
+            obstaculos = "0",
             caidas = "0",
             eventos = "0",
             distancia = "0"
@@ -274,22 +275,15 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Cuando regresas a la app, si está corriendo, reactivamos de inmediato el bucle visual
         corriendo = sharedPreferences.getBoolean("cronometro_corriendo", false)
         if (corriendo) {
             handler.post(runnableCronometro)
         }
-        // Reconectar por si acaso
-        val macMochila = globalPreferences.getString("dispositivo_mac", null)
-        if (!macMochila.isNullOrEmpty()) {
-            bleManager.conectar(macMochila)
-        }
+        verificarEstatusDispositivo()
     }
 
     override fun onPause() {
         super.onPause()
-        // Evita fugas de memoria si la app pasa a segundo plano deteniendo el bucle visual,
-        // pero la marca de tiempo sigue segura en el almacenamiento.
         handler.removeCallbacks(runnableCronometro)
     }
 
