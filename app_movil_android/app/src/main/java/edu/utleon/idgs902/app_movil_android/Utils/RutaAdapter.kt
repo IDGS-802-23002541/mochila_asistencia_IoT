@@ -34,13 +34,15 @@ class RutaAdapter(private val listaRutas: List<RutaModels>) :
         holder.lblNombre.text = nombreMostrar
         holder.lblDetalles.text = "${ruta.fecha} · ${ruta.duracion} · ${ruta.eventos} eventos"
 
-        holder.itemView.setOnClickListener { context ->
+        holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, DetallesRutaActivity::class.java).apply {
+                // Pasamos el ID string para que DetallesRutaActivity lo reciba e invoque a Retrofit
+                putExtra("RECORRIDO_ID", ruta.id)
+
                 putExtra("NUMERO_RUTA", nombreMostrar)
                 putExtra("FECHA", ruta.fecha)
                 putExtra("DURACION", ruta.duracion)
                 putExtra("CANTIDAD_EVENTOS", ruta.eventos)
-                // Si tu modelo maneja coordenadas o distancia guardada, puedes pasarla aquí:
                 putExtra("DISTANCIA", ruta.distancia)
             }
             holder.itemView.context.startActivity(intent)
