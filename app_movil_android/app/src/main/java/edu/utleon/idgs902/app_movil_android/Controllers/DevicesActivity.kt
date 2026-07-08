@@ -1,6 +1,8 @@
 package edu.utleon.idgs902.app_movil_android.Controllers
 
 import android.Manifest
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -61,6 +63,7 @@ class DevicesActivity : AppCompatActivity() {
 
             override fun onDispositivoEncontrado(nombre: String, mac: String) {
                 sharedPreferences.edit().putString("dispositivo_mac", mac).apply()
+                bleManager.detenerEscaneo()
                 bleManager.conectar(mac)
             }
 
@@ -68,6 +71,19 @@ class DevicesActivity : AppCompatActivity() {
                 Toast.makeText(this@DevicesActivity, mensaje, Toast.LENGTH_LONG).show()
                 btnVincular.text = "Vincular dispositivo"
                 btnVincular.isEnabled = true
+            }
+
+            override fun onAckRecibido(comando: String) {
+                if (comando == "ACK_START:OK") {
+                    Toast.makeText(this@DevicesActivity, "¡Mochila Vision Guard en línea! Sincronización exitosa.", Toast.LENGTH_SHORT).show()
+
+                    val intent = Intent(this@DevicesActivity, HomeActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                } else if (comando == "ACK_STOP:OK") {
+                    Toast.makeText(this@DevicesActivity, "Recorrido finalizado y guardado correctamente.", Toast.LENGTH_LONG).show()
+                }
             }
         })
 
@@ -125,6 +141,7 @@ class DevicesActivity : AppCompatActivity() {
             }
         }
     }
+
 
     /**
      * 🛠️ Lógica visual modificada para usar fondos con bordes redondeados

@@ -1,10 +1,13 @@
 package edu.utleon.idgs902.app_movil_android.Controllers
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ListPopupWindow
 import androidx.core.content.ContextCompat
@@ -13,8 +16,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import edu.utleon.idgs902.app_movil_android.R
 import edu.utleon.idgs902.app_movil_android.Models.RutaModels
-import edu.utleon.idgs902.app_movil_android.Utils.HistorialHelper
 import edu.utleon.idgs902.app_movil_android.Utils.RutaAdapter
+import edu.utleon.idgs902.app_movil_android.Utils.RecorridoHistorialResponse
+import edu.utleon.idgs902.app_movil_android.Utils.VisionGuardApiService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -26,6 +33,8 @@ class HistorialActivity : AppCompatActivity() {
 
     private lateinit var adaptador: RutaAdapter
     private lateinit var rvHistorial: RecyclerView
+    private lateinit var sharedPreferences: SharedPreferences
+    private val apiService = VisionGuardApiService.create()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,9 +45,10 @@ class HistorialActivity : AppCompatActivity() {
 
         val btnFiltrar = findViewById<TextView>(R.id.btnFiltrar)
         val btnOrdenar = findViewById<TextView>(R.id.btnOrdenar)
+        sharedPreferences = getSharedPreferences("VisionGuardPrefs", Context.MODE_PRIVATE)
 
-        listaOriginal = HistorialHelper.obtenerRutas(this)
-        listaFiltrada.addAll(listaOriginal)
+        listaOriginal = emptyList()
+        listaFiltrada.clear()
 
         rvHistorial = findViewById(R.id.rvHistorial)
         rvHistorial.layoutManager = LinearLayoutManager(this)
@@ -152,6 +162,73 @@ class HistorialActivity : AppCompatActivity() {
                 R.id.nav_historial -> true
                 else -> false
             }
+        }
+
+        cargarHistorialDesdeServidor()
+    }
+
+    private fun cargarHistorialDesdeServidor() {
+        val organizacionId = sharedPreferences.getInt("organizacion_id", -1)
+        if (organizacionId <= 0) {
+            return
+        }
+
+        apiService.obtenerHistorialPorOrganizacion(organizacionId).enqueue(object : Callback<List<RecorridoHistorialResponse>> {
+            override fun onResponse(
+                call: Call<List<RecorridoHistorialResponse>>,
+                response: Response<List<RecorridoHistorialResponse>>
+            ) {
+                if (response.isSuccessful && response.body() != null) {
+                    val recorridosBackend = response.body()!!.map { item ->
+                        RutaModels(
+                            id = item.id.toString(),
+                            fecha = formatearFecha(item.fechaInicio),
+                            duracion = formatearDuracion(item.duracionSegundos),
+                            obstaculos = "0",
+                            caidas = "0",
+                            eventos = item.totalEventos.toString(),
+                            distancia = formatearDistancia(item.distanciaTotalMetros)
+                        )
+                    }
+
+                    listaOriginal = recorridosBackend
+                    listaFiltrada.clear()
+                    listaFiltrada.addAll(listaOriginal)
+                    adaptador = RutaAdapter(listaFiltrada)
+                    rvHistorial.adapter = adaptador
+                    adaptador.notifyDataSetChanged()
+                } else {
+                    Toast.makeText(this@HistorialActivity, "No se pudo cargar el historial del servidor", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<RecorridoHistorialResponse>>, t: Throwable) {
+                Toast.makeText(this@HistorialActivity, "Error al consultar el historial", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun formatearFecha(fechaIso: String): String {
+        return try {
+            val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+            val date = parser.parse(fechaIso)
+            val sdf = SimpleDateFormat("dd 'de' MMMM", Locale("es", "MX"))
+            sdf.format(date)
+        } catch (_: Exception) {
+            fechaIso
+        }
+    }
+
+    private fun formatearDuracion(segundos: Double): String {
+        val minutos = (segundos / 60).toInt()
+        return if (minutos > 0) "$minutos min" else "0 min"
+    }
+
+    private fun formatearDistancia(metros: Double): String {
+        return if (metros >= 1000) {
+            String.format(Locale.US, "%.2f km", metros / 1000.0)
+        } else {
+            String.format(Locale.US, "%.0f m", metros)
         }
     }
 

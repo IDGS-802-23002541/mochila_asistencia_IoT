@@ -96,8 +96,8 @@ class MonitoreoActivity : AppCompatActivity() {
                             if (resumenResponse.isSuccessful && resumenResponse.body() != null) {
                                 val resumen = resumenResponse.body()!!
                                 txtEventos.text = detalle.totalEventos.toString()
-                                val minutosTotales = resumen.duracionSegundos / 60
-                                txtTiempo.text = "$minutosTotales min"
+                                val minutosTotales = (resumen.duracionSegundos ?: 0.0) / 60.0
+                                txtTiempo.text = String.format("%.1f min", minutosTotales)
                                 txtObstaculos.text = detalle.totalEventos.toString()
                                 txtCaidas.text = "0"
                             }

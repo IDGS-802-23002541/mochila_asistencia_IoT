@@ -5,12 +5,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import edu.utleon.idgs902.app_movil_android.R
 import edu.utleon.idgs902.app_movil_android.Utils.RecorridoDetalleResponse
 import edu.utleon.idgs902.app_movil_android.Utils.ResumenRecorridoResponse
 import edu.utleon.idgs902.app_movil_android.Utils.VisionGuardApiService
-import edu.utleon.idgs902.app_movil_android.R
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -91,10 +90,9 @@ class DetallesRutaActivity : AppCompatActivity() {
                                 } else {
                                     String.format("%.0f m", resumen.distanciaTotalMetros)
                                 }
-
                                 // 4. Formatear y pintar Duración en minutos
-                                val minutos = resumen.duracionSegundos / 60
-                                lblDetalleDuracion.text = "$minutos min"
+                                val minutos = (resumen.duracionSegundos ?: 0.0) / 60.0
+                                lblDetalleDuracion.text = String.format("%.1f min", minutos)
 
                                 // Opcional: Aquí puedes configurar el LayoutManager y Adaptador
                                 // de tu rvEventosInternos para mostrar la bitácora si fuera necesario.

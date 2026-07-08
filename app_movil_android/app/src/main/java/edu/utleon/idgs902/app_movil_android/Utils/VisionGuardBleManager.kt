@@ -45,6 +45,7 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
         fun onDesconectado()
         fun onDispositivoEncontrado(nombre: String, mac: String)
         fun onError(mensaje: String)
+        fun onAckRecibido(comando: String)
     }
 
     /**
@@ -111,13 +112,25 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
      * Conecta al servidor GATT del ESP32 utilizando su dirección física
      */
     fun conectar(direccionMac: String) {
-        val device = bluetoothAdapter?.getRemoteDevice(direccionMac)
-        if (device == null) {
-            listener.onError("Dirección MAC del dispositivo no válida")
-            return
+        if (bluetoothGatt != null) {
+            Log.w(TAG, "[Bluetooth] Cerrando instancia previa de GATT antes de reconectar...")
+            bluetoothGatt?.disconnect()
+            bluetoothGatt?.close()
+            bluetoothGatt = null
         }
+
+        val dispositivo = bluetoothAdapter?.getRemoteDevice(direccionMac) ?: return
         Log.d(TAG, "Conectando con la mochila por GATT a la MAC: $direccionMac...")
-        bluetoothGatt = device.connectGatt(context, false, gattCallback)
+
+        // 2. Usar la bandera de autoConnect en false para ejecución inmediata
+        bluetoothGatt = dispositivo.connectGatt(context, false, gattCallback)
+//        val device = bluetoothAdapter?.getRemoteDevice(direccionMac)
+//        if (device == null) {
+//            listener.onError("Dirección MAC del dispositivo no válida")
+//            return
+//        }
+//        Log.d(TAG, "Conectando con la mochila por GATT a la MAC: $direccionMac...")
+//        bluetoothGatt = device.connectGatt(context, false, gattCallback)
     }
 
     /**
@@ -157,6 +170,24 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
                 }
             }
         }
+
+        override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
+            super.onCharacteristicChanged(gatt, characteristic)
+
+            // 1. Extraer los bytes crudos enviados por la mochila
+            val data = characteristic.value ?: return
+            val mensajeRecibido = String(data, Charsets.UTF_8).trim()
+
+            Log.d(TAG, "[Bluetooth] Mensaje recibido del ESP32: '$mensajeRecibido'")
+
+            // 2. Despachar el mensaje al hilo principal usando el Listener delegado
+            if (mensajeRecibido == "ACK_START:OK" || mensajeRecibido == "ACK_STOP:OK") {
+                Handler(Looper.getMainLooper()).post {
+                    listener.onAckRecibido(mensajeRecibido)
+                }
+            }
+        }
+
     }
 
     /**

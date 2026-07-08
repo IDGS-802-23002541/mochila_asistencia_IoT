@@ -108,6 +108,9 @@ class HomeActivity : AppCompatActivity() {
             override fun onError(mensaje: String) {
                 Log.e("HomeActivity", "Error BLE: $mensaje")
             }
+            override fun onAckRecibido(comando: String) {
+                Log.d("HomeActivity", "ACK recibido: $comando")
+            }
         })
 
         verificarEstatusDispositivo()
@@ -168,7 +171,7 @@ class HomeActivity : AppCompatActivity() {
     private fun iniciarRecorridoServidor(macAddress: String) {
         thread {
             try {
-                val url = URL("http://34.30.116.129/api/recorridos/iniciar")
+                val url = URL("https://lmsidgs902.runasp.net/api/recorridos/iniciar")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json; utf-8")
@@ -227,22 +230,7 @@ class HomeActivity : AppCompatActivity() {
     private fun detenerRecorridoLocal() {
         bleManager.enviarDetenerRecorrido()
 
-        val tiempoFinal = txtTiempo.text.toString()
-        val sdf = SimpleDateFormat("dd 'de' MMMM", Locale("es", "MX"))
-        val fechaHoy = sdf.format(Date())
         val idRecorrido = sharedPreferences.getInt("ultimo_recorrido_id", 0)
-
-        val nuevaRuta = RutaModels(
-            id = idRecorrido.toString(),
-            fecha = fechaHoy,
-            duracion = tiempoFinal,
-            obstaculos = "0",
-            caidas = "0",
-            eventos = "0",
-            distancia = "0"
-        )
-
-        HistorialHelper.guardarRuta(this, nuevaRuta)
 
         corriendo = false
         handler.removeCallbacks(runnableCronometro)
@@ -256,7 +244,8 @@ class HomeActivity : AppCompatActivity() {
         txtTiempo.text = "00:00"
 
         val intent = Intent(this, MonitoreoActivity::class.java).apply {
-            putExtra("EXTRA_DURACION", nuevaRuta.duracion)
+            putExtra("RECORRIDO_ID", idRecorrido)
+            putExtra("EXTRA_DURACION", txtTiempo.text.toString())
         }
         startActivity(intent)
     }
