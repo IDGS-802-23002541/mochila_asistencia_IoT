@@ -1,0 +1,86 @@
+/* sidebar.component.css */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e4e6eb;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px 24px;
+  border-bottom: 1px solid #e4e6eb;
+}
+.logo-icon {
+  width: 34px; height: 34px;
+  background: #16305c;
+  color: #fff;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+}
+.logo-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #16305c;
+  line-height: 1.1;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 12px;
+  flex: 1;
+}
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 14px;
+  border-left: 3px solid transparent;
+}
+.menu a:hover {
+  background: #f5f6f8;
+}
+.menu a.active {
+  color: #2f5fa8;
+  background: #eef3fb;
+  border-left: 3px solid #2f5fa8;
+  font-weight: 600;
+}
+
+.sidebar-bottom {
+  padding: 16px 20px 0;
+  border-top: 1px solid #e4e6eb;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.btn-ayuda {
+  background: #fff;
+  border: 1px solid #16305c;
+  color: #16305c;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.btn-cerrar {
+  background: #16305c;
+  color: #fff;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}

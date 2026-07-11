@@ -1,0 +1,228 @@
+# Cangurera Inteligente — Guía de Integración para el Equipo
+
+> **Para:** Compañero de equipo (app móvil + firmware ESP32)  
+> **API Base URL:** `http://<servidor>:5000`  
+> **MQTT Broker:** `<servidor>:1883`
+
+---
+
+## Flujo General
+
+```
+┌─────────────┐   1. POST /api/recorridos/iniciar     ┌────────────┐
+│  App Móvil  │ ──────────────────────────────────── ▶│    API     │
+│   (HTTP)    │ ◀─────── { recorridoId: 42 } ─────── │ .NET 8     │
+└─────┬───────┘                                        └─────┬──────┘
+      │ 2. Envía recorridoId=42 por Bluetooth                │
+      ▼                                                       │
+┌─────────────┐   3. MQTT: cangurera/eventos           ┌─────▼──────┐
+│   ESP32     │ ──────────────────────────────────── ▶│   Broker   │
+│  (MQTT)     │   MQTT: cangurera/recorrido/finalizar  │   MQTT     │
+└─────────────┘ ─────────────────────────────────── ▶└─────┬──────┘
+                                                            │ 4. Suscripción
+                                                       ┌────▼──────┐
+                                                       │    API     │
+                                                       │ (guarda    │
+                                                       │  en SQL)   │
+                                                       └────────────┘
+```
+
+---
+
+## PARTE 1 — App Móvil (HTTP)
+
+### `POST /api/recorridos/iniciar`
+
+Llama este endpoint cuando el usuario toma la mochila prestada.
+
+**Request Body (JSON):**
+
+```json
+{
+  "dispositivoMac": "24:0A:C4:8B:58:FC",
+  "usuarioEdad": 22,
+  "discapacidadId": 1
+}
+```
+
+| Campo           | Tipo    | Requerido | Descripción                                           |
+|-----------------|---------|-----------|-------------------------------------------------------|
+| `dispositivoMac`| string  | ✅ Sí     | MAC del ESP32 que se presta. Formato `XX:XX:XX:XX:XX:XX` |
+| `usuarioEdad`   | int     | ❌ No     | Edad del portador de la mochila (1–120)               |
+| `discapacidadId`| int     | ❌ No     | ID del catálogo de discapacidades (ver endpoint abajo)|
+
+**Response 201 Created:**
+
+```json
+{
+  "recorridoId": 42,
+  "dispositivoMac": "24:0A:C4:8B:58:FC",
+  "fechaInicio": "2025-06-25T10:00:00Z",
+  "mensaje": "Recorrido iniciado correctamente"
+}
+```
+
+> ⚠️ **Importante:** El campo `recorridoId` es el que debes enviar al ESP32 vía Bluetooth. El ESP lo usará en todos sus mensajes MQTT.
+
+**Errores posibles:**
+
+| Código | Significado |
+|--------|-------------|
+| 400    | MAC con formato incorrecto o discapacidadId no existe |
+| 404    | No existe un dispositivo con esa MAC en la base de datos |
+| 409    | El dispositivo ya tiene un recorrido activo sin cerrar |
+
+---
+
+### `GET /api/recorridos/{id}`
+
+Consulta el estado actual de un recorrido.
+
+**Ejemplo:** `GET /api/recorridos/42`
+
+**Response 200 OK:**
+
+```json
+{
+  "id": 42,
+  "dispositivoMac": "24:0A:C4:8B:58:FC",
+  "organizacion": "Universidad Tecnológica de León",
+  "fechaInicio": "2025-06-25T10:00:00Z",
+  "fechaFin": null,
+  "usuarioEdad": 22,
+  "discapacidad": "Ceguera Total",
+  "activo": true,
+  "totalEventos": 3
+}
+```
+
+---
+
+### `GET /api/recorridos/catalogos/discapacidades`
+
+Lista de discapacidades para el picker del formulario de préstamo.
+
+**Response:**
+
+```json
+[
+  { "id": 1, "nombre": "Ceguera Total" },
+  { "id": 2, "nombre": "Disminución Visual Grave" }
+]
+```
+
+---
+
+### `GET /api/recorridos/catalogos/eventos`
+
+Lista de tipos de evento. Útil para que el firmware del ESP sepa qué IDs usar.
+
+**Response:**
+
+```json
+[
+  { "id": 1, "nombreEvento": "Trafico_Denso",    "severidad": "Media"   },
+  { "id": 2, "nombreEvento": "Obstaculo_Fijo",   "severidad": "Baja"    },
+  { "id": 3, "nombreEvento": "Caida_Detectada",  "severidad": "Critica" }
+]
+```
+
+---
+
+## PARTE 2 — ESP32 (MQTT)
+
+> El ESP32 recibe el `recorridoId` por Bluetooth desde la app móvil y lo usa en todos los mensajes MQTT que publique.
+
+**Broker:** `<servidor>:1883`  
+**QoS recomendado:** 1 (at-least-once)
+
+---
+
+### Topic: `cangurera/eventos`
+
+El ESP publica en este topic **cada vez que detecta un evento** durante el recorrido (obstáculo, caída, tráfico, etc.).
+
+**Payload JSON:**
+
+```json
+{
+  "recorridoId": 42,
+  "tipoEventoId": 3,
+  "latitud": 21.12345678,
+  "longitud": -101.56789012,
+  "geoEsEstimado": false,
+  "fuerzaImpactoG": 2.75
+}
+```
+
+| Campo           | Tipo    | Requerido | Descripción                                                    |
+|-----------------|---------|-----------|----------------------------------------------------------------|
+| `recorridoId`   | int     | ✅ Sí     | ID recibido por Bluetooth al inicio del préstamo               |
+| `tipoEventoId`  | int     | ✅ Sí     | ID del tipo de evento (1=Tráfico, 2=Obstáculo, 3=Caída)        |
+| `latitud`       | float   | ❌ No     | Latitud GPS con 8 decimales. Omitir o `null` si no hay señal   |
+| `longitud`      | float   | ❌ No     | Longitud GPS con 8 decimales. Omitir o `null` si no hay señal  |
+| `geoEsEstimado` | bool    | ❌ No     | `true` si el GPS no tiene fix y la posición es estimada        |
+| `fuerzaImpactoG`| float   | ❌ No     | Solo para `tipoEventoId=3` (Caída). Fuerza en G del impacto    |
+
+**Ejemplo mínimo (sin GPS):**
+
+```json
+{
+  "recorridoId": 42,
+  "tipoEventoId": 2
+}
+```
+
+---
+
+### Topic: `cangurera/recorrido/finalizar`
+
+El ESP publica **una sola vez** en este topic cuando el recorrido termina (el usuario regresa la mochila). Esto cierra el recorrido en la base de datos.
+
+**Payload JSON:**
+
+```json
+{
+  "recorridoId": 42,
+  "rutaCoordenadas": "[{\"lat\":21.1234,\"lon\":-101.5678,\"ts\":\"2025-06-25T10:00:00Z\"},{\"lat\":21.1240,\"lon\":-101.5682,\"ts\":\"2025-06-25T10:01:00Z\"}]",
+  "fechaFin": "2025-06-25T10:30:00Z"
+}
+```
+
+| Campo             | Tipo   | Requerido | Descripción                                                                 |
+|-------------------|--------|-----------|-----------------------------------------------------------------------------|
+| `recorridoId`     | int    | ✅ Sí     | ID del recorrido activo                                                     |
+| `rutaCoordenadas` | string | ❌ No     | JSON serializado como string: array de puntos `{lat, lon, ts}`. Puede ser `"[]"` si no hubo GPS |
+| `fechaFin`        | string | ❌ No     | ISO 8601 UTC. Si se omite, la API usa la hora actual del servidor           |
+
+**Formato de `rutaCoordenadas` (el JSON interno):**
+
+```json
+[
+  { "lat": 21.12345678, "lon": -101.56789012, "ts": "2025-06-25T10:00:00Z" },
+  { "lat": 21.12350000, "lon": -101.56800000, "ts": "2025-06-25T10:00:30Z" }
+]
+```
+
+> El campo `rutaCoordenadas` viaja como **string escapado** dentro del JSON principal porque la columna en SQL Server tiene una restricción `ISJSON`.
+
+---
+
+## Resumen de Topics MQTT
+
+| Topic                          | Dirección  | Cuándo                              |
+|-------------------------------|------------|-------------------------------------|
+| `cangurera/eventos`            | ESP32 → API | Cada evento detectado en el camino |
+| `cangurera/recorrido/finalizar`| ESP32 → API | Una vez, al devolver la mochila    |
+
+---
+
+## Orden de llamadas esperado
+
+```
+1. [Móvil]  POST /api/recorridos/iniciar           → recibe recorridoId = 42
+2. [Móvil]  Envía recorridoId=42 por Bluetooth al ESP32
+3. [ESP32]  Publica en cangurera/eventos  (N veces durante el recorrido)
+4. [ESP32]  Publica en cangurera/recorrido/finalizar  (1 vez al terminar)
+5. [Móvil]  (Opcional) GET /api/recorridos/42  para confirmar cierre
+```

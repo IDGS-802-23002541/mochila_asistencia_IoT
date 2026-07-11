@@ -1,0 +1,68 @@
+####################################
+# GENERAL
+####################################
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+####################################
+# .NET / Visual Studio (ASP MVC)
+####################################
+
+# Build outputs
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# NuGet
+packages/
+!packages/build/
+
+####################################
+# ANDROID / ANDROID STUDIO
+####################################
+
+# Gradle
+.gradle/
+build/
+
+# Android Studio
+.idea/
+*.iml
+local.properties
+captures/
+
+# APKs
+*.apk
+*.aab
+
+####################################
+# ESP32 / PYTHON / THONNY
+####################################
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Entornos virtuales
+venv/
+.env/
+
+####################################
+# ENV VARIABLES / SECRETOS
+####################################
+
+.env
+appsettings.Development.json
+secrets.json

@@ -27,20 +27,21 @@ class RutaAdapter(private val listaRutas: List<RutaModels>) :
     override fun onBindViewHolder(holder: RutaViewHolder, position: Int) {
         val ruta = listaRutas[position]
 
-        val listaCompletaOriginal = HistorialHelper.obtenerRutas(holder.itemView.context)
-        val numeroRealRuta = listaCompletaOriginal.indexOfFirst { it.id == ruta.id } + 1
-        val nombreMostrar = if (numeroRealRuta > 0) "Ruta #$numeroRealRuta" else "Ruta registrada"
+        val numeroRealRuta = position + 1
+        val nombreMostrar = "Ruta #$numeroRealRuta"
 
         holder.lblNombre.text = nombreMostrar
         holder.lblDetalles.text = "${ruta.fecha} · ${ruta.duracion} · ${ruta.eventos} eventos"
 
-        holder.itemView.setOnClickListener { context ->
+        holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, DetallesRutaActivity::class.java).apply {
+                // Pasamos el ID string para que DetallesRutaActivity lo reciba e invoque a Retrofit
+                putExtra("RECORRIDO_ID", ruta.id)
+
                 putExtra("NUMERO_RUTA", nombreMostrar)
                 putExtra("FECHA", ruta.fecha)
                 putExtra("DURACION", ruta.duracion)
                 putExtra("CANTIDAD_EVENTOS", ruta.eventos)
-                // Si tu modelo maneja coordenadas o distancia guardada, puedes pasarla aquí:
                 putExtra("DISTANCIA", ruta.distancia)
             }
             holder.itemView.context.startActivity(intent)

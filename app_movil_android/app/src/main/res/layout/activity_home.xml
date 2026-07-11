@@ -43,6 +43,7 @@
             android:paddingBottom="24dp">
 
             <LinearLayout
+                android:id="@+id/cardEstadoDispositivo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_login_card"
@@ -52,6 +53,7 @@
                 android:layout_marginTop="20dp">
 
                 <ImageView
+                    android:id="@+id/imgMochilaIcon"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:src="@drawable/mochila"
@@ -65,6 +67,7 @@
                     android:layout_marginStart="16dp">
 
                     <TextView
+                        android:id="@+id/lblNombreMochilaHome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Mochila UTL 1"
@@ -73,6 +76,7 @@
                         android:textSize="15sp" />
 
                     <TextView
+                        android:id="@+id/lblStatusSenalHome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
@@ -82,15 +86,15 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/badgeStatusContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
                     android:background="@drawable/bg_status_available"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="6dp"
                     android:gravity="center">
                     <TextView
+                        android:id="@+id/lblBadgeStatusTexto"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="● Conectado"
@@ -176,13 +180,12 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <Button
+                <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnIniciarRecorrido"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginTop="20dp"
                     android:background="@drawable/bg_button_outline_blue"
-                    app:backgroundTint="@null"
                     android:text="Iniciar recorrido"
                     android:textColor="@color/vg_dark_blue"
                     android:textAllCaps="false"
@@ -263,7 +266,7 @@
                     android:textColor="@color/vg_text_muted" />
 
                 <Button
-                    android:id="@+id/btnDetallesHome"
+                    android:id="@+id/btnDetallesHome2"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_width="wrap_content"

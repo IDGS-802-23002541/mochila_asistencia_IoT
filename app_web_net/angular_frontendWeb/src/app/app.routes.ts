@@ -4,10 +4,9 @@ import { Home } from './pages/home/home';
 import { Login } from './pages/login/login';
 import { Inicio } from './pages/inicio/inicio';
 import { MainLayout } from './layout/main-layout/main-layout';
-
+import { MapaCalor } from './pages/analitica/mapa-calor/mapa-calor';
 
 export const routes: Routes = [
-
   {
     path: '',
     component: Home
@@ -24,6 +23,10 @@ export const routes: Routes = [
         path: 'inicio',
         component: Inicio
       },
+      {
+        path: 'analitica/mapa-calor',
+        component: MapaCalor
+      }
 
       // {
       //   path: 'dispositivos',
