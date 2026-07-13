@@ -1,8 +1,6 @@
 package edu.utleon.idgs902.app_movil_android.Controllers
 
 import android.Manifest
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCharacteristic
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -16,7 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import edu.utleon.idgs902.app_movil_android.R
+import edu.utleon.idgs902.app_movil_android.Utils.MqttConfig
+import edu.utleon.idgs902.app_movil_android.Utils.MqttManager
 import edu.utleon.idgs902.app_movil_android.Utils.VisionGuardBleManager
+import org.json.JSONObject
+import android.os.Handler
+import android.os.Looper
 
 class DevicesActivity : AppCompatActivity() {
 
@@ -27,6 +30,9 @@ class DevicesActivity : AppCompatActivity() {
 
     private lateinit var itemMochila1: LinearLayout
     private lateinit var itemMochila2: LinearLayout
+    private lateinit var mqttManager: MqttManager
+    private var macEncontrada = ""
+
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 101
@@ -43,26 +49,58 @@ class DevicesActivity : AppCompatActivity() {
         itemMochila1 = findViewById(R.id.itemMochila1)
         itemMochila2 = findViewById(R.id.itemMochila2)
 
+        mqttManager = MqttManager(this,object : MqttManager.MqttListener {
+
+            override fun onConectado() {}
+
+            override fun onDesconectado() {}
+
+            override fun onError(mensaje: String) {}
+        })
+
         bleManager = VisionGuardBleManager(this, object : VisionGuardBleManager.BleStateListener {
             override fun onConectado() {
+
+                // Marcamos que el ESP32 está vinculado a la app
+                sharedPreferences.edit()
+                    .putBoolean("dispositivo_vinculado", true)
+                    .apply()
+
                 Toast.makeText(this@DevicesActivity, "¡Mochila Conectada con Éxito!", Toast.LENGTH_SHORT).show()
 
-                sharedPreferences.edit().putBoolean("dispositivo_vinculado", true).apply()
+                mqttManager.conectar()
+
+                val json = JSONObject().apply {
+                    put("accion", "vincular")
+                    put("macAddress", macEncontrada)
+                }
+
+                mqttManager.publicar(
+                    MqttConfig.TOPICO_COMANDOS,
+                    json.toString()
+                )
+
+                bleManager.desconectar()
 
                 val intent = Intent(this@DevicesActivity, HomeActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
+
             }
 
             override fun onDesconectado() {
                 btnVincular.text = "Vincular dispositivo"
                 btnVincular.isEnabled = true
-                sharedPreferences.edit().putBoolean("dispositivo_vinculado", false).apply()
+                // Dejamos la conexión activa hasta desvincular la app
             }
 
             override fun onDispositivoEncontrado(nombre: String, mac: String) {
-                sharedPreferences.edit().putString("dispositivo_mac", mac).apply()
+                macEncontrada = mac
+                sharedPreferences.edit()
+                    .putString("dispositivo_mac", mac)
+                    .putString("dispositivo_nombre", nombre)
+                    .apply()
                 bleManager.detenerEscaneo()
                 bleManager.conectar(mac)
             }
@@ -73,18 +111,6 @@ class DevicesActivity : AppCompatActivity() {
                 btnVincular.isEnabled = true
             }
 
-            override fun onAckRecibido(comando: String) {
-                if (comando == "ACK_START:OK") {
-                    Toast.makeText(this@DevicesActivity, "¡Mochila Vision Guard en línea! Sincronización exitosa.", Toast.LENGTH_SHORT).show()
-
-                    val intent = Intent(this@DevicesActivity, HomeActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
-                } else if (comando == "ACK_STOP:OK") {
-                    Toast.makeText(this@DevicesActivity, "Recorrido finalizado y guardado correctamente.", Toast.LENGTH_LONG).show()
-                }
-            }
         })
 
         btnVincular.setOnClickListener {
@@ -96,8 +122,12 @@ class DevicesActivity : AppCompatActivity() {
         }
 
         btnContinuarSinVincular.setOnClickListener {
-            sharedPreferences.edit().putBoolean("dispositivo_vinculado", false).apply()
-
+            //Quitamos las preferencias del BLE
+            sharedPreferences.edit()
+                .remove("dispositivo_mac")
+                .remove("dispositivo_nombre")
+                .putBoolean("dispositivo_vinculado", false)
+                .apply()
             val intent = Intent(this@DevicesActivity, HomeActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
