@@ -1,131 +1,498 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* STREAMING_CHUNK: Resetting base styles and typography */
+
+*{
+box-sizing: border-box;
+margin: 0;
+padding: 0;
 }
 
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #f5f6f8;
+font-family: 'Segoe UI', Arial, sans-serif;
+background: #f5f6f8;
 }
 
-/* Encabezado de sección */
+.quotation-section {
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 2rem 1rem;
+}
+
+/* STREAMING_CHUNK: Styling the section header and main titles /
+/ ==========================================
+ENCABEZADO DE SECCIÓN (TEXTOS MÁS GRANDES)
+========================================== */
 .section-header {
-  text-align: center;
-  padding: 2.5rem 2rem 1.5rem;
+text-align: center;
+padding: 1.5rem 2rem 2rem;
+max-width: 900px;
+margin: 0 auto;
+}
+
+.section-eyebrow {
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: #2563eb;
+margin-bottom: 10px;
+display: block;
 }
 
 .section-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #0d1f4e;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+font-size: 26px;
+font-weight: 700;
+color: #0d1f4e;
+letter-spacing: 0.08em;
+text-transform: uppercase;
 }
 
 .section-divider {
-  width: 40px;
-  height: 3px;
-  background: #2563eb;
-  margin: 10px auto 0;
-  border-radius: 2px;
+width: 50px;
+height: 3px;
+background: #2563eb;
+margin: 14px auto 0;
+border-radius: 2px;
 }
 
-/* Grid de productos */
+.section-subtitle {
+font-size: 16px;
+color: #7a8499;
+line-height: 1.7;
+margin-top: 16px;
+}
+
+/* STREAMING_CHUNK: Configuring layout grid and adaptive containers /
+/ ==========================================
+ESTILOS DE DISTRIBUCIÓN PANTALLA COMPLETA
+========================================== */
+.quotation-layout-container {
+display: grid;
+grid-template-columns: 2.5fr 1.5fr;
+gap: 24px;
+max-width: 1400px;
+width: 100%;
+padding: 0 2rem;
+align-items: start;
+}
+
 .products-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  padding: 0 2rem 2.5rem;
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 20px;
+width: 100%;
 }
 
-/* Tarjeta de producto */
+/* STREAMING_CHUNK: Designing the Virtual Assistant Chat Box /
+/ ==========================================
+ESTILOS DEL ASISTENTE VIRTUAL (CHAT)
+========================================== */
+.chat-container {
+width: 100%;
+height: 600px;
+background: #ffffff;
+border-radius: 16px;
+box-shadow: 0 8px 24px rgba(13, 31, 78, 0.05);
+border: 1px solid #e2e6ef;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+position: sticky;
+top: 20px;
+}
+
+.chat-header {
+background: linear-gradient(135deg, #0d1f4e, #162a6a);
+padding: 16px 20px;
+display: flex;
+align-items: center;
+color: #ffffff;
+}
+
+.bot-avatar {
+width: 36px;
+height: 36px;
+background: rgba(255, 255, 255, 0.15);
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+font-size: 12px;
+margin-right: 12px;
+}
+
+.bot-status h3 { font-size: 13px; font-weight: 600; margin: 0; }
+.bot-status p { font-size: 11px; opacity: 0.75; margin: 0; }
+
+.chat-window {
+flex: 1;
+padding: 16px;
+overflow-y: auto;
+display: flex;
+flex-direction: column;
+gap: 12px;
+background: #f8fafc;
+}
+
+.msg-bot {
+align-self: flex-start;
+max-width: 95%;
+animation: fadeIn 0.3s ease-out forwards;
+}
+
+.msg-bubble {
+padding: 12px 16px;
+border-radius: 4px 14px 14px 14px;
+font-size: 13px;
+line-height: 1.5;
+background: #ffffff;
+color: #0d1f4e;
+border: 1px solid #e2e6ef;
+}
+
+.chat-summary-inside {
+margin-top: 12px;
+padding-top: 12px;
+border-top: 1px solid #e2e6ef;
+}
+
+/* STREAMING_CHUNK: Styling the email input field and interactive states /
+/ NUEVO: Diseño Premium para el Campo de Correo */
+.chat-email-input {
+width: 100%;
+padding: 12px 16px;
+border: 2px solid #cbd5e1;
+border-radius: 10px;
+font-size: 13.5px;
+color: #0d1f4e;
+background-color: #ffffff;
+outline: none;
+font-family: inherit;
+transition: all 0.25s ease-in-out;
+box-shadow: inset 0 2px 4px rgba(13, 31, 78, 0.03);
+}
+
+.chat-email-input::placeholder {
+color: #94a3b8;
+}
+
+.chat-email-input:focus {
+border-color: #2563eb;
+box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15), inset 0 2px 4px rgba(13, 31, 78, 0.02);
+background-color: #ffffff;
+}
+
+.chat-email-input:disabled {
+background-color: #f1f5f9;
+color: #94a3b8;
+border-color: #e2e6ef;
+cursor: not-allowed;
+}
+
+/* NUEVO: Alerta elegante para CORS o Adblockers */
+.network-warning-box {
+background-color: #fef3c7;
+border-left: 4px solid #f59e0b;
+color: #78350f;
+padding: 10px 12px;
+border-radius: 8px;
+font-size: 11px;
+line-height: 1.4;
+margin-top: 8px;
+margin-bottom: 12px;
+text-align: left;
+}
+
+.summary-note {
+font-size: 11px;
+color: #7a8499;
+line-height: 1.4;
+margin-bottom: 12px;
+}
+
+/* STREAMING_CHUNK: Designing budget calculations display */
+.total-display {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 14px;
+}
+
+.total-label { font-size: 13px; font-weight: 600; color: #0d1f4e; }
+.total-amount { font-size: 22px; font-weight: 700; color: #2563eb; }
+
+.btn-submit-quote {
+width: 100%;
+background: #0d1f4e;
+color: #ffffff;
+border: none;
+border-radius: 8px;
+padding: 11px 0;
+font-size: 12.5px;
+font-weight: 600;
+cursor: pointer;
+transition: background 0.15s;
+}
+
+.btn-submit-quote:hover:not(:disabled) { background: #2563eb; }
+
+.btn-submit-quote:disabled {
+background: #94a3b8;
+color: #ffffff;
+cursor: not-allowed;
+opacity: 0.8;
+}
+
+/* STREAMING_CHUNK: Styling the product cards and grid layout /
+/ ==========================================
+ESTILOS DE TARJETAS
+========================================== */
 .product-card {
-  background: #ffffff;
-  border: 1px solid #e2e6ef;
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow 0.2s;
+position: relative;
+min-height: 420px;
+border: 1px solid #e2e6ef;
+border-radius: 16px;
+overflow: hidden;
+transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .product-card:hover {
-  box-shadow: 0 4px 16px rgba(13, 31, 78, 0.1);
+transform: translateY(-6px);
+box-shadow: 0 12px 24px rgba(13, 31, 78, 0.15);
 }
 
-/* Imagen */
 .product-img {
-  width: 100%;
-  height: 140px;
-  background: #e8edf5;
-  overflow: hidden;
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 1;
 }
 
-.product-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.card-bg-img {
+width: 100%;
+height: 100%;
+object-fit: cover;
 }
 
-/* Info */
-.product-info {
-  padding: 12px 14px 8px;
-  flex: 1;
+.card-overlay {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(to top, rgba(13, 31, 78, 0.98) 20%, rgba(13, 31, 78, 0.5) 65%, rgba(0, 0, 0, 0) 100%);
+z-index: 2;
 }
 
-.product-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #0d1f4e;
+/* STREAMING_CHUNK: Defining action buttons and card animations */
+.card-content {
+position: relative;
+z-index: 3;
+display: flex;
+flex-direction: column;
+height: 100%;
+min-height: 420px;
+justify-content: flex-end;
+box-sizing: border-box;
 }
 
-.product-price {
-  font-size: 15px;
-  font-weight: 600;
-  color: #0d1f4e;
-  margin: 5px 0 6px;
+.product-info { padding: 20px 20px 10px; }
+.product-name { font-size: 15px; font-weight: 700; color: #ffffff; }
+.product-price { font-size: 16px; font-weight: 700; color: #3b82f6; margin: 6px 0 8px; }
+.product-desc { font-size: 12px; color: #e2e8f0; line-height: 1.5; }
+.product-actions { padding: 0 20px 20px; }
+
+.btn-add, .btn-remove {
+width: 100%;
+border: none;
+border-radius: 10px;
+padding: 11px 0;
+font-size: 12.5px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
 }
 
-.product-desc {
-  font-size: 11px;
-  color: #7a8499;
-  line-height: 1.6;
+.btn-add { background: #ffffff; color: #0d1f4e; }
+.btn-add:hover { background: #2563eb; color: #ffffff; }
+.btn-remove { background: #10b981; color: #ffffff; }
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(6px); }
+to { opacity: 1; transform: translateY(0); }
 }
 
-/* Botón */
-.product-actions {
-  padding: 0 14px 14px;
+/* STREAMING_CHUNK: Making the layout responsive for tablets and mobile devices /
+/ ==========================================
+RESPONSIVE (PASAR A VERTICAL EN MÓVILES)
+========================================== */
+@media (max-width: 1100px) {
+.quotation-layout-container {
+grid-template-columns: 1fr;
+padding: 0 1rem;
 }
 
-.btn-add {
-  width: 100%;
-  background: #0d1f4e;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 0;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
+.chat-container {
+height: 420px;
+position: relative;
+top: 0;
+order: -1;
+}
 }
 
-.btn-add:hover {
-  background: #162a6a;
+@media (max-width: 650px) {
+.products-grid {
+grid-template-columns: 1fr;
+}
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+/* STREAMING_CHUNK: Styling the overlay window for local simulation feedback /
+/ ==========================================
+PANTALLA FLOTANTE DE CONFIRMACIÓN LOCALHOST
+========================================== */
+.localhost-overlay {
+position: fixed;
+inset: 0;
+background: rgba(13, 31, 78, 0.45);
+backdrop-filter: blur(5px);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 9999;
+padding: 20px;
+animation: fadeIn 0.25s ease-out;
 }
 
-@media (max-width: 500px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-    padding: 0 1rem 2rem;
-  }
+.localhost-card {
+background: #ffffff;
+border-radius: 16px;
+width: 100%;
+max-width: 500px;
+box-shadow: 0 20px 40px rgba(13, 31, 78, 0.25);
+border: 1px solid #cbd5e1;
+overflow: hidden;
+animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.localhost-header {
+background: #0d1f4e;
+padding: 18px 20px;
+color: #ffffff;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.server-badge {
+background: #10b981;
+color: white;
+font-size: 10px;
+font-weight: 700;
+padding: 3px 8px;
+border-radius: 4px;
+letter-spacing: 0.05em;
+}
+
+.server-badge.badge-warning {
+background: #f59e0b;
+}
+
+.localhost-header h3 {
+font-size: 15px;
+font-weight: 600;
+margin: 0;
+}
+
+/* STREAMING_CHUNK: Styling details in localhost modal payload display */
+.localhost-body {
+padding: 24px;
+text-align: center;
+color: #334155;
+}
+
+.icon-success {
+font-size: 40px;
+margin-bottom: 12px;
+}
+
+.localhost-body h4 {
+font-size: 17px;
+color: #0d1f4e;
+margin-bottom: 8px;
+font-weight: 700;
+}
+
+.localhost-body p {
+font-size: 13px;
+color: #64748b;
+line-height: 1.5;
+margin-bottom: 16px;
+}
+
+.text-fallback-note {
+background-color: #f8fafc;
+border-radius: 8px;
+padding: 10px;
+border: 1px solid #e2e8f0;
+text-align: left;
+font-size: 12px !important;
+color: #475569 !important;
+}
+
+.url-code {
+display: block;
+background: #f1f5f9;
+color: #2563eb;
+padding: 10px;
+border-radius: 8px;
+font-family: 'Courier New', Courier, monospace;
+font-size: 13px;
+font-weight: bold;
+border: 1px dashed #cbd5e1;
+margin-top: 12px;
+margin-bottom: 18px;
+}
+
+.payload-box {
+background: #f8fafc;
+border: 1px solid #e2e6ef;
+border-radius: 10px;
+padding: 12px;
+text-align: left;
+font-size: 12.5px;
+}
+
+.payload-box p {
+margin: 4px 0;
+}
+
+.localhost-footer {
+padding: 16px 24px 24px;
+background: #f8fafc;
+border-top: 1px solid #e2e6ef;
+}
+
+.btn-close-localhost {
+width: 100%;
+background: #2563eb;
+color: white;
+border: none;
+padding: 11px;
+border-radius: 8px;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+transition: background 0.15s;
+}
+
+.btn-close-localhost:hover {
+background: #0d1f4e;
+}
+
+@keyframes scaleUp {
+from { transform: scale(0.92); opacity: 0; }
+to { transform: scale(1); opacity: 1; }
 }

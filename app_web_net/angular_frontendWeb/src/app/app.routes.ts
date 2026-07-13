@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
+
 import { Home } from './pages/home/home';
+import { Login } from './pages/login/login';
+import { Inicio } from './pages/inicio/inicio';
+import { MainLayout } from './layout/main-layout/main-layout';
 import { MapaCalor } from './pages/analitica/mapa-calor/mapa-calor';
 
 export const routes: Routes = [
@@ -8,7 +12,36 @@ export const routes: Routes = [
     component: Home
   },
   {
-    path: 'analitica/mapa-calor',
-    component: MapaCalor
+    path: 'login',
+    component: Login
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      {
+        path: 'inicio',
+        component: Inicio
+      },
+      {
+        path: 'analitica/mapa-calor',
+        component: MapaCalor
+      }
+
+      // {
+      //   path: 'dispositivos',
+      //   component: Dispositivos
+      // },
+
+      // {
+      //   path: 'mapa',
+      //   component: Mapa
+      // },
+
+      // {
+      //   path: 'graficas',
+      //   component: Graficas
+      // }
+    ]
   }
 ];

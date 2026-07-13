@@ -2,63 +2,160 @@
 
   <div class="services-header">
     <h2>¿Qué ofrecemos?</h2>
-    <p class="services-subtitle">Soluciones de seguridad diseñadas para proteger lo que más importa</p>
+
+    <p class="services-subtitle">
+      Soluciones especializadas para evaluar, diagnosticar y mejorar la accesibilidad
+      en instituciones educativas mediante tecnología IoT.
+    </p>
   </div>
 
   <div class="services-grid">
 
+   <!-- SERVICIO 1 -->
+<div class="service-card">
+  <img src="images/paquete1.1.jpg" alt="Diagnóstico de accesibilidad" class="card-bg-img">
+  <!-- Una capa oscura para que el texto se lea bien -->
+  <div class="card-overlay"></div>
+
+  <!-- El contenido que flotará sobre la imagen -->
+  <div class="card-content">
+    <div class="service-info">
+      <h3 class="service-name">
+        Diagnóstico de Accesibilidad
+      </h3>
+      <p class="service-desc">
+        Evaluamos la infraestructura mediante recorridos reales para identificar
+        barreras que afectan la movilidad de personas con discapacidad visual.
+      </p>
+    </div>
+    <div class="service-actions">
+      <button class="btn-service" (click)="openPanel(1)">
+        Ver más
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICIO 2 -->
+<div class="service-card">
+  <div class="service-img">
+    <img src="images/paquete2.jpg" alt="Evaluación con Tecnología IoT">
+  </div>
+  <!-- Una capa oscura para que el texto se lea bien -->
+  <div class="card-overlay"></div>
+  <!-- El contenido que flotará sobre la imagen -->
+  <div class="card-content">
+    <div class="service-info">
+      <p class="service-name">
+        Evaluación con Tecnología IoT
+      </p>
+      <p class="service-desc">
+        Utilizamos sensores inteligentes para recopilar información objetiva
+        sobre obstáculos, rutas y condiciones del entorno durante los recorridos.
+      </p>
+    </div>
+
+    <div class="service-actions">
+      <button class="btn-service" (click)="openPanel(2)">
+        Ver más
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- SERVICIO 3 -->
     <div class="service-card">
       <div class="service-img">
-        <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Monitoreo GPS">
+        <img src="images/paquete3.jpg" alt="Índice de accesibilidad">
       </div>
-      <div class="service-info">
-        <p class="service-name">Monitoreo GPS</p>
-        <p class="service-desc">Rastrea la ubicación de tus unidades en tiempo real con precisión y sin interrupciones.</p>
-      </div>
-      <div class="service-actions">
-        <button class="btn-service">Ver más</button>
+
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <div class="service-info">
+          <p class="service-name">
+            Índice de Accesibilidad por Zona
+          </p>
+          <p class="service-desc">
+            Generamos indicadores que permiten conocer el nivel de accesibilidad de
+            cada área evaluada para facilitar la toma de decisiones.
+          </p>
+        </div>
+        <div class="service-actions">
+          <button class="btn-service" (click)="openPanel(3)">
+            Ver más
+          </button>
+        </div>
       </div>
     </div>
 
+    <!-- SERVICIO 4 -->
     <div class="service-card">
       <div class="service-img">
-        <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Alertas inteligentes">
+        <img src="images/paquete4.jpg" alt="Consultoría especializada">
       </div>
-      <div class="service-info">
-        <p class="service-name">Alertas inteligentes</p>
-        <p class="service-desc">Recibe notificaciones automáticas ante cualquier situación de riesgo detectada.</p>
-      </div>
-      <div class="service-actions">
-        <button class="btn-service">Ver más</button>
-      </div>
-    </div>
 
-    <div class="service-card">
-      <div class="service-img">
-        <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" alt="Reportes automáticos">
-      </div>
-      <div class="service-info">
-        <p class="service-name">Reportes automáticos</p>
-        <p class="service-desc">Genera reportes detallados e inteligentes con toda la actividad de tu sistema.</p>
-      </div>
-      <div class="service-actions">
-        <button class="btn-service">Ver más</button>
-      </div>
-    </div>
+      <div class="card-overlay"></div>
 
-    <div class="service-card">
-      <div class="service-img">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Panel administrativo">
-      </div>
-      <div class="service-info">
-        <p class="service-name">Panel administrativo</p>
-        <p class="service-desc">Administra y controla todos tus dispositivos y usuarios desde un solo lugar.</p>
-      </div>
-      <div class="service-actions">
-        <button class="btn-service">Ver más</button>
+      <div class="card-content">
+        <div class="service-info">
+          <p class="service-name">
+            Consultoría en Accesibilidad
+          </p>
+          <p class="service-desc">
+            Entregamos un informe técnico con recomendaciones para que las
+            instituciones implementen mejoras orientadas a la inclusión y movilidad autónoma.
+          </p>
+        </div>
+        <div class="service-actions">
+          <button class="btn-service" (click)="openPanel(4)">
+            Ver más
+          </button>
+        </div>
       </div>
     </div>
 
   </div>
-
 </section>
+
+<!-- ==========================
+     PANEL INFORMACIÓN ANGULAR
+=========================== -->
+    <div
+    class="overlay" *ngIf="showPanel" (click)="closePanel()">
+    </div>
+
+<div
+class="info-panel"
+[class.active]="showPanel">
+  <div class="info-panel-header">
+    <h2>
+      {{selectedPackage.title}}
+    </h2>
+    <span
+    class="close-panel" (click)="closePanel()"> &times;
+    </span>
+  </div>
+
+  <div class="info-body">
+    <p>
+      {{selectedPackage.description}}
+    </p>
+    <h3>
+      Incluye:
+    </h3>
+    <ul>
+      <li *ngFor="let item of selectedPackage.includes">
+        {{item}}
+      </li>
+    </ul>
+    <h3>
+      Beneficios:
+    </h3>
+    <ul>
+      <li *ngFor="let item of selectedPackage.benefits">
+        {{item}}
+      </li>
+    </ul>
+  </div>
+</div>
