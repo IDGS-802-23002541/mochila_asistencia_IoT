@@ -14,12 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import edu.utleon.idgs902.app_movil_android.R
-import edu.utleon.idgs902.app_movil_android.Utils.MqttConfig
-import edu.utleon.idgs902.app_movil_android.Utils.MqttManager
 import edu.utleon.idgs902.app_movil_android.Utils.VisionGuardBleManager
-import org.json.JSONObject
-import android.os.Handler
-import android.os.Looper
 
 class DevicesActivity : AppCompatActivity() {
 
@@ -30,7 +25,6 @@ class DevicesActivity : AppCompatActivity() {
 
     private lateinit var itemMochila1: LinearLayout
     private lateinit var itemMochila2: LinearLayout
-    private lateinit var mqttManager: MqttManager
     private var macEncontrada = ""
 
 
@@ -49,14 +43,6 @@ class DevicesActivity : AppCompatActivity() {
         itemMochila1 = findViewById(R.id.itemMochila1)
         itemMochila2 = findViewById(R.id.itemMochila2)
 
-        mqttManager = MqttManager(this,object : MqttManager.MqttListener {
-
-            override fun onConectado() {}
-
-            override fun onDesconectado() {}
-
-            override fun onError(mensaje: String) {}
-        })
 
         bleManager = VisionGuardBleManager(this, object : VisionGuardBleManager.BleStateListener {
             override fun onConectado() {
@@ -68,17 +54,6 @@ class DevicesActivity : AppCompatActivity() {
 
                 Toast.makeText(this@DevicesActivity, "¡Mochila Conectada con Éxito!", Toast.LENGTH_SHORT).show()
 
-                mqttManager.conectar()
-
-                val json = JSONObject().apply {
-                    put("accion", "vincular")
-                    put("macAddress", macEncontrada)
-                }
-
-                mqttManager.publicar(
-                    MqttConfig.TOPICO_COMANDOS,
-                    json.toString()
-                )
 
                 bleManager.desconectar()
 
