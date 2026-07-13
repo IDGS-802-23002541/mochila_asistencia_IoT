@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+
 android {
     namespace = "edu.utleon.idgs902.app_movil_android"
     compileSdk {
@@ -48,4 +49,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    // Eclipse Paho para comunicación MQTT
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation("com.github.hannesa2:paho.mqtt.android:4.3")
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 }
+
