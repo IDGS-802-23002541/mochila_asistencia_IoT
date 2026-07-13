@@ -42,6 +42,8 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var lblStatusSenalHome: TextView
     private lateinit var lblBadgeStatusTexto: TextView
     private lateinit var badgeStatusContainer: android.view.View
+    private var vinculacionEnviada = false
+    private var macMochila = ""
 
     private var recorridoId = 0
 
@@ -67,6 +69,7 @@ class HomeActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("CronometroPrefs", Context.MODE_PRIVATE)
         globalPreferences = getSharedPreferences("VisionGuardPrefs", Context.MODE_PRIVATE)
+
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNavigation.selectedItemId = R.id.nav_home
@@ -101,6 +104,24 @@ class HomeActivity : AppCompatActivity() {
 
                 override fun onConectado() {
                     mqttManager.suscribirse(MqttConfig.TOPICO_ESCUCHA)
+                    macMochila = globalPreferences.getString("dispositivo_mac", "") ?: ""
+
+                    if (!vinculacionEnviada && !macMochila.isNullOrEmpty()) {
+
+                        val json = JSONObject().apply {
+                            put("accion", "vincular")
+                            put("macAddress", macMochila)
+                        }
+
+                        mqttManager.publicar(
+                            MqttConfig.TOPICO_COMANDOS,
+                            json.toString()
+                        )
+
+                        vinculacionEnviada = true
+
+                        Log.d("HomeActivity", "Comando de vinculación enviado.")
+                    }
 
                     runOnUiThread {
                         verificarEstatusDispositivo()
@@ -131,7 +152,6 @@ class HomeActivity : AppCompatActivity() {
 
         btnIniciarRecorrido.setOnClickListener {
             val dispositivoVinculado = globalPreferences.getBoolean("dispositivo_vinculado", false)
-            val macMochila = globalPreferences.getString("dispositivo_mac", null)
 
             if (!corriendo) {
                 if (!dispositivoVinculado || macMochila.isNullOrEmpty()) {
