@@ -56,6 +56,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -63,5 +64,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+
+// Servir archivos estáticos
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseRouting();
+
 app.MapControllers();
+
+// Angular SPA
+app.MapFallbackToFile("index.html");
+
 app.Run();
