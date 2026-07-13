@@ -176,6 +176,7 @@ def ble_irq(event, data):
     if event == _IRQ_CENTRAL_CONNECT:
         conexion, _, _ = data
         print("[BLE] Celular conectado.")
+        led.estado_vinculado()
     elif event == _IRQ_CENTRAL_DISCONNECT:
         conexion = None
         print("[BLE] Celular desconectado.")
@@ -233,12 +234,16 @@ def on_comando(topico, mensaje):
 
     if accion == "vincular":
         estado["vinculado"] = True
-        led.estado_vinculado()
+        asyncio.create_task(led.parpadear_azul())
         print("[LED] Mochila vinculada correctamente.")
         return
     
     mac = datos.get("macAddress")
+    print("MAC recibida :", mac)
+    print("MAC ESP32    :", obtener_mac_address())
+
     if mac != obtener_mac_address():
+        print("MAC diferente, ignorando comando")
         return
     if accion == "iniciar":
         if estado["recorrido_activo"]:
@@ -250,7 +255,7 @@ def on_comando(topico, mensaje):
             return
         estado["recorrido_id"] = recorrido
         estado["recorrido_activo"] = True
-        led.estado_recorrido()
+        asyncio.create_task(led.parpadear_verde())
         estado["ruta_coordenadas"] = []
         print(f"[Sistema] Recorrido {recorrido} iniciado.")
         actuadores.reproducir_audio(5)
@@ -541,7 +546,7 @@ async def finalizar_recorrido_actual():
         
         # 5. Modificar estados de control de ruta de forma segura
         estado["recorrido_activo"] = False
-        led.estado_finalizado()
+        await led.parpadear_rojo()
 
         await asyncio.sleep(3)
 
