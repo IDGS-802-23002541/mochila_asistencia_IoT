@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CangureraInteligente.DTOs;
@@ -15,12 +14,12 @@ public record MqttFinalizarRecorridoPayload
 	public int RecorridoId { get; init; }
 
 	/// <summary>
-	/// Array JSON de coordenadas GPS grabadas durante el recorrido.
-	/// El firmware publica este campo como array JSON; también se acepta
-	/// el formato legacy como string para compatibilidad.
+	/// Array JSON de coordenadas GPS grabadas durante el recorrido, ya
+	/// serializado como string por el ESP32.
+	/// Formato: [{"lat":21.1234,"lon":-101.5678,"ts":"2025-06-25T10:00:00Z"}, ...]
 	/// </summary>
 	[JsonPropertyName("rutaCoordenadas")]
-	public JsonElement? RutaCoordenadas { get; init; }
+	public string RutaCoordenadas { get; init; } = "[]";
 
 	/// <summary>
 	/// AJUSTADO: timestamp del momento en que el usuario devolvió la mochila.

@@ -30,9 +30,9 @@ public class MqttPublisherService : IMqttPublisherService
 			return;
 		}
 		string json = JsonSerializer.Serialize(payload);
-		MqttApplicationMessage applicationMessage = new MqttApplicationMessageBuilder().WithTopic(TopicPull).WithPayload(json).WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+		MqttApplicationMessage applicationMessage = new MqttApplicationMessageBuilder().WithTopic("cangurera/pull").WithPayload(json).WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
 			.Build();
 		await _conn.Client.PublishAsync(applicationMessage, ct);
-		_log.LogInformation("Alerta de zona caliente publicada [{Topic}]: {Json}", TopicPull, json);
+		_log.LogInformation("Alerta de zona caliente publicada [{Topic}]: {Json}", "cangurera/pull", json);
 	}
 }

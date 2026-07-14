@@ -23,58 +23,6 @@ namespace CangureraInteligente.Controllers;
 [Produces("application/json", new string[] { })]
 public class RecorridosController(CangureraDbContext db, ILogger<RecorridosController> log) : ControllerBase
 {
-	[HttpGet]
-	[ProducesResponseType(typeof(List<RecorridoHistorialResponse>), 200)]
-	public async Task<IActionResult> GetAll([FromQuery] int? organizacionId, CancellationToken ct)
-	{
-		IQueryable<Recorrido> query = db.Recorridos.AsNoTracking().Include((Recorrido r) => r.Dispositivo).Include((Recorrido r) => r.Eventos);
-		if (organizacionId.HasValue)
-		{
-			if (!(await db.Organizaciones.AnyAsync((Organizacion o) => o.Id == organizacionId.Value, ct)))
-			{
-				return NotFound(new
-				{
-					error = $"La organización {organizacionId.Value} no existe."
-				});
-			}
-			query = query.Where((Recorrido r) => r.Dispositivo.OrganizacionId == organizacionId.Value);
-		}
-
-		List<Recorrido> recorridos = await query.OrderByDescending((Recorrido r) => r.FechaInicio).ToListAsync(ct);
-		var respuesta = recorridos.Select((Recorrido r) =>
-		{
-			var coordenadas = new List<CoordenadaGps>();
-			if (!string.IsNullOrWhiteSpace(r.Ruta_Coordenadas))
-			{
-				try
-				{
-					coordenadas = JsonSerializer.Deserialize<List<CoordenadaGps>>(r.Ruta_Coordenadas, new JsonSerializerOptions
-					{
-						PropertyNameCaseInsensitive = true
-					}) ?? new List<CoordenadaGps>();
-				}
-				catch (JsonException)
-				{
-					coordenadas = new List<CoordenadaGps>();
-				}
-			}
-
-			var resumen = CalcularResumen(coordenadas, r.Id);
-			return new RecorridoHistorialResponse
-			{
-				Id = r.Id,
-				DispositivoMac = r.Dispositivo?.MacAddress ?? string.Empty,
-				FechaInicio = r.FechaInicio,
-				FechaFin = r.FechaFin,
-				DuracionSegundos = resumen.DuracionSegundos ?? 0,
-				TotalEventos = r.Eventos?.Count ?? 0,
-				DistanciaTotalMetros = resumen.DistanciaTotalMetros
-			};
-		}).ToList();
-
-		return Ok(respuesta);
-	}
-
 	[HttpPost("iniciar")]
 	[ProducesResponseType(typeof(IniciarRecorridoResponse), 201)]
 	[ProducesResponseType(400)]
@@ -131,63 +79,6 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 			DispositivoMac = dispositivo.MacAddress,
 			FechaInicio = recorrido.FechaInicio
 		});
-	}
-
-	[HttpGet("dispositivo/{mac}")]
-	[ProducesResponseType(typeof(List<RecorridoHistorialResponse>), 200)]
-	[ProducesResponseType(404)]
-	public async Task<IActionResult> GetRecorridosPorDispositivo(string mac, CancellationToken ct)
-	{
-		Dispositivo dispositivo = await db.Dispositivos
-			.AsNoTracking()
-			.FirstOrDefaultAsync((Dispositivo d) => d.MacAddress == mac, ct);
-		if (dispositivo == null)
-		{
-			return NotFound(new
-			{
-				error = $"Dispositivo con MAC '{mac}' no encontrado."
-			});
-		}
-
-		List<Recorrido> recorridos = await db.Recorridos
-			.AsNoTracking()
-			.Where((Recorrido r) => r.DispositivoId == dispositivo.Id)
-			.OrderByDescending((Recorrido r) => r.FechaInicio)
-			.ToListAsync(ct);
-
-		List<RecorridoHistorialResponse> respuesta = new List<RecorridoHistorialResponse>();
-		foreach (Recorrido recorrido in recorridos)
-		{
-			List<CoordenadaGps> coordenadas = new List<CoordenadaGps>();
-			if (!string.IsNullOrWhiteSpace(recorrido.Ruta_Coordenadas))
-			{
-				try
-				{
-					coordenadas = JsonSerializer.Deserialize<List<CoordenadaGps>>(recorrido.Ruta_Coordenadas, new JsonSerializerOptions
-					{
-						PropertyNameCaseInsensitive = true
-					}) ?? new List<CoordenadaGps>();
-				}
-				catch (JsonException)
-				{
-					coordenadas = new List<CoordenadaGps>();
-				}
-			}
-
-			ResumenRecorridoResponse resumen = CalcularResumen(coordenadas, recorrido.Id);
-			respuesta.Add(new RecorridoHistorialResponse
-			{
-				Id = recorrido.Id,
-				DispositivoMac = dispositivo.MacAddress,
-				FechaInicio = recorrido.FechaInicio,
-				FechaFin = recorrido.FechaFin,
-				DuracionSegundos = resumen.DuracionSegundos ?? 0,
-				TotalEventos = recorrido.Eventos?.Count ?? 0,
-				DistanciaTotalMetros = resumen.DistanciaTotalMetros
-			});
-		}
-
-		return Ok(respuesta);
 	}
 
 	[HttpGet("{id:int}")]

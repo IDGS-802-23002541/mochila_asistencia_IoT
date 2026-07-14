@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CangureraInteligente.DTOs;
@@ -124,21 +123,8 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 				_log.LogInformation("Finalizar recorrido: el recorrido {Id} ya estaba cerrado; se ignora.", payload.RecorridoId);
 				return true;
 			}
-			string rutaCoordenadasJson = "[]";
-			if (payload.RutaCoordenadas.HasValue)
-			{
-				if (payload.RutaCoordenadas.Value.ValueKind == JsonValueKind.String)
-				{
-					rutaCoordenadasJson = payload.RutaCoordenadas.Value.GetString() ?? "[]";
-				}
-				else if (payload.RutaCoordenadas.Value.ValueKind == JsonValueKind.Array)
-				{
-					rutaCoordenadasJson = payload.RutaCoordenadas.Value.GetRawText();
-				}
-			}
-
 			recorrido.FechaFin = payload.FechaFin;
-			recorrido.Ruta_Coordenadas = rutaCoordenadasJson;
+			recorrido.Ruta_Coordenadas = payload.RutaCoordenadas;
 			await _db.SaveChangesAsync(ct);
 			_log.LogInformation("Recorrido {Id} finalizado.", payload.RecorridoId);
 			return true;
