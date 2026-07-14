@@ -52,19 +52,10 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 				error = "El dispositivo ya tiene un recorrido activo sin cerrar."
 			});
 		}
-		if (req.DiscapacidadId.HasValue && !(await db.TiposDiscapacidad.AnyAsync((CatTipoDiscapacidad d) => d.Id == req.DiscapacidadId.Value, ct)))
-		{
-			return BadRequest(new
-			{
-				error = $"DiscapacidadId {req.DiscapacidadId} no existe en el catálogo."
-			});
-		}
 		Recorrido recorrido = new Recorrido
 		{
 			DispositivoId = dispositivo.Id,
-			FechaInicio = DateTime.UtcNow,
-			Usuario_Edad = req.UsuarioEdad,
-			DiscapacidadId = req.DiscapacidadId
+			FechaInicio = DateTime.UtcNow
 		};
 		db.Recorridos.Add(recorrido);
 		dispositivo.UltimaConexion = DateTime.UtcNow;
@@ -86,7 +77,7 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 	[ProducesResponseType(404)]
 	public async Task<IActionResult> GetRecorrido(int id, CancellationToken ct)
 	{
-		Recorrido recorrido = await db.Recorridos.Include((Recorrido r) => r.Dispositivo).ThenInclude((Dispositivo d) => d.Organizacion).Include((Recorrido r) => r.Discapacidad)
+		Recorrido recorrido = await db.Recorridos.Include((Recorrido r) => r.Dispositivo).ThenInclude((Dispositivo d) => d.Organizacion)
 			.Include((Recorrido r) => r.Eventos)
 			.FirstOrDefaultAsync((Recorrido r) => r.Id == id, ct);
 		if (recorrido == null)
@@ -96,6 +87,7 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 				error = $"Recorrido {id} no encontrado."
 			});
 		}
+		int totalPuntos = await db.RecorridoCoordenadas.AsNoTracking().CountAsync((RecorridoCoordenada c) => c.RecorridoId == recorrido.Id, ct);
 		return Ok(new RecorridoDetalleResponse
 		{
 			Id = recorrido.Id,
@@ -103,9 +95,8 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 			Organizacion = recorrido.Dispositivo.Organizacion.Nombre,
 			FechaInicio = recorrido.FechaInicio,
 			FechaFin = recorrido.FechaFin,
-			UsuarioEdad = recorrido.Usuario_Edad,
-			Discapacidad = recorrido.Discapacidad?.Nombre,
-			TotalEventos = recorrido.Eventos.Count
+			TotalEventos = recorrido.Eventos.Count,
+			TotalPuntos = totalPuntos
 		});
 	}
 
@@ -123,33 +114,14 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 				error = $"Recorrido {id} no encontrado."
 			});
 		}
-		if (string.IsNullOrWhiteSpace(recorrido.Ruta_Coordenadas))
+		List<RecorridoCoordenada> coordenadasDb = await db.RecorridoCoordenadas.AsNoTracking().Where((RecorridoCoordenada c) => c.RecorridoId == id).OrderBy((RecorridoCoordenada c) => c.Fecha).ToListAsync(ct);
+		List<CoordenadaGps> coordenadas = coordenadasDb.Select((RecorridoCoordenada c) => new CoordenadaGps
 		{
-			return Ok(new ResumenRecorridoResponse
-			{
-				RecorridoId = recorrido.Id,
-				TotalPuntos = 0,
-				DistanciaTotalMetros = 0.0,
-				DuracionSegundos = 0.0,
-				VelocidadPromedioKmh = 0.0
-			});
-		}
-		try
-		{
-			List<CoordenadaGps> coordenadas = JsonSerializer.Deserialize<List<CoordenadaGps>>(recorrido.Ruta_Coordenadas, new JsonSerializerOptions
-			{
-				PropertyNameCaseInsensitive = true
-			}) ?? new List<CoordenadaGps>();
-			return Ok(CalcularResumen(coordenadas, recorrido.Id));
-		}
-		catch (JsonException exception)
-		{
-			log.LogWarning(exception, "No se pudo deserializar Ruta_Coordenadas del recorrido {RecorridoId}", recorrido.Id);
-			return BadRequest(new
-			{
-				error = "El formato de Ruta_Coordenadas no es válido."
-			});
-		}
+			Latitud = c.Latitud,
+			Longitud = c.Longitud,
+			Timestamp = c.Fecha
+		}).ToList();
+		return Ok(CalcularResumen(coordenadas, recorrido.Id));
 	}
 
 	private static ResumenRecorridoResponse CalcularResumen(IEnumerable<CoordenadaGps> coordenadas, int? recorridoId = null)
@@ -201,13 +173,6 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 			VelocidadPromedioKmh = ((!num4.HasValue) ? ((double?)null) : new double?(Math.Round(num4.Value, 2))),
 			Coordenadas = list
 		};
-	}
-
-	[HttpGet("catalogos/discapacidades")]
-	[ProducesResponseType(200)]
-	public async Task<IActionResult> GetDiscapacidades(CancellationToken ct)
-	{
-		return Ok(await db.TiposDiscapacidad.Select((CatTipoDiscapacidad d) => new { d.Id, d.Nombre }).ToListAsync(ct));
 	}
 
 	[HttpGet("catalogos/eventos")]

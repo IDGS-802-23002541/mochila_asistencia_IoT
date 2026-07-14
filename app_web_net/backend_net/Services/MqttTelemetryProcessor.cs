@@ -22,16 +22,10 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 
 	private readonly ILogger<MqttTelemetryProcessor> _log;
 
-	private readonly IMqttPublisherService _publisher;
-
-	private readonly ZonaCalienteAlertState _alertState;
-
-	public MqttTelemetryProcessor(CangureraDbContext db, ILogger<MqttTelemetryProcessor> log, IMqttPublisherService publisher, ZonaCalienteAlertState alertState)
+		public MqttTelemetryProcessor(CangureraDbContext db, ILogger<MqttTelemetryProcessor> log)
 	{
 		_db = db;
 		_log = log;
-		_publisher = publisher;
-		_alertState = alertState;
 	}
 
 	public async Task<bool> ProcesarTelemetriaAsync(MqttTelemetryPayload payload, CancellationToken ct = default(CancellationToken))
@@ -45,11 +39,18 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 				return false;
 			}
 			dispositivo.UltimaConexion = payload.Fecha;
-			await _db.SaveChangesAsync(ct);
-			if (payload.Latitud.HasValue && payload.Longitud.HasValue)
+			Recorrido recorrido = await _db.Recorridos.FirstOrDefaultAsync((Recorrido r) => r.DispositivoId == dispositivo.Id && r.FechaFin == null, ct);
+			if (recorrido != null && payload.Latitud.HasValue && payload.Longitud.HasValue)
 			{
-				await EvaluarZonasCalientesAsync(dispositivo.Id, payload.Latitud.Value, payload.Longitud.Value, ct);
+				_db.RecorridoCoordenadas.Add(new RecorridoCoordenada
+				{
+					RecorridoId = recorrido.Id,
+					Fecha = payload.Fecha,
+					Latitud = payload.Latitud.Value,
+					Longitud = payload.Longitud.Value
+				});
 			}
+			await _db.SaveChangesAsync(ct);
 			return true;
 		}
 		catch (Exception exception)
@@ -94,10 +95,6 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 			};
 			_db.EventosDetectados.Add(entity);
 			await _db.SaveChangesAsync(ct);
-			if (payload.Latitud.HasValue && payload.Longitud.HasValue)
-			{
-				await EvaluarZonasCalientesAsync(recorrido.DispositivoId, payload.Latitud.Value, payload.Longitud.Value, ct);
-			}
 			_log.LogInformation("Evento (tipo {TipoId}) registrado para recorrido {RecId}", payload.TipoEventoId, payload.RecorridoId);
 			return true;
 		}
@@ -124,7 +121,6 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 				return true;
 			}
 			recorrido.FechaFin = payload.FechaFin;
-			recorrido.Ruta_Coordenadas = payload.RutaCoordenadas;
 			await _db.SaveChangesAsync(ct);
 			_log.LogInformation("Recorrido {Id} finalizado.", payload.RecorridoId);
 			return true;
@@ -136,32 +132,4 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 		}
 	}
 
-	private async Task EvaluarZonasCalientesAsync(int dispositivoId, decimal lat, decimal lon, CancellationToken ct)
-	{
-		Dispositivo dispositivo = await _db.Dispositivos.AsNoTracking().FirstOrDefaultAsync((Dispositivo d) => d.Id == dispositivoId, ct);
-		List<ZonaCaliente> list = await _db.ZonasCalientes.Where((ZonaCaliente z) => z.Activa).ToListAsync(ct);
-		List<int> zonasDentroAhora = new List<int>();
-		foreach (ZonaCaliente item in list)
-		{
-			double num = GeoUtil.DistanciaMetros((double)lat, (double)lon, (double)item.Latitud, (double)item.Longitud);
-			if (!(num > item.RadioMetros))
-			{
-				zonasDentroAhora.Add(item.Id);
-				if (!_alertState.YaAlertado(dispositivoId, item.Id))
-				{
-					ZonaCalienteAlertaPayload payload = new ZonaCalienteAlertaPayload
-					{
-						MacAddress = (dispositivo?.MacAddress ?? string.Empty),
-						Mensaje = "acercandose_zona_caliente",
-						TipoEventoId = item.TipoEventoPredominanteId.GetValueOrDefault(),
-						Latitud = lat,
-						Longitud = lon,
-						DistanciaMetros = Math.Round(num, 1)
-					};
-					await _publisher.PublicarAlertaZonaCalienteAsync(payload, ct);
-				}
-			}
-		}
-		_alertState.ActualizarZonasActuales(dispositivoId, zonasDentroAhora);
-	}
 }
