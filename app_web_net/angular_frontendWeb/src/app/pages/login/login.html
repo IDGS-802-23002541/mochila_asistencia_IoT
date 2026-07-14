@@ -2,16 +2,16 @@
   <div class="login-card">
     <!-- Panel izquierdo: bienvenida -->
     <div class="login-card__welcome">
-      <svg 
-        class="login-card__blob" 
-        viewBox="0 0 400 600" 
-        preserveAspectRatio="none" 
+      <svg
+        class="login-card__blob"
+        viewBox="0 0 400 600"
+        preserveAspectRatio="none"
         aria-hidden="true">
         <path d="M0,0 H320 C380,150 380,450 320,600 H0 Z" />
       </svg>
       <div class="login-card__welcome-content">
         <img
-          src="images/logo.png"
+          src="images/logo2.1.png"
           class="login-card__image"
           alt="Vision Guard"
         />
@@ -38,10 +38,10 @@
         Ingresa tus credenciales para acceder al sistema de monitoreo de Vision Guard.
       </p>
 
-      <form 
-        class="login-form" 
-        [formGroup]="loginForm" 
-        (ngSubmit)="onSubmit()" 
+      <form
+        class="login-form"
+        [formGroup]="loginForm"
+        (ngSubmit)="onSubmit()"
         novalidate>
 
         <div class="login-form__field">
@@ -127,9 +127,9 @@
           </p>
         }
 
-        <button 
-          type="submit" 
-          class="login-form__submit" 
+        <button
+          type="submit"
+          class="login-form__submit"
           [disabled]="loading">
 
           @if (loading) {
