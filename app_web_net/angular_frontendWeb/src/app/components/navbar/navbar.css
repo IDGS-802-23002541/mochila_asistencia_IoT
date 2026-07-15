@@ -1,53 +1,83 @@
-.navbar{
-
-    width:100%;
-    background:#223A63;
-    position:fixed;
-    top:0;
-    left:0;
-    z-index:1000;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-.container{
-    max-width:1200px;
-    margin:auto;
-    height:70px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 30px;
+.navbar {
+    width: 100%;
+    background: #223A63;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .15);
 }
 
-.logo{
-    display:flex;
-    align-items:center;
-    gap:10px;
+.container {
+    max-width: 1200px;
+    margin: auto;
+    height: 80px; /* ◄ Subió de 70px a 80px para dar espacio al logo más grande */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
 }
 
-.logo img{
-    width:42px;
-
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* ◄ Un poco más de separación espacio-logo */
 }
 
-.logo span{
-    color:white;
-    font-weight:600;
-    letter-spacing:1px;
+.logo img {
+    width: 150px; /* ◄ Subió de 42px a 54px para verse más imponente */
+    height: auto; /* Mantiene la proporción correcta de la imagen */
 }
 
-nav{
-    display:flex;
-    gap:40px;
+.logo span {
+    color: white;
+    font-size: 19px; /* ◄ Se agregó tamaño al texto del logo para equilibrar */
+    font-weight: 600;
+    letter-spacing: 1px;
 }
 
-nav a{
-    color:white;
-    text-decoration:none;
-    font-size:15px;
-    transition:.3s;
+nav {
+    display: flex;
+    gap: 40px;
 }
 
-nav a:hover{
-    color:#7EC8FF;
+nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
+    transition: .3s;
+}
 
+nav a:hover {
+    color: #7EC8FF;
+}
+
+.nav-home {
+    display: flex;
+    align-items: center;
+}
+
+.nav-home a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+}
+
+.material-icons {
+    font-size: 24px;
+    color: #fff;
+    transition: .3s;
+}
+
+.material-icons:hover {
+    color: #7EC8FF;
+    transform: scale(1.1);
 }

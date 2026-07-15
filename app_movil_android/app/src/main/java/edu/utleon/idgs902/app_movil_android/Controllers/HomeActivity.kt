@@ -14,16 +14,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import edu.utleon.idgs902.app_movil_android.R
-import edu.utleon.idgs902.app_movil_android.Models.RutaModels
-import edu.utleon.idgs902.app_movil_android.Utils.HistorialHelper
-import edu.utleon.idgs902.app_movil_android.Utils.VisionGuardBleManager
+import edu.utleon.idgs902.app_movil_android.Utils.MqttManager
+import edu.utleon.idgs902.app_movil_android.Utils.MqttConfig
 import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlin.apply
 import kotlin.concurrent.thread
 
 class HomeActivity : AppCompatActivity() {
@@ -32,6 +29,7 @@ class HomeActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var globalPreferences: SharedPreferences
+    private lateinit var mqttManager: MqttManager
 
     // Componentes visuales
     private lateinit var txtTiempo: TextView
@@ -44,8 +42,10 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var lblStatusSenalHome: TextView
     private lateinit var lblBadgeStatusTexto: TextView
     private lateinit var badgeStatusContainer: android.view.View
+    private var vinculacionEnviada = false
+    private var macMochila = ""
 
-    private lateinit var bleManager: VisionGuardBleManager
+    private var recorridoId = 0
 
     private val runnableCronometro = object : Runnable {
         override fun run() {
@@ -69,6 +69,7 @@ class HomeActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("CronometroPrefs", Context.MODE_PRIVATE)
         globalPreferences = getSharedPreferences("VisionGuardPrefs", Context.MODE_PRIVATE)
+
 
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNavigation.selectedItemId = R.id.nav_home
@@ -97,21 +98,49 @@ class HomeActivity : AppCompatActivity() {
         lblBadgeStatusTexto = findViewById(R.id.lblBadgeStatusTexto)
         badgeStatusContainer = findViewById(R.id.badgeStatusContainer)
 
-        bleManager = VisionGuardBleManager(this, object : VisionGuardBleManager.BleStateListener {
-            override fun onConectado() {
-                Log.d("HomeActivity", "Mochila enlazada por Bluetooth.")
-            }
-            override fun onDesconectado() {
-                Log.d("HomeActivity", "Mochila desconectada.")
-            }
-            override fun onDispositivoEncontrado(nombre: String, mac: String) {}
-            override fun onError(mensaje: String) {
-                Log.e("HomeActivity", "Error BLE: $mensaje")
-            }
-            override fun onAckRecibido(comando: String) {
-                Log.d("HomeActivity", "ACK recibido: $comando")
-            }
-        })
+        //Manejo por MQTT
+        mqttManager = MqttManager(this,
+            object : MqttManager.MqttListener {
+
+                override fun onConectado() {
+                    mqttManager.suscribirse(MqttConfig.TOPICO_ESCUCHA)
+                    macMochila = globalPreferences.getString("dispositivo_mac", "") ?: ""
+
+                    if (!vinculacionEnviada && !macMochila.isNullOrEmpty()) {
+
+                        val json = JSONObject().apply {
+                            put("accion", "vincular")
+                            put("macAddress", macMochila)
+                        }
+
+                        mqttManager.publicar(
+                            MqttConfig.TOPICO_COMANDOS,
+                            json.toString()
+                        )
+
+                        vinculacionEnviada = true
+
+                        Log.d("HomeActivity", "Comando de vinculación enviado.")
+                    }
+
+                    runOnUiThread {
+                        verificarEstatusDispositivo()
+                    }
+                }
+
+                override fun onDesconectado() {
+                    Log.w("HomeActivity", "Broker desconectado")
+                }
+
+                override fun onError(mensaje: String) {
+                    Log.e("HomeActivity", mensaje)
+                }
+
+            })
+        Handler(Looper.getMainLooper()).postDelayed({
+            Log.d("HomeActivity", "Conectando MQTT...")
+            mqttManager.conectar()
+        }, 1000)
 
         verificarEstatusDispositivo()
 
@@ -123,7 +152,6 @@ class HomeActivity : AppCompatActivity() {
 
         btnIniciarRecorrido.setOnClickListener {
             val dispositivoVinculado = globalPreferences.getBoolean("dispositivo_vinculado", false)
-            val macMochila = globalPreferences.getString("dispositivo_mac", null)
 
             if (!corriendo) {
                 if (!dispositivoVinculado || macMochila.isNullOrEmpty()) {
@@ -148,27 +176,37 @@ class HomeActivity : AppCompatActivity() {
 
     private fun verificarEstatusDispositivo() {
         val dispositivoVinculado = globalPreferences.getBoolean("dispositivo_vinculado", false)
+        val nombre = globalPreferences.getString("dispositivo_nombre", "")
         val macMochila = globalPreferences.getString("dispositivo_mac", null)
 
         if (dispositivoVinculado && !macMochila.isNullOrEmpty()) {
-            lblNombreMochilaHome.text = "Mochila enlazada"
-            lblStatusSenalHome.text = "📶 Señal buena"
-            lblStatusSenalHome.setTextColor(Color.parseColor("#2E7D32"))
-            lblBadgeStatusTexto.text = "● Conectado"
-            lblBadgeStatusTexto.setTextColor(Color.parseColor("#2E7D32"))
-            badgeStatusContainer.background.setTintList(null)
-            bleManager.conectar(macMochila)
+            if(mqttManager.estaConectado()){
+                lblNombreMochilaHome.text = nombre
+                lblStatusSenalHome.text = "📶 Buena señal MQTT"
+                lblStatusSenalHome.setTextColor(Color.parseColor("#2E7D32"))
+                lblBadgeStatusTexto.text = "● Conectada"
+                lblBadgeStatusTexto.setTextColor(Color.parseColor("#2E7D32"))
+                badgeStatusContainer.background.setTintList(null)
+            }else {
+                lblNombreMochilaHome.text = nombre
+                lblStatusSenalHome.text = "ᚼᛒ Lista para iniciar"
+                lblStatusSenalHome.setTextColor(Color.parseColor("#319ae8"))
+                lblBadgeStatusTexto.text = "● Vinculada"
+                lblBadgeStatusTexto.setTextColor(Color.parseColor("#319ae8"))
+                badgeStatusContainer.background.setTint(Color.parseColor("#aedcff"))
+            }
         } else {
             lblNombreMochilaHome.text = "Sin dispositivo"
             lblStatusSenalHome.text = "⚠ Requiere vinculación"
             lblStatusSenalHome.setTextColor(Color.parseColor("#C62828"))
-            lblBadgeStatusTexto.text = "🚫 Off-line"
+            lblBadgeStatusTexto.text = "🚫 No vinculada"
             lblBadgeStatusTexto.setTextColor(Color.parseColor("#C62828"))
             badgeStatusContainer.background.setTint(Color.parseColor("#FFEBEE"))
         }
     }
 
     private fun iniciarRecorridoServidor(macAddress: String) {
+        Log.d("HomeActivity", "Entró a iniciarRecorridoLocal")
         thread {
             try {
                 val url = URL("https://lmsidgs902.runasp.net/api/recorridos/iniciar")
@@ -190,15 +228,26 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 val code = conn.responseCode
+                Log.d("HTTP", "Código = $code")
+
+                val stream =
+                    if (code in 200..299)
+                        conn.inputStream
+                    else
+                        conn.errorStream
+                val respuesta = stream?.bufferedReader()?.use { it.readText() }
+                Log.d("HTTP", "Respuesta = $respuesta")
+
                 if (code == HttpURLConnection.HTTP_OK || code == HttpURLConnection.HTTP_CREATED) {
                     val respuesta = conn.inputStream.bufferedReader().use { it.readText() }
                     val jsonResponse = JSONObject(respuesta)
-                    val recorridoId = jsonResponse.getInt("recorridoId")
+                    recorridoId = jsonResponse.getInt("recorridoId")
 
                     runOnUiThread {
                         iniciarRecorridoLocal(recorridoId)
                     }
                 } else {
+                    Log.e("HTTP", "Error servidor: $respuesta")
                     runOnUiThread {
                         Toast.makeText(this, "Error de red con el servidor de HiverMQTT: $code", Toast.LENGTH_LONG).show()
                     }
@@ -213,23 +262,68 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun iniciarRecorridoLocal(recorridoId: Int) {
-        corriendo = true
-        sharedPreferences.edit().apply {
-            putLong("tiempo_inicio", System.currentTimeMillis())
-            putBoolean("cronometro_corriendo", true)
-            putInt("ultimo_recorrido_id", recorridoId)
-            apply()
+    private fun iniciarRecorridoLocal(IDrecorrido: Int) {
+        // Verificamos que esté conectados con el servidor MQTT
+        if (!mqttManager.estaConectado()) {
+            mqttManager.conectar()
+            Handler(Looper.getMainLooper()).postDelayed({
+                iniciarRecorridoLocal(IDrecorrido)
+            },1500)
+            return
         }
-        handler.post(runnableCronometro)
-        bleManager.enviarInicioRecorrido(recorridoId)
-        establecerVistaDetener()
-        Toast.makeText(this, "¡Recorrido #$recorridoId iniciado!", Toast.LENGTH_SHORT).show()
+
+        corriendo = true
+        // Valores para publicar en el topico comandos "cangurera/comandos" que el recorrido inicia
+        val json_iniciarR = JSONObject().apply {
+            put("accion","iniciar")
+            put("recorridoId", IDrecorrido)
+            put(
+                "macAddress",
+                globalPreferences.getString(
+                    "dispositivo_mac",
+                    ""
+                )
+            )
+        }
+        Log.d("HomeActivity", json_iniciarR.toString())
+        val enviado = mqttManager.publicar(
+            MqttConfig.TOPICO_COMANDOS,
+            json_iniciarR.toString()
+        )
+        Log.d("HomeActivity", "Publicado = $enviado")
+        // Si fue publicado correctamente inicia el cronómetro
+        if (enviado){
+            sharedPreferences.edit().apply {
+                putLong("tiempo_inicio", System.currentTimeMillis())
+                putBoolean("cronometro_corriendo", true)
+                putInt("ultimo_recorrido_id", IDrecorrido)
+                apply()
+            }
+            handler.post(runnableCronometro)
+            establecerVistaDetener()
+            Toast.makeText(this, "¡Recorrido #$recorridoId iniciado!", Toast.LENGTH_SHORT).show()
+        }else{
+            Toast.makeText(this, "No fue posible iniciar el recorrido.", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     private fun detenerRecorridoLocal() {
-        bleManager.enviarDetenerRecorrido()
-
+        val json_detenerR = JSONObject().apply {
+            put("accion","detener")
+            put("recorridoId", recorridoId)
+            put(
+                "macAddress",
+                globalPreferences.getString(
+                    "dispositivo_mac",
+                    ""
+                )
+            )
+        }
+        mqttManager.publicar(
+            MqttConfig.TOPICO_COMANDOS,
+            json_detenerR.toString()
+        )
         val idRecorrido = sharedPreferences.getInt("ultimo_recorrido_id", 0)
 
         corriendo = false
@@ -277,7 +371,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        mqttManager.desconectar()
         super.onDestroy()
-        bleManager.desconectar()
     }
 }

@@ -1,72 +1,127 @@
-<section id="quotation" class="quotation">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cotización - Vision Guard</title>
-<body>
+<section id="quotation" class="quotation-section">
 
   <div class="section-header">
-    <h2>Cotización</h2>
+    <span class="section-eyebrow">Modelo de Servitización basado en Evidencia</span>
+    <h2>Cotiza con nosotros</h2>
     <div class="section-divider"></div>
+    <p class="section-subtitle">
+      Diseña un diagnóstico a la medida de tu institución. Alinea tu campus a los marcos normativos
+      de la <strong>Ley General de Educación Superior</strong> y la <strong>RENADESI</strong>
+      seleccionando los módulos requeridos.
+    </p>
   </div>
 
-  <div class="products-grid">
+  <div class="quotation-layout-container">
 
-    <div class="product-card">
-      <div class="product-img">
-        <img src="imagen1.jpg" alt="Cámara IP 4K">
-      </div>
-      <div class="product-info">
-        <p class="product-name">Cámara IP 4K</p>
-        <p class="product-price">$3,200</p>
-        <p class="product-desc">Resolución 4K, visión nocturna, detección de movimiento.</p>
-      </div>
-      <div class="product-actions">
-        <button class="btn-add">Agregar</button>
+    <!-- GRID DE TARJETAS -->
+    <div class="products-grid">
+      <div class="product-card" *ngFor="let item of modulosConsultoria; let i = index">
+        <div class="product-img">
+          <img [src]="item.imagen" [alt]="item.nombre" class="card-bg-img">
+        </div>
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <div class="product-info">
+            <h3 class="product-name">{{ item.nombre }}</h3>
+            <p class="product-price">{{ item.precio | currency:'MXN':'symbol':'1.0-0' }}</p>
+            <p class="product-desc">{{ item.desc }}</p>
+          </div>
+          <div class="product-actions">
+            <button [class.btn-add]="!item.agregado" [class.btn-remove]="item.agregado" (click)="toggleConcepto(i)">
+              {{ item.agregado ? '✓ Seleccionado (Quitar)' : 'Agregar al Proyecto' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="product-card">
-      <div class="product-img">
-        <img src="imagen2.jpg" alt="Domo PTZ">
+    <!-- ASISTENTE VIRTUAL -->
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="bot-avatar">VG</div>
+        <div class="bot-status">
+          <h3>Asistente de Inversión VisionGuard</h3>
+          <p>Presupuesto en Línea</p>
+        </div>
       </div>
-      <div class="product-info">
-        <p class="product-name">Domo PTZ</p>
-        <p class="product-price">$5,800</p>
-        <p class="product-desc">360° panorámico, zoom óptico 30x, resistente a la intemperie.</p>
-      </div>
-      <div class="product-actions">
-        <button class="btn-add">Agregar</button>
+      <div class="chat-window">
+        <div *ngFor="let msg of historialMensajes" [ngClass]="{'msg-bot': msg.emisor === 'bot', 'msg-user': msg.emisor === 'usuario'}">
+          <div class="msg-bubble">
+            <p>{{ msg.texto }}</p>
+
+            <!-- RESUMEN DENTRO DEL DIÁLOGO DEL BOT -->
+            <div *ngIf="msg.esResumen" class="chat-summary-inside">
+
+              <!-- Input de correo independiente del formulario nativo con estilos de clase aplicados -->
+              <div class="email-input-group" style="margin-bottom: 12px; margin-top: 10px;">
+                <input
+                  type="email"
+                  [(ngModel)]="correoUsuario"
+                  placeholder="ejemplo@universidad.edu.mx"
+                  class="chat-email-input"
+                  [disabled]="estaEnviando"
+                >
+              </div>
+
+              <!-- Alerta de advertencia de red elegante en el chat (Evita alert nativo) -->
+              <div *ngIf="errorRedDetectado" class="network-warning-box">
+                ⚠️ Envío directo bloqueado por el navegador (CORS o Adblock). Mostrando simulación de desarrollo local.
+              </div>
+
+              <p class="summary-note">
+                Esquema de consultoría externa: exime a la institución de costos fijos de mantenimiento.
+              </p>
+
+              <div class="total-display">
+                <span class="total-label">Total Estimado:</span>
+                <span class="total-amount">{{ totalProyecto | currency:'MXN':'symbol':'1.0-0' }}</span>
+              </div>
+
+              <!-- Botón dinámico controlado por Angular con validación de correo robusta -->
+              <button
+                class="btn-submit-quote"
+                (click)="enviarCotizacionFinal()"
+                [disabled]="estaEnviando || !esEmailValido()"
+              >
+                {{ estaEnviando ? 'Enviando propuesta...' : 'Solicitar Propuesta Formal' }}
+              </button>
+
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="product-card">
-      <div class="product-img">
-        <img src="imagen3.jpg" alt="NVR 16 canales">
-      </div>
-      <div class="product-info">
-        <p class="product-name">NVR 16 canales</p>
-        <p class="product-price">$7,500</p>
-        <p class="product-desc">Grabación continua, acceso remoto, almacenamiento local.</p>
-      </div>
-      <div class="product-actions">
-        <button class="btn-add">Agregar</button>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <div class="product-img">
-        <img src="imagen4.jpg" alt="Monitor central">
-      </div>
-      <div class="product-info">
-        <p class="product-name">Monitor central</p>
-        <p class="product-price">$2,900</p>
-        <p class="product-desc">Panel 27", conexión multi-cámara, alertas en tiempo real.</p>
-      </div>
-      <div class="product-actions">
-        <button class="btn-add">Agregar</button>
-      </div>
-    </div>
-
   </div>
 
-</body>
+  <div class="localhost-overlay" *ngIf="mostrarPantallaLocalhost">
+    <div class="localhost-card">
+      <div class="localhost-header">
+        <!-- El badge cambia de color si el servidor externo falló pero se recuperó localmente -->
+        <span class="server-badge" [class.badge-warning]="errorRedDetectado">
+        </span>
+        <h3>VisionGuard</h3>
+      </div>
+      <div class="localhost-body">
+        <div class="icon-success">💻</div>
+        <h4>¡Presupuesto Sincronizado Exitosamente!</h4>
+
+        <p *ngIf="!errorRedDetectado">Los datos estructurados han sido procesados y enviados a la Empresa</p>
+        <p *ngIf="errorRedDetectado" class="text-fallback-note">
+          <strong>Nota de simulación activa:</strong> Tu cotización ya está estructurada y guardada con éxito
+        </p>
+
+        <code class="url-code">Gracias, nosotros nos contactamos</code>
+
+        <div class="payload-box">
+          <p><strong>Correo del remitente:</strong> {{ correoUsuario }}</p>
+          <p><strong>Monto total mapeado:</strong> {{ totalProyecto | currency:'MXN':'symbol':'1.0-0' }}</p>
+          <p><strong>Status de comunicación:</strong> En proceso de ser contactada</p>
+        </div>
+      </div>
+      <div class="localhost-footer">
+        <button class="btn-close-localhost" (click)="cerrarPantallaLocalhost()">Entendido, volver</button>
+      </div>
+    </div>
+  </div>
+
+</section>

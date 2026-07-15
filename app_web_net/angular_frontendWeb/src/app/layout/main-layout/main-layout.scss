@@ -1,0 +1,384 @@
+$navy-900: #101c3a;
+$navy-800: #16213f;
+$navy-700: #1e2c52;
+
+$teal: #21b6a8;
+
+$ink: #1c2333;
+$gray-500: #6b7280;
+$gray-200: #e5e8f0;
+$gray-100: #f8f9fc;
+
+$active-bg: #eef1fb;
+$white: #ffffff;
+
+
+:host {
+  display: block;
+  height: 100vh;
+}
+
+
+//=====================================================
+// Layout
+//=====================================================
+
+.app-shell {
+
+  display:flex;
+
+  height:100vh;
+
+  background:$gray-100;
+
+}
+
+
+//=====================================================
+// Sidebar
+//=====================================================
+
+.sidebar {
+
+  width:240px;
+
+  flex-shrink:0;
+
+  background:$white;
+
+  border-right:1px solid $gray-200;
+
+  display:flex;
+
+  flex-direction:column;
+
+  padding:28px 18px;
+
+}
+
+
+
+// Logo
+
+.sidebar__brand {
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+  padding:0 8px 28px;
+
+}
+
+
+
+.sidebar__logo-image {
+
+  width:42px;
+
+  height:42px;
+
+  object-fit:contain;
+
+  border-radius:10px;
+
+}
+
+
+
+.sidebar__brand-name {
+
+  font-family:'Jost', sans-serif;
+
+  font-size:1rem;
+
+  font-weight:700;
+
+  letter-spacing:.10em;
+
+  color:$navy-800;
+
+}
+
+
+
+//=====================================================
+// Navegación
+//=====================================================
+
+.sidebar__nav {
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:4px;
+
+  flex:1;
+
+}
+
+
+
+.sidebar__nav-item {
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+  padding:11px 14px;
+
+  border-radius:10px;
+
+  color:$gray-500;
+
+  font-size:.88rem;
+
+  font-weight:500;
+
+  text-decoration:none;
+
+  transition:.15s;
+
+
+  svg {
+
+    width:18px;
+
+    height:18px;
+
+    fill:none;
+
+    stroke:currentColor;
+
+    stroke-width:1.8;
+
+    stroke-linecap:round;
+
+    stroke-linejoin:round;
+
+  }
+
+
+  &:hover {
+
+    background:$gray-100;
+
+    color:$navy-800;
+
+  }
+
+}
+
+
+
+.sidebar__nav-item--active {
+
+  background:$active-bg;
+
+  color:$navy-900;
+
+  font-weight:600;
+
+}
+
+
+
+.sidebar__nav-icon {
+
+  display:flex;
+
+}
+
+
+
+//=====================================================
+// Footer
+//=====================================================
+
+.sidebar__footer {
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:10px;
+
+  padding-top:16px;
+
+  border-top:1px solid $gray-200;
+
+}
+
+
+
+.sidebar__settings,
+.sidebar__logout {
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:8px;
+
+  height:42px;
+
+  border-radius:10px;
+
+  font-size:.85rem;
+
+  font-weight:600;
+
+  cursor:pointer;
+
+  border:none;
+
+  transition:.15s;
+
+
+  svg {
+
+    width:16px;
+
+    height:16px;
+
+    fill:none;
+
+    stroke:currentColor;
+
+    stroke-width:1.8;
+
+  }
+
+
+  &:hover {
+
+    opacity:.85;
+
+  }
+
+}
+
+
+
+.sidebar__settings {
+
+  background:$gray-100;
+
+  color:$ink;
+
+  border:1px solid $gray-200;
+
+}
+
+
+
+.sidebar__logout {
+
+  background:$navy-900;
+
+  color:$white;
+
+}
+
+
+
+//=====================================================
+// Contenido
+//=====================================================
+
+.app-shell__content {
+
+  flex:1;
+
+  overflow-y:auto;
+
+}
+
+
+
+//=====================================================
+// Responsive
+//=====================================================
+
+@media(max-width:780px){
+
+
+  .app-shell {
+
+    flex-direction:column;
+
+    height:auto;
+
+    min-height:100vh;
+
+  }
+
+
+
+  .sidebar {
+
+    width:100%;
+
+    flex-direction:row;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:8px;
+
+    padding:16px;
+
+  }
+
+
+
+  .sidebar__brand {
+
+    width:100%;
+
+    padding-bottom:10px;
+
+  }
+
+
+
+  .sidebar__nav {
+
+    flex-direction:row;
+
+    flex-wrap:wrap;
+
+  }
+
+
+
+  .sidebar__footer {
+
+    flex-direction:row;
+
+    border-top:none;
+
+    padding-top:0;
+
+    width:100%;
+
+  }
+
+
+
+  .sidebar__settings,
+  .sidebar__logout {
+
+    flex:1;
+
+  }
+
+}

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ZonaAccesibilidad } from '../graficas/models/zona-accesibilidad.model';
+import { ZonaAccesibilidad } from '../models/zona-accesibilidad.model';
 
 @Component({
   selector: 'app-interpretacion',

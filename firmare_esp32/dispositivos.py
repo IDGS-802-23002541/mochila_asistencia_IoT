@@ -3,7 +3,7 @@
 # ARCHIVO    : dispositivos.py (Versión con Infrarrojos, Motor y Buzzer)
 # DESCRIPCIÓN: Biblioteca HAL (Hardware Abstraction Layer) para gestión
 #              unificada de sensores y actuadores optimizados para ESP32.
-# VERSIÓN    : 2.4 (Resolución de conflicto UART1/UART2 y checksum del DFPlayer)
+# VERSIÓN    : 3.0 (Eliminación FireBaseCliente y uso de funciones MQTT)
 # =============================================================================
 
 from machine import Pin, SoftI2C
@@ -257,7 +257,7 @@ class ActuatorBox:
 # CLASE: MQTTManager (Mantenida intacta para transmisión de telemetría)
 # ─────────────────────────────────────────────────────────────────────────────
 class MQTTManager:
-    def __init__(self, broker, puerto=1883, usuario="", contrasena="", client_id="safepath_client"):
+    def __init__(self, broker, puerto=1883, usuario="", contrasena="", client_id="vision_guard"):
         self._broker     = broker
         self._puerto     = puerto
         self._usuario    = usuario
@@ -322,6 +322,13 @@ class MQTTManager:
             print("[MQTTManager] Error de publicación:", e)
             self._conectado = False
             return False
+        
+    def suscribir_topicos(self):
+        if not self._conectado:
+            return
+
+        for topico in self._callbacks:
+            self._cliente.subscribe(topico.encode())
 
     def verificar_mensajes(self):
         if self._conectado:
@@ -335,45 +342,3 @@ class MQTTManager:
     def conectado(self):
         return self._conectado
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CLASE: FirebaseClient (Mantenida intacta para subida histórica)
-# ─────────────────────────────────────────────────────────────────────────────
-class FirebaseClient:
-    def __init__(self, api_key, project_id, coleccion):
-        self._api_key    = api_key
-        self._project_id = project_id
-        self._coleccion  = coleccion
-        self._url = (
-            f"https://firestore.googleapis.com/v1/projects/{project_id}"
-            f"/databases/(default)/documents/{coleccion}?key={api_key}"
-        )
-
-    def enviar_evento(self, datos_dict):
-        import urequests
-        import json
-
-        campos = {}
-        for clave, valor in datos_dict.items():
-            if isinstance(valor, bool):
-                campos[clave] = {"booleanValue": valor}
-            elif isinstance(valor, int):
-                campos[clave] = {"integerValue": str(valor)}
-            elif isinstance(valor, float):
-                campos[clave] = {"doubleValue": valor}
-            elif valor is None:
-                campos[clave] = {"nullValue": None}
-            else:
-                campos[clave] = {"stringValue": str(valor)}
-
-        cuerpo = json.dumps({"fields": campos})
-        try:
-            headers = {"Content-Type": "application/json"}
-            resp = urequests.post(self._url, data=cuerpo, headers=headers)
-            ok = (resp.status_code == 200)
-            resp.close()
-            gc.collect()
-            return ok
-        except Exception as e:
-            print("[FirebaseClient] Error al escribir en la nube:", e)
-            return False
