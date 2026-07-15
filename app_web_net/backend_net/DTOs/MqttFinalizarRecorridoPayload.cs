@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CangureraInteligente.DTOs;
@@ -15,19 +14,8 @@ public record MqttFinalizarRecorridoPayload
 	public int RecorridoId { get; init; }
 
 	/// <summary>
-	/// Array JSON de coordenadas GPS grabadas durante el recorrido.
-	/// El firmware publica este campo como array JSON; también se acepta
-	/// el formato legacy como string para compatibilidad.
-	/// </summary>
-	[JsonPropertyName("rutaCoordenadas")]
-	public JsonElement? RutaCoordenadas { get; init; }
-
-	/// <summary>
-	/// AJUSTADO: timestamp del momento en que el usuario devolvió la mochila.
-	/// Acepta epoch Unix en segundos/milisegundos (lo más probable según el
-	/// firmware) o cadena ISO-8601, gracias a FlexibleUnixDateTimeConverter.
-	/// Antes este campo esperaba forzosamente un string ISO-8601 y hubiera
-	/// tronado al deserializar un número.
+	/// Timestamp del momento en que el usuario devolvió la mochila.
+	/// Acepta epoch Unix en segundos/milisegundos o cadena ISO-8601.
 	/// </summary>
 	[JsonPropertyName("fechaFin")]
 	[JsonConverter(typeof(FlexibleUnixDateTimeConverter))]

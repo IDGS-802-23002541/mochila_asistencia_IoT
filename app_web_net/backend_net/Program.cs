@@ -27,8 +27,6 @@ builder.Services.AddSingleton(mqttSettings);
 builder.Services.AddScoped<IMqttTelemetryProcessor, MqttTelemetryProcessor>();
 builder.Services.AddHostedService<MqttListenerService>();
 builder.Services.AddSingleton<MqttConnectionManager>();
-builder.Services.AddSingleton<IMqttPublisherService, MqttPublisherService>();
-builder.Services.AddSingleton<ZonaCalienteAlertState>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

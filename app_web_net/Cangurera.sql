@@ -72,21 +72,22 @@ CREATE TABLE Operativo.Cat_TiposEvento (
     Severidad    VARCHAR(20)  NOT NULL
 );
 
-CREATE TABLE Operativo.Cat_TiposDiscapacidad (
-    Id           INT IDENTITY(1,1) PRIMARY KEY,
-    Nombre       NVARCHAR(50) NOT NULL UNIQUE
-);
-
 CREATE TABLE Operativo.Recorridos (
     Id                   INT IDENTITY(1,1) PRIMARY KEY,
     DispositivoId        INT          NOT NULL FOREIGN KEY REFERENCES Operativo.Dispositivos(Id),
     FechaInicio          DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME(),
-    FechaFin             DATETIME2(3) NULL,
-    Usuario_Edad         INT          NULL,
-    DiscapacidadId       INT          NULL FOREIGN KEY REFERENCES Operativo.Cat_TiposDiscapacidad(Id),
-    Ruta_Coordenadas     VARCHAR(MAX) NOT NULL
-        CONSTRAINT chk_ruta_json CHECK (ISJSON(Ruta_Coordenadas) = 1)
+    FechaFin             DATETIME2(3) NULL
 );
+
+CREATE TABLE Operativo.RecorridoCoordenadas (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    RecorridoId  INT          NOT NULL FOREIGN KEY REFERENCES Operativo.Recorridos(Id),
+    Fecha        DATETIME2(3) NOT NULL,
+    Latitud      DECIMAL(9,6)  NOT NULL,
+    Longitud     DECIMAL(9,6)  NOT NULL
+);
+
+CREATE INDEX IX_RecorridoCoordenadas_RecorridoId ON Operativo.RecorridoCoordenadas(RecorridoId);
 
 CREATE TABLE Operativo.Eventos_Detectados (
     Id              BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -118,7 +119,6 @@ CREATE TABLE Analitico.Hechos_Eventos (
     Fecha           DATETIME2(3),
     Organizacion    NVARCHAR(150),
     TipoEvento      VARCHAR(50),
-    Discapacidad    NVARCHAR(50),
     Latitud         DECIMAL(10,8) NULL,
     Longitud        DECIMAL(11,8) NULL,
     Geo_Es_Estimado BIT,
@@ -126,7 +126,7 @@ CREATE TABLE Analitico.Hechos_Eventos (
 );
 GO
 
--- Procedimiento de volcado simple con LEFT JOIN para evitar pérdida de datos
+-- Procedimiento de volcado simple sin datos de discapacidad
 CREATE PROCEDURE Analitico.Sp_Cargar_DW AS
 BEGIN
     SET NOCOUNT ON;
@@ -134,14 +134,13 @@ BEGIN
     TRUNCATE TABLE Analitico.Hechos_Eventos;
 
     INSERT INTO Analitico.Hechos_Eventos
-        (Id_Hecho, Fecha, Organizacion, TipoEvento, Discapacidad,
+        (Id_Hecho, Fecha, Organizacion, TipoEvento,
          Latitud, Longitud, Geo_Es_Estimado, FuerzaImpactoG)
     SELECT
         e.Id,
         e.TimestampEvento,
         o.Nombre,
         t.NombreEvento,
-        ISNULL(d.Nombre, N'No especificado'),
         e.Latitud,
         e.Longitud,
         e.Geo_Es_Estimado,
@@ -149,7 +148,6 @@ BEGIN
     FROM Operativo.Eventos_Detectados e
     JOIN Operativo.Recorridos r ON e.RecorridoId = r.Id
     JOIN Operativo.Cat_TiposEvento t ON e.TipoEventoId = t.Id
-    LEFT JOIN Operativo.Cat_TiposDiscapacidad d ON r.DiscapacidadId = d.Id
     JOIN Operativo.Dispositivos disp ON r.DispositivoId = disp.Id
     JOIN Operativo.Organizaciones o ON disp.OrganizacionId = o.Id;
 END;

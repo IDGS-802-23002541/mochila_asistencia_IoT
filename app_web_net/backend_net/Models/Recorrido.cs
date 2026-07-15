@@ -18,19 +18,13 @@ public class Recorrido
 
 	public DateTime? FechaFin { get; set; }
 
-	public int? Usuario_Edad { get; set; }
-
-	public int? DiscapacidadId { get; set; }
-
-	public string? Ruta_Coordenadas { get; set; }
-
 	[ForeignKey("DispositivoId")]
 	[JsonIgnore]
 	public Dispositivo Dispositivo { get; set; }
 
-	[ForeignKey("DiscapacidadId")]
-	public CatTipoDiscapacidad? Discapacidad { get; set; }
-
 	[JsonIgnore]
 	public ICollection<EventoDetectado> Eventos { get; set; } = new List<EventoDetectado>();
+
+	[JsonIgnore]
+	public ICollection<RecorridoCoordenada> Coordenadas { get; set; } = new List<RecorridoCoordenada>();
 }

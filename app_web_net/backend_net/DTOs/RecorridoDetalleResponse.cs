@@ -17,11 +17,9 @@ public record RecorridoDetalleResponse
 
 	public DateTime? FechaFin { get; init; }
 
-	public int? UsuarioEdad { get; init; }
-
-	public string? Discapacidad { get; init; }
-
 	public bool Activo => !FechaFin.HasValue;
 
 	public int TotalEventos { get; init; }
+
+	public int TotalPuntos { get; init; }
 }

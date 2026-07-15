@@ -29,29 +29,52 @@ public class UsuariosController(CangureraDbContext db) : ControllerBase
 		}
 		string correo = req.Correo.Trim();
 		Usuario usuario = await db.Usuarios.AsNoTracking().Include((Usuario u) => u.Organizacion).FirstOrDefaultAsync((Usuario u) => u.Correo.ToLower() == correo.ToLower(), ct);
-		if (usuario == null || !ValidarContrasena(req.Contrasena, usuario.Contrasena_Hash))
+		if (usuario != null && ValidarContrasena(req.Contrasena, usuario.Contrasena_Hash))
 		{
-			return Unauthorized(new
+			if (!usuario.Estado_Activo)
 			{
-				error = "Correo o contraseña inválidos."
+				return StatusCode(403, new
+				{
+					error = "El usuario está inactivo."
+				});
+			}
+			return Ok(new LoginResponse
+			{
+				Id = usuario.Id,
+				Nombre = usuario.Nombre,
+				Correo = usuario.Correo,
+				Rol = usuario.Rol,
+				OrganizacionId = usuario.OrganizacionId,
+				Estado_Activo = usuario.Estado_Activo,
+				Mensaje = "Login exitoso"
 			});
 		}
-		if (!usuario.Estado_Activo)
+
+		Organizacion organizacion = await db.Organizaciones.AsNoTracking().FirstOrDefaultAsync((Organizacion o) => o.Email_Contacto != null && o.Email_Contacto.ToLower() == correo.ToLower(), ct);
+		if (organizacion != null && !string.IsNullOrWhiteSpace(organizacion.Contrasena_Hash) && ValidarContrasena(req.Contrasena, organizacion.Contrasena_Hash))
 		{
-			return StatusCode(403, new
+			if (!organizacion.Estado_Activo)
 			{
-				error = "El usuario está inactivo."
+				return StatusCode(403, new
+				{
+					error = "La organización está inactiva."
+				});
+			}
+			return Ok(new LoginResponse
+			{
+				Id = organizacion.Id,
+				Nombre = organizacion.Nombre,
+				Correo = organizacion.Email_Contacto ?? string.Empty,
+				Rol = organizacion.Rol,
+				OrganizacionId = organizacion.Id,
+				Estado_Activo = organizacion.Estado_Activo,
+				Mensaje = "Login exitoso"
 			});
 		}
-		return Ok(new LoginResponse
+
+		return Unauthorized(new
 		{
-			Id = usuario.Id,
-			Nombre = usuario.Nombre,
-			Correo = usuario.Correo,
-			Rol = usuario.Rol,
-			OrganizacionId = usuario.OrganizacionId,
-			Estado_Activo = usuario.Estado_Activo,
-			Mensaje = "Login exitoso"
+			error = "Correo o contraseña inválidos."
 		});
 	}
 
