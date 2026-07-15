@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
-import { MapaCalor } from './pages/analitica/mapa-calor/mapa-calor';
+import { Graficas } from './pages/graficas/graficas';
 
 export const routes: Routes = [
   {
@@ -8,7 +8,7 @@ export const routes: Routes = [
     component: Home
   },
   {
-    path: 'analitica/mapa-calor',
-    component: MapaCalor
+    path: 'graficas/dashboard',
+    component: Graficas
   }
 ];

@@ -1,0 +1,23 @@
+<div class="tarjeta-interpretacion">
+  <h4>Interpretación de resultados</h4>
+  <ul>
+    <li>
+      La zona más crítica es <strong>{{ zonaMasCritica.zonaId }}</strong> con un IAZ de
+      <strong>{{ zonaMasCritica.iaz }}</strong>, predominando eventos de severidad
+      <strong>{{ zonaMasCritica.tipoEventoPredominante }}</strong>.
+    </li>
+    <li>
+      La zona más accesible es <strong>{{ zonaMasSegura.zonaId }}</strong> con un IAZ de
+      <strong>{{ zonaMasSegura.iaz }}</strong>.
+    </li>
+    <li>
+      El IAZ promedio del campus es de <strong>{{ iazPromedio }}</strong>, con
+      <strong>{{ totalEventos }}</strong> eventos detectados en total sobre las
+      {{ totalZonas }} zonas monitoreadas.
+    </li>
+    <li>
+      Las zonas de mayor tránsito (estacionamientos y entrada principal) concentran la mayor
+      severidad, lo que sugiere priorizarlas en la siguiente ronda de inspección de campo.
+    </li>
+  </ul>
+</div>

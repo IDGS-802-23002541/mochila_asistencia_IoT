@@ -1,5 +1,15 @@
-<header class="topbar">
-  <span class="menu-icon">☰</span>
-  <h1>GRÁFICAS</h1>
-</header>
-<div class="page-body"></div>
+<div class="pagina-graficas">
+  <div class="tarjeta-graficas">
+    <h3 class="titulo-graficas">Dashboard — Accesibilidad por Zona</h3>
+    <p class="subtitulo-graficas">Campus UTL · Índice de Accesibilidad por Zona (IAZ)</p>
+
+    <app-mapa-calor></app-mapa-calor>
+
+    <div class="grid-graficas">
+      <app-grafica-iaz [zonas]="zonas"></app-grafica-iaz>
+      <app-grafica-desglose [zonas]="zonas"></app-grafica-desglose>
+    </div>
+
+    <app-interpretacion [zonas]="zonas"></app-interpretacion>
+  </div>
+</div>
