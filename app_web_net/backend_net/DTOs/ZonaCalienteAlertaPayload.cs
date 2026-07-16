@@ -4,13 +4,13 @@ namespace CangureraInteligente.DTOs;
 
 public record ZonaCalienteAlertaPayload
 {
-	[JsonPropertyName("MacAdress")]
+	[JsonPropertyName("MacAddress")]
 	public string MacAddress { get; init; } = string.Empty;
 
 	[JsonPropertyName("mensaje")]
 	public string Mensaje { get; init; } = "acercandose_zona_caliente";
 
-	[JsonPropertyName("tipoEventoid")]
+	[JsonPropertyName("tipoEventoId")]
 	public int TipoEventoId { get; init; }
 
 	[JsonPropertyName("latitud")]

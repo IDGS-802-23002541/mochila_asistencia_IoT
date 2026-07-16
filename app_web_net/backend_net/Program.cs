@@ -27,8 +27,6 @@ builder.Services.AddSingleton(mqttSettings);
 builder.Services.AddScoped<IMqttTelemetryProcessor, MqttTelemetryProcessor>();
 builder.Services.AddHostedService<MqttListenerService>();
 builder.Services.AddSingleton<MqttConnectionManager>();
-builder.Services.AddSingleton<IMqttPublisherService, MqttPublisherService>();
-builder.Services.AddSingleton<ZonaCalienteAlertState>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -56,6 +54,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -63,5 +62,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+
+// Servir archivos estáticos
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseRouting();
+
 app.MapControllers();
+
+// Angular SPA
+app.MapFallbackToFile("index.html");
+
 app.Run();

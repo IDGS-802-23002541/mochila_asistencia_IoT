@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CangureraInteligente.Data;
@@ -52,6 +54,7 @@ public class OrganizacionesController(CangureraDbContext db) : ControllerBase
 		}
 		organizacion.Id = 0;
 		organizacion.FechaCreacion = ((organizacion.FechaCreacion == default(DateTime)) ? DateTime.UtcNow : organizacion.FechaCreacion);
+		organizacion.Contrasena_Hash = HashContrasena(organizacion.Contrasena_Hash);
 		db.Organizaciones.Add(organizacion);
 		await db.SaveChangesAsync(ct);
 		return CreatedAtAction("GetById", new
@@ -83,7 +86,7 @@ public class OrganizacionesController(CangureraDbContext db) : ControllerBase
 		existing.Contacto_Principal = organizacion.Contacto_Principal;
 		existing.Email_Contacto = organizacion.Email_Contacto;
 		existing.Estado_Activo = organizacion.Estado_Activo;
-		existing.Contrasena_Hash = organizacion.Contrasena_Hash;
+		existing.Contrasena_Hash = HashContrasena(organizacion.Contrasena_Hash);
 		existing.Rol = organizacion.Rol;
 		existing.Es_Interna = organizacion.Es_Interna;
 		await db.SaveChangesAsync(ct);
@@ -114,5 +117,15 @@ public class OrganizacionesController(CangureraDbContext db) : ControllerBase
 			});
 		}
 		return NoContent();
+	}
+
+	private static string HashContrasena(string contrasena)
+	{
+		if (string.IsNullOrWhiteSpace(contrasena))
+		{
+			return string.Empty;
+		}
+		byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(contrasena));
+		return Convert.ToHexString(hash).ToLowerInvariant();
 	}
 }
