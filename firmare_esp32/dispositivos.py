@@ -28,7 +28,7 @@ class SensorBox:
     UMBRAL_CAIDA_DEFAULT = 1.5  # Fuerza G para disparar alerta de caída (2.5G)
 
     def __init__(self,
-                 pin_trigger=12, pin_echo=13,
+                 pin_trigger=23, pin_echo=13, # Se cambia el trigger al pin 23
                  pin_ir_izq=14, pin_ir_der=27,
                  pin_scl=22, pin_sda=21,
                  muestras_us=5,

@@ -4,11 +4,10 @@
 # DESCRIPCIÓN: Clase GPSManager — encapsula la lectura del módulo GPS
 #              Ublox NEO-6M (o compatible NMEA-0183) via UART.
 #
-#              VERSION CORREGIDA CON OPTIMIZACIÓN UART:
-#                - Inicialización UART con enteros nativos (tx=17, rx=16) para ESP32
-#                - Lectura por bloques de datos (evita caídas de bytes y lag por consola)
-#                - Tolerancia a errores de checksum en strings de prueba offline (*6B/*60)
-# VERSIÓN    : 1.2
+#              VERSION CORREGIDA:
+#                - Mensaje fix gps
+#                - Coordenadas default
+# VERSIÓN    : 1.3
 # =============================================================================
 
 from machine import UART, Pin
@@ -30,8 +29,8 @@ class GPSManager:
                  uart_id=2,
                  pin_tx=17, pin_rx=16,
                  baudrate=115200,
-                 lat_defecto=21.1092,
-                 lon_defecto=-101.6275,
+                 lat_defecto=00.00,
+                 lon_defecto=-00.00,
                  max_historial=10):
 
         # Inicializar UART usando enteros nativos (¡Evita fallos de punteros en ESP32!)
@@ -225,20 +224,37 @@ class GPSManager:
 
         return actualizado
 
-    async def esperar_fix(self, timeout_s=60):
+    async def esperar_fix(self, timeout_s=60, led=None):
         if not self._uart_ok:
             return False
+        if led is not None:
+            led.estado_buscando_gps()  
 
         print(f"[GPSManager] Buscando señal activa en exteriores (timeout={timeout_s}s)...")
         inicio = time.time()
+        ultimo_log = inicio
 
         while time.time() - inicio < timeout_s:
-            if self.leer_uart() and self._tiene_fix:
-                print(f"[GPSManager] ¡Enlace exitoso!: {self._lat:.6f}, {self._lon:.6f}")
+            self.leer_uart()
+            
+            if self._tiene_fix:
+                if led is not None:
+                    await led.parpadear_verde_gps(3)
+                print(f"[GPSManager] ¡FIX conseguido! "
+                      f"Lat={self._lat:.6f}, Lon={self._lon:.6f}, "
+                      f"Sats={self._num_sats}")
                 return True
-            await asyncio.sleep(1)
 
-        print(f"[GPSManager] Timeout alcanzado. UsandoFallback: {self._lat_defecto}, {self._lon_defecto}")
+            if time.time() - ultimo_log >= 5:
+                print(f"[GPSManager] Esperando FIX... "
+                      f"Satélites={self._num_sats}")
+                ultimo_log = time.time()
+
+            await asyncio.sleep(0.2)
+        
+        if led is not None:
+            await led.parpadear_rojo_gps(3)
+        print(f"[GPSManager] Timeout alcanzado. No se obtuvo FIX. UsandoFallback: {self._lat_defecto}, {self._lon_defecto}")
         return False
 
     # ─────────────────────────────────────────────────────────────────────

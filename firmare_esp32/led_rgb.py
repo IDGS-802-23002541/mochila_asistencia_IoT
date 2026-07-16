@@ -47,6 +47,22 @@ class LedRGBManager:
     def estado_finalizado(self):
         print("[LED] Estado: Recorrido Finalizado")
         self._set_color(r=True)
+    
+    def estado_fix_gps(self):
+        print("[LED] Estado: GPS con fix")
+        self._set_color(g=True)
+        
+    def estado_buscando_gps(self):
+        print("[LED] Estado: Esperando fix")
+        self._set_color(r=True, g=True)
+    
+    def estado_fix_fallido(self):
+        print("[LED] Estado: Fallo el fix gps")
+        self._set_color(r=True)
+    
+    def estado_completado(self):
+        print("[LED] Estado: Tareas completadas: Esperando vincular")
+        self._set_color(r=True, g=True, b=True)
 
     # --------------------------------------------------------
     # Parpadeos
@@ -69,7 +85,6 @@ class LedRGBManager:
             await asyncio.sleep(0.3)
         self.estado_recorrido()
 
-
     async def parpadear_rojo(self, veces=3):
         for _ in range(veces):
             self.estado_finalizado()
@@ -77,3 +92,19 @@ class LedRGBManager:
             self.apagar()
             await asyncio.sleep(0.3)
         self.estado_finalizado()
+    
+    async def parpadear_verde_gps(self, veces=3):
+        for _ in range(veces):
+            self.estado_fix_gps()
+            await asyncio.sleep(0.3)
+            self.apagar()
+            await asyncio.sleep(0.3)
+        self.estado_fix_gps()
+    
+    async def parpadear_rojo_gps(self, veces=3):
+        for _ in range(veces):
+            self.estado_fix_fallido()
+            await asyncio.sleep(0.3)
+            self.apagar()
+            await asyncio.sleep(0.3)
+        self.estado_fix_fallido()

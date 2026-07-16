@@ -12,6 +12,10 @@ import edu.utleon.idgs902.app_movil_android.Utils.RecorridoDetalleResponse
 import edu.utleon.idgs902.app_movil_android.Utils.ResumenRecorridoResponse
 import edu.utleon.idgs902.app_movil_android.Utils.VisionGuardApiService
 import edu.utleon.idgs902.app_movil_android.R
+import edu.utleon.idgs902.app_movil_android.Utils.MqttConfig
+import edu.utleon.idgs902.app_movil_android.Utils.MqttHolder
+import edu.utleon.idgs902.app_movil_android.Utils.MqttManager
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,6 +32,7 @@ class MonitoreoActivity : AppCompatActivity() {
         // Inicializar SharedPreferences (Asegúrate de usar el mismo nombre "VisionGuardPrefs")
         sharedPreferences = getSharedPreferences("VisionGuardPrefs", Context.MODE_PRIVATE)
         apiService = VisionGuardApiService.create()
+        val mqtt = MqttHolder.mqttManager
 
         val txtTiempo = findViewById<TextView>(R.id.txtTiempoDetalle)
         val txtObstaculos = findViewById<TextView>(R.id.txtObstaculosDetalle)
@@ -59,11 +64,19 @@ class MonitoreoActivity : AppCompatActivity() {
 
         // 🛠️ LOGICA ACTUALIZADA DE DESVINCULACIÓN
         btnDesvincular.setOnClickListener {
-            // 1. Modificar preferencias locales para indicar que ya no hay dispositivo activo
-            sharedPreferences.edit().apply {
-                putBoolean("dispositivo_vinculado", false)
-                remove("recorrido_actual_id") // Limpia el id de ruta si es necesario
-                apply()
+            val mac = sharedPreferences.getString("dispositivo_mac", "") ?: ""
+
+            if (mac.isNotEmpty()) {
+
+                val jsonDesvincular  = JSONObject().apply{
+                    put("accion", "desvincular")
+                    put("macAddress", mac)
+                }
+
+                mqtt?.publicar(
+                    MqttConfig.TOPICO_COMANDOS,
+                    jsonDesvincular.toString()
+                )
             }
 
             Toast.makeText(this, "Dispositivo desvinculado con éxito", Toast.LENGTH_SHORT).show()
