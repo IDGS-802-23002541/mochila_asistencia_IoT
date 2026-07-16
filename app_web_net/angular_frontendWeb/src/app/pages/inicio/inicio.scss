@@ -1,110 +1,164 @@
-$navy-900: #101c3a;
-$navy-800: #16213f;
-$teal: #21b6a8;
-$white: #ffffff;
-
-:host {
-  display: block;
-  height: 100%;
+/* --- Variables de diseño (Adaptadas para tarjeta blanca) --- */
+:root {
+  --bg-fallback: #080b11;
+  --card-bg: rgba(255, 255, 255, 0.92); /* Blanco premium con ligera transparencia */
+  --card-border: rgba(255, 255, 255, 0.6); /* Borde blanco sutil */
+  --color-text: #0f172a; /* Azul pizarra oscuro (excelente lectura) */
+  --color-muted: #475569; /* Gris pizarra medio */
+  --color-accent: #0284c7; /* Azul cian más profundo para destacar sobre blanco */
+  --color-brand-muted: #64748b; /* Gris para la marca secundario */
 }
 
+/* --- Contenedor Principal (Mantiene el fondo tecnológico de internet) --- */
 .inicio {
   display: flex;
-  align-items: center;
   justify-content: center;
-  height: 100%;
-  min-height: calc(100vh - 56px);
-  padding: 40px 24px;
-}
-
-.inicio__content {
-  display: flex;
-  flex-direction: column;
   align-items: center;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-text);
+  position: relative;
+  overflow: hidden;
+
+  background-color: var(--bg-fallback);
+  background-image: url('https://encrypted-tbn3.gstatic.com/licensed-image?q=tbn:ANd9GcQeaky0Zi20zKmkSmpROLkwaTEFsC48T1ZVOrysw6IEi9f5Guz5osC27BcitYdEN07swA6Fye5KqcPFDFQ');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Capa de contraste oscura para el fondo */
+.inicio::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(10, 15, 25, 0.4) 0%, rgba(5, 8, 15, 0.85) 100%);
+  z-index: 1;
+}
+
+/* --- TARJETA BLANCA (Glassmorphism Claro) --- */
+.inicio__card {
+  position: relative;
+  z-index: 2;
+  background: #ffffff; /* ¡Blanco puro y sólido! */
+  border: 1px solid rgba(0, 0, 0, 0.05); /* Un borde sumamente sutil para dar definición */
+  border-radius: 24px;
+  padding: 3.5rem 2.5rem;
+  width: 100%;
+  max-width: 400px;
   text-align: center;
+
+  /* Sombra oscura y suave para que el recuadro blanco flote con elegancia sobre el fondo */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35),
+              0 1px 3px rgba(0, 0, 0, 0.1);
+
+  animation: cardFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.inicio__logo-icon {
-  width: 96px;
-  height: 96px;
-  margin-bottom: 20px;
-
-  path {
-    fill: $navy-800;
-  }
-  .inicio__logo-icon-eye {
-    fill: $white;
-  }
-  .inicio__logo-icon-pupil {
-    fill: $navy-800;
-  }
-  .inicio__logo-icon-signal {
-    fill: none;
-    stroke: $teal;
-    stroke-width: 2;
-    stroke-linecap: round;
-  }
+/* --- Logo con pulso (Sombra adaptada para fondo blanco) --- */
+.inicio__logo-wrapper {
+  margin-bottom: 1.8rem;
 }
 
+.inicio__logo {
+  width: 230px;
+  height: auto;
+  /* Sombra azulada y suave para que resalte sobre el blanco */
+  filter: drop-shadow(0 4px 12px rgba(2, 132, 199, 0.2));
+  animation: floatLogo 4s ease-in-out infinite;
+}
+
+/* --- Textos y Títulos (Optimizados para legibilidad) --- */
 .inicio__brand {
-  font-family: 'Jost', sans-serif;
-  font-size: 1.6rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 2.2rem;
+  color: var(--color-brand-muted);
+}
+
+.inicio__brand--highlight {
+  color: var(--color-accent);
+  font-weight: 900;
+}
+
+.inicio__welcome-container {
+  margin-bottom: 2.5rem;
+}
+
+.inicio__welcome-text {
+  font-size: 0.9rem;
+  color: #0369a1; /* Azul tecnológico intermedio */
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.5rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: $navy-900;
-  margin: 0 0 28px;
-
-  span {
-    color: $teal;
-  }
 }
 
-.inicio__welcome {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 1.9rem;
-  font-weight: 600;
-  color: $navy-900;
+.inicio__user-name {
+  font-size: 2.1rem;
+  font-weight: 800;
   margin: 0;
+  /* Degradado elegante de azul oscuro a azul eléctrico */
+  background: linear-gradient(135deg, #0f172a 30%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-@media (max-width: 480px) {
-  .inicio__logo-icon {
-    width: 72px;
-    height: 72px;
+/* --- Cargador (Colores adaptados) --- */
+.inicio__loader {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.inicio__loader-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: loaderPulse 1.4s infinite ease-in-out;
+}
+
+.inicio__loader-dot:nth-child(2) { animation-delay: 0.2s; }
+.inicio__loader-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* --- Animaciones Keyframes --- */
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(15px);
   }
-
-  .inicio__welcome {
-    font-size: 1.5rem;
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
-  .inicio__logo-image {
-
-  width:90px;
-
-  height:90px;
-
-  object-fit:contain;
-
-  margin-bottom:20px;
-
 }
 
-
-.inicio__brand {
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  gap:8px;
-
+@keyframes floatLogo {
+  0%, 100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 4px 12px rgba(2, 132, 199, 0.2));
+  }
+  50% {
+    transform: translateY(-6px);
+    filter: drop-shadow(0 8px 16px rgba(2, 132, 199, 0.35));
+  }
 }
 
-
-.inicio__brand span {
-
-  color:#2c6cff;
-
-}
+@keyframes loaderPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(2, 132, 199, 0.5);
+  }
 }

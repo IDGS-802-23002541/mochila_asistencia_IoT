@@ -1,0 +1,71 @@
+<div class="dispositivos-page">
+  <!-- Cabecera de la página -->
+  <header class="dispositivos-header">
+    <div class="dispositivos-header__text">
+      <h1 class="dispositivos-title">Monitoreo de Dispositivos</h1>
+      <p class="dispositivos-subtitle">Gestión y estado en tiempo real de la red Vision Guard</p>
+    </div>
+    <button class="btn-primary" type="button">
+      <span>+</span> Registrar Dispositivo
+    </button>
+  </header>
+
+  <!-- Tarjetas de Resumen Rápido -->
+  <section class="metrics-grid">
+    <div class="metric-card">
+      <span class="metric-card__label">Total Dispositivos</span>
+      <span class="metric-card__value">5</span>
+    </div>
+    <div class="metric-card metric-card--success">
+      <span class="metric-card__label">Activos</span>
+      <span class="metric-card__value">3</span>
+    </div>
+    <div class="metric-card metric-card--warning">
+      <span class="metric-card__label">En Alerta</span>
+      <span class="metric-card__value">1</span>
+    </div>
+    <div class="metric-card metric-card--danger">
+      <span class="metric-card__label">Inactivos</span>
+      <span class="metric-card__value">1</span>
+    </div>
+  </section>
+
+  <!-- Tabla de Dispositivos -->
+  <div class="table-container">
+    <table class="dispositivos-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre del Dispositivo</th>
+          <th>Tipo</th>
+          <th>Ubicación</th>
+          <th>Estado</th>
+          <th>Última Conexión</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (disp of listaDispositivos; track disp.id) {
+          <tr>
+            <td class="td-id">#{{ disp.id }}</td>
+            <td class="td-name"><strong>{{ disp.nombre }}</strong></td>
+            <td>{{ disp.tipo }}</td>
+            <td>{{ disp.ubicacion }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="'status-badge--' + disp.estado">
+                {{ disp.estado | titlecase }}
+              </span>
+            </td>
+            <td class="td-muted">{{ disp.ultimaConexion }}</td>
+            <td>
+              <div class="table-actions">
+                <button class="btn-icon" title="Editar">✏️</button>
+                <button class="btn-icon btn-icon--danger" title="Eliminar">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
