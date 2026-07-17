@@ -1,3 +1,15 @@
+export interface DesgloseSeveridad {
+  baja: number;
+  media: number;
+  critica: number;
+}
+
+export interface DesgloseTipoEvento {
+  tipoEvento: string;
+  cantidad: number;
+  severidadPredominante: 'Baja' | 'Media' | 'Critica';
+}
+
 export interface ZonaAccesibilidad {
   zonaId: string;
   lat: number;
@@ -6,6 +18,9 @@ export interface ZonaAccesibilidad {
   iaz: number;
   cantidadEventos: number;
   cantidadRecorridosQueCruzaron: number;
-  tipoEventoPredominante: 'Bajo' | 'Medio' | 'Alto';
-  desglose: { bajo: number; medio: number; alto: number };
+  severidadPredominante: 'Baja' | 'Media' | 'Critica';
+  tipoEventoPredominante: string;
+  desgloseSeveridad: DesgloseSeveridad;
+  desglosePorTipoEvento: DesgloseTipoEvento[];
+  fechaUltimaActualizacion: string;
 }

@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
-import { ZonaAccesibilidad } from '../models/zona-accesibilidad.model';
+import { ZonaAccesibilidad, DesgloseSeveridad } from '../models/zona-accesibilidad.model';
 
 Chart.register(...registerables);
 
@@ -18,15 +18,14 @@ export class GraficaDesglose implements AfterViewInit, OnDestroy {
   private chart?: Chart;
 
   ngAfterViewInit(): void {
-    const totalBajo = this.zonas.reduce((acc, z) => acc + z.desglose.bajo, 0);
-    const totalMedio = this.zonas.reduce((acc, z) => acc + z.desglose.medio, 0);
-    const totalAlto = this.zonas.reduce((acc, z) => acc + z.desglose.alto, 0);
-
+    const totalBaja = this.zonas.reduce((acc, z) => acc + z.desgloseSeveridad.baja, 0);
+    const totalMedia = this.zonas.reduce((acc, z) => acc + z.desgloseSeveridad.media, 0);
+    const totalCritica = this.zonas.reduce((acc, z) => acc + z.desgloseSeveridad.critica, 0);
     this.chart = new Chart(this.canvasRef.nativeElement, {
       type: 'doughnut',
       data: {
-        labels: ['Bajo', 'Medio', 'Alto'],
-        datasets: [{ data: [totalBajo, totalMedio, totalAlto], backgroundColor: ['#16A34A', '#F59E0B', '#DC2626'] }],
+        labels: ['Baja', 'Media', 'Critica'],
+        datasets: [{ data: [totalBaja, totalMedia, totalCritica], backgroundColor: ['#16A34A', '#F59E0B', '#DC2626'] }],
       },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } },
     });
