@@ -3,11 +3,7 @@
 # ARCHIVO    : gps_manager.py
 # DESCRIPCIÓN: Clase GPSManager — encapsula la lectura del módulo GPS
 #              Ublox NEO-6M (o compatible NMEA-0183) via UART.
-#
-#              VERSION CORREGIDA:
-#                - Mensaje fix gps
-#                - Coordenadas default
-# VERSIÓN    : 1.3
+# VERSIÓN    : 1.4 - Lineas comentadas para ver el parseo de mensajes GPS
 # =============================================================================
 
 from machine import UART, Pin
@@ -208,8 +204,10 @@ class GPSManager:
                 datos_leidos = self._uart.read()
                 if datos_leidos:
                     cadena = datos_leidos.decode('utf-8', 'ignore')
+                    #print(repr(cadena))
                     for caracter in cadena:
                         if caracter == '\n':
+                            # print("LINEA:", repr(self._buffer))
                             if self._buffer:
                                 if self._parsear_sentencia(self._buffer):
                                     actualizado = True
