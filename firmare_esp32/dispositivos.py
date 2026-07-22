@@ -132,8 +132,12 @@ class ActuatorBox:
     PISTA_OBSTACULO_FRONTAL = 1
     PISTA_OBSTACULO_IZQ     = 2
     PISTA_OBSTACULO_DER     = 3
-    PISTA_CAIDA_DETECTADA   = 4
-    PISTA_DESCONOCIDO       = 9
+    PISTA_TROPIEZO_DETECTADO= 4
+    PISTA_CAIDA_DETECTADA   = 5
+    PISTA_RECORRIDO_INICIAR = 6
+    PISTA_RECORRIDO_FINALIZAR = 7
+    PISTA_FIX_FALLIDO       = 9
+    PISTA_DESCONOCIDO       = 8
 
     # Umbral de distancia crítico para activación física del buzzer (en cm)
     UMBRAL_BUZZER_CRITICO_CM = 30.0
@@ -229,6 +233,9 @@ class ActuatorBox:
         Si el obstáculo está a menos de 30 cm (riesgo de choque inminente),
         el buzzer se enciende para alertar sonoramente al usuario.
         """
+        if distancia_cm is None:
+            return
+    
         if distancia_cm <= self.UMBRAL_BUZZER_CRITICO_CM:
             self.encender_buzzer()
         else:
