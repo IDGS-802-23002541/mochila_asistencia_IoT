@@ -1,0 +1,19 @@
+<header class="topbar">
+  <div class="topbar__control">
+    <button
+      type="button"
+      class="menu-icon"
+      (click)="toggle()"
+      [attr.aria-expanded]="!layout.sidebarCollapsed()"
+      aria-label="Mostrar u ocultar menú"
+    >
+      <svg viewBox="0 0 24 24" fill="none">
+        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <h1 class="topbar__title">{{ layout.currentTitle() }}</h1>
+</header>

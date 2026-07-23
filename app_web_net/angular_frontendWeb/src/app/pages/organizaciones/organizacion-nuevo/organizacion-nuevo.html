@@ -1,122 +1,116 @@
-<div class="layout">
-  <app-sidebar></app-sidebar>
+<header class="topbar">
+  <h1>CLIENTES</h1>
+</header>
 
-  <div class="main-content">
-    <header class="topbar">
-      <h1>CLIENTES</h1>
-    </header>
+<div class="page-body">
+  <div class="nuevo-wrapper">
 
-    <div class="page-body">
-      <div class="nuevo-wrapper">
-
-        <div class="nuevo-header">
-          <div>
-            <h2 class="section-title">Nueva organización</h2>
-            <p class="nuevo-subtitulo">Registra un nuevo cliente en el sistema</p>
-          </div>
-        </div>
-
-        <form class="nuevo-card" [formGroup]="form" (ngSubmit)="guardar()">
-
-          <p class="form-seccion-titulo">Información general</p>
-
-          <div class="form-grid">
-
-            <div class="form-field full">
-              <label for="nombre">Nombre de la institución <span class="req">*</span></label>
-              <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Universidad Tecnológica de León" />
-              @if (f['nombre'].touched && f['nombre'].invalid) {
-                <span class="form-error">El nombre es obligatorio (máx. 150 caracteres)</span>
-              }
-            </div>
-
-            <div class="form-field">
-              <label for="sector">Sector <span class="req">*</span></label>
-              <input id="sector" type="text" formControlName="sector" placeholder="Ej. Educación" />
-              @if (f['sector'].touched && f['sector'].invalid) {
-                <span class="form-error">El sector es obligatorio</span>
-              }
-            </div>
-
-            <div class="form-field">
-              <label for="rol">Rol <span class="req">*</span></label>
-              <select id="rol" formControlName="rol">
-                <option value="usuario">Usuario</option>
-                <option value="organizacion">Organización</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-
-          </div>
-
-          <p class="form-seccion-titulo">Contacto</p>
-
-          <div class="form-grid">
-
-            <div class="form-field">
-              <label for="contacto_Principal">Contacto principal</label>
-              <input id="contacto_Principal" type="text" formControlName="contacto_Principal" placeholder="Nombre del contacto" />
-            </div>
-
-            <div class="form-field">
-              <label for="email_Contacto">Correo de contacto</label>
-              <input id="email_Contacto" type="email" formControlName="email_Contacto" placeholder="correo@ejemplo.com" />
-              @if (f['email_Contacto'].touched && f['email_Contacto'].invalid) {
-                <span class="form-error">Ingresa un correo válido</span>
-              }
-            </div>
-
-          </div>
-
-          <p class="form-seccion-titulo">Acceso</p>
-
-          <div class="form-grid">
-
-            <div class="form-field full">
-              <label for="contrasena_Hash">Contraseña</label>
-              <input id="contrasena_Hash" type="password" formControlName="contrasena_Hash" placeholder="Déjalo vacío si no aplica" />
-              <span class="form-hint">Se usará como credencial de acceso de la organización, si aplica.</span>
-            </div>
-
-          </div>
-
-          <p class="form-seccion-titulo">Estado</p>
-
-          <div class="form-grid">
-
-            <div class="form-field toggle-field">
-              <label>Activo</label>
-              <label class="switch">
-                <input type="checkbox" formControlName="estado_Activo" />
-                <span class="slider"></span>
-              </label>
-              <span class="toggle-texto">
-                {{ f['estado_Activo'].value ? 'Sí' : 'No' }}
-              </span>
-            </div>
-
-            <div class="form-field toggle-field">
-              <label>Organización interna</label>
-              <label class="switch">
-                <input type="checkbox" formControlName="es_Interna" />
-                <span class="slider"></span>
-              </label>
-              <span class="toggle-texto">
-                {{ f['es_Interna'].value ? 'Sí' : 'No' }}
-              </span>
-            </div>
-
-          </div>
-
-          <div class="nuevo-acciones">
-            <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
-            <button type="submit" class="btn-guardar" [disabled]="guardando">
-              {{ guardando ? 'Guardando...' : 'Crear organización' }}
-            </button>
-          </div>
-        </form>
-
+    <div class="nuevo-header">
+      <div>
+        <h2 class="section-title">Nueva organización</h2>
+        <p class="nuevo-subtitulo">Registra un nuevo cliente en el sistema</p>
       </div>
     </div>
+
+    <form class="nuevo-card" [formGroup]="form" (ngSubmit)="guardar()">
+
+      <p class="form-seccion-titulo">Información general</p>
+
+      <div class="form-grid">
+
+        <div class="form-field full">
+          <label for="nombre">Nombre de la institución <span class="req">*</span></label>
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Universidad Tecnológica de León" />
+          @if (f['nombre'].touched && f['nombre'].invalid) {
+            <span class="form-error">El nombre es obligatorio (máx. 150 caracteres)</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="sector">Sector <span class="req">*</span></label>
+          <input id="sector" type="text" formControlName="sector" placeholder="Ej. Educación" />
+          @if (f['sector'].touched && f['sector'].invalid) {
+            <span class="form-error">El sector es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="rol">Rol <span class="req">*</span></label>
+          <select id="rol" formControlName="rol">
+            <option value="usuario">Usuario</option>
+            <option value="organizacion">Organización</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+      </div>
+
+      <p class="form-seccion-titulo">Contacto</p>
+
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label for="contacto_Principal">Contacto principal</label>
+          <input id="contacto_Principal" type="text" formControlName="contacto_Principal" placeholder="Nombre del contacto" />
+        </div>
+
+        <div class="form-field">
+          <label for="email_Contacto">Correo de contacto</label>
+          <input id="email_Contacto" type="email" formControlName="email_Contacto" placeholder="correo@ejemplo.com" />
+          @if (f['email_Contacto'].touched && f['email_Contacto'].invalid) {
+            <span class="form-error">Ingresa un correo válido</span>
+          }
+        </div>
+
+      </div>
+
+      <p class="form-seccion-titulo">Acceso</p>
+
+      <div class="form-grid">
+
+        <div class="form-field full">
+          <label for="contrasena_Hash">Contraseña</label>
+          <input id="contrasena_Hash" type="password" formControlName="contrasena_Hash" placeholder="Déjalo vacío si no aplica" />
+          <span class="form-hint">Se usará como credencial de acceso de la organización, si aplica.</span>
+        </div>
+
+      </div>
+
+      <p class="form-seccion-titulo">Estado</p>
+
+      <div class="form-grid">
+
+        <div class="form-field toggle-field">
+          <label>Activo</label>
+          <label class="switch">
+            <input type="checkbox" formControlName="estado_Activo" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-texto">
+            {{ f['estado_Activo'].value ? 'Sí' : 'No' }}
+          </span>
+        </div>
+
+        <div class="form-field toggle-field">
+          <label>Organización interna</label>
+          <label class="switch">
+            <input type="checkbox" formControlName="es_Interna" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-texto">
+            {{ f['es_Interna'].value ? 'Sí' : 'No' }}
+          </span>
+        </div>
+
+      </div>
+
+      <div class="nuevo-acciones">
+        <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="btn-guardar" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Crear organización' }}
+        </button>
+      </div>
+    </form>
+
   </div>
 </div>

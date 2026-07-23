@@ -1,384 +1,328 @@
-$navy-900: #101c3a;
-$navy-800: #16213f;
-$navy-700: #1e2c52;
+// =========================================================
+// Tokens
+// =========================================================
+$navy-deep:      #0a1730;
+$navy:           #16294f;
+$navy-raised:    #1e3560;
+$accent-blue:    #6ec3ff;
+$accent-blue-dim: #4a9de0;
+$accent-blue-wash: rgba(110, 195, 255, .12);
+$white:          #ffffff;
+$gray-100:       #f4f6fb;
+$text-muted:     rgba(255, 255, 255, .60);
+$text-dim:       rgba(255, 255, 255, .38);
+$divider:        rgba(255, 255, 255, .09);
 
-$teal: #21b6a8;
+$sidebar-width: 232px;
+$radius-sm: 8px;
+$radius-md: 12px;
 
-$ink: #1c2333;
-$gray-500: #6b7280;
-$gray-200: #e5e8f0;
-$gray-100: #f8f9fc;
-
-$active-bg: #eef1fb;
-$white: #ffffff;
-
-
-:host {
-  display: block;
-  height: 100vh;
-}
-
-
-//=====================================================
-// Layout
-//=====================================================
+:host { display: block; height: 100vh; }
 
 .app-shell {
-
-  display:flex;
-
-  height:100vh;
-
-  background:$gray-100;
-
+  display: flex;
+  height: 100vh;
+  background: $gray-100;
+  overflow: hidden;
 }
 
-
-//=====================================================
+// =========================================================
 // Sidebar
-//=====================================================
-
+// =========================================================
 .sidebar {
-
-  width:240px;
-
-  flex-shrink:0;
-
-  background:$white;
-
-  border-right:1px solid $gray-200;
-
-  display:flex;
-
-  flex-direction:column;
-
-  padding:28px 18px;
-
+  width: $sidebar-width;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, $navy-deep 0%, $navy 100%);
+  color: $text-muted;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px;
+  overflow: hidden;
+  box-shadow: 2px 0 24px rgba(4, 10, 26, .18);
+  transition: width .22s ease, opacity .18s ease, padding .22s ease;
+  z-index: 30;
 }
 
+.sidebar--collapsed {
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  opacity: 0;
+  pointer-events: none;
+}
 
-
-// Logo
-
+// ---------------------------------------------------------
+// Brand
+// ---------------------------------------------------------
 .sidebar__brand {
-
-  display:flex;
-
-  align-items:center;
-
-  gap:12px;
-
-  padding:0 8px 28px;
-
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 22px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid $divider;
 }
-
-
 
 .sidebar__logo-image {
-
-  width:42px;
-
-  height:42px;
-
-  object-fit:contain;
-
-  border-radius:10px;
-
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: $radius-sm;
+  background: $white;
+  padding: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .28), 0 0 0 1px rgba(255, 255, 255, .06);
 }
-
-
 
 .sidebar__brand-name {
-
-  font-family:'Jost', sans-serif;
-
-  font-size:1rem;
-
-  font-weight:700;
-
-  letter-spacing:.10em;
-
-  color:$navy-800;
-
+  font-size: .95rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  color: $white;
+  white-space: nowrap;
+  line-height: 1.25;
 }
 
+// ---------------------------------------------------------
+// Live status
+// ---------------------------------------------------------
+.sidebar__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 16px;
+  margin-bottom: 4px;
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  color: $accent-blue;
+  text-transform: uppercase;
+  white-space: nowrap;
 
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $accent-blue;
+    box-shadow: 0 0 0 3px rgba($accent-blue, .18);
+    animation: pulse 2.2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+}
 
-//=====================================================
-// Navegación
-//=====================================================
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .4; }
+}
 
+@media (prefers-reduced-motion: reduce) {
+  .sidebar__status::before { animation: none; }
+}
+
+// ---------------------------------------------------------
+// Nav
+// ---------------------------------------------------------
 .sidebar__nav {
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:4px;
-
-  flex:1;
-
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  width: 100%;
+  margin-top: 10px;
 }
-
-
 
 .sidebar__nav-item {
-
-  display:flex;
-
-  align-items:center;
-
-  gap:12px;
-
-  padding:11px 14px;
-
-  border-radius:10px;
-
-  color:$gray-500;
-
-  font-size:.88rem;
-
-  font-weight:500;
-
-  text-decoration:none;
-
-  transition:.15s;
-
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: $radius-sm;
+  color: $text-muted;
+  font-size: .84rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background .15s ease, color .15s ease;
+  white-space: nowrap;
 
   svg {
-
-    width:18px;
-
-    height:18px;
-
-    fill:none;
-
-    stroke:currentColor;
-
-    stroke-width:1.8;
-
-    stroke-linecap:round;
-
-    stroke-linejoin:round;
-
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
   }
-
 
   &:hover {
+    background: rgba($white, .05);
+    color: $white;
+  }
+}
 
-    background:$gray-100;
+// Signature detail: viewfinder corners on the active icon,
+// echoing the "vision" in Vision Guard.
+.sidebar__nav-icon {
+  position: relative;
+  display: flex;
+  padding: 3px;
 
-    color:$navy-800;
-
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    opacity: 0;
+    transition: opacity .18s ease;
   }
 
+  &::before {
+    top: -3px;
+    left: -3px;
+    border-top: 1.5px solid $accent-blue;
+    border-left: 1.5px solid $accent-blue;
+  }
+
+  &::after {
+    bottom: -3px;
+    right: -3px;
+    border-bottom: 1.5px solid $accent-blue;
+    border-right: 1.5px solid $accent-blue;
+  }
 }
 
-
+.sidebar__nav-item:hover .sidebar__nav-icon::before,
+.sidebar__nav-item:hover .sidebar__nav-icon::after {
+  opacity: .5;
+}
 
 .sidebar__nav-item--active {
+  background: $accent-blue-wash;
+  color: $accent-blue;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba($accent-blue, .16);
 
-  background:$active-bg;
-
-  color:$navy-900;
-
-  font-weight:600;
-
+  .sidebar__nav-icon::before,
+  .sidebar__nav-icon::after {
+    opacity: 1;
+  }
 }
 
-
-
-.sidebar__nav-icon {
-
-  display:flex;
-
-}
-
-
-
-//=====================================================
+// ---------------------------------------------------------
 // Footer
-//=====================================================
-
+// ---------------------------------------------------------
 .sidebar__footer {
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:10px;
-
-  padding-top:16px;
-
-  border-top:1px solid $gray-200;
-
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 14px;
+  margin-top: 10px;
+  border-top: 1px solid $divider;
+  width: 100%;
 }
-
-
 
 .sidebar__settings,
 .sidebar__logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  border-radius: $radius-sm;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+  white-space: nowrap;
+  border: none;
 
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  gap:8px;
-
-  height:42px;
-
-  border-radius:10px;
-
-  font-size:.85rem;
-
-  font-weight:600;
-
-  cursor:pointer;
-
-  border:none;
-
-  transition:.15s;
-
-
-  svg {
-
-    width:16px;
-
-    height:16px;
-
-    fill:none;
-
-    stroke:currentColor;
-
-    stroke-width:1.8;
-
-  }
-
-
-  &:hover {
-
-    opacity:.85;
-
-  }
-
+  svg { width: 14px; height: 14px; }
 }
-
-
 
 .sidebar__settings {
+  background: transparent;
+  color: $text-muted;
+  border: 1px solid $divider;
 
-  background:$gray-100;
-
-  color:$ink;
-
-  border:1px solid $gray-200;
-
+  &:hover {
+    color: $white;
+    border-color: rgba($white, .22);
+  }
 }
-
-
 
 .sidebar__logout {
+  background: transparent;
+  color: $accent-blue;
+  border: 1px solid rgba($accent-blue, .35);
 
-  background:$navy-900;
-
-  color:$white;
-
+  &:hover {
+    background: $accent-blue-wash;
+    border-color: $accent-blue;
+  }
 }
 
-
-
-//=====================================================
-// Contenido
-//=====================================================
-
+// =========================================================
+// Content
+// =========================================================
 .app-shell__content {
-
-  flex:1;
-
-  overflow-y:auto;
-
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-width: 0;
 }
 
+.app-shell__page {
+  flex: 1;
+  padding: 26px 32px 40px;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
 
+.sidebar__backdrop { display: none; }
 
-//=====================================================
+// =========================================================
 // Responsive
-//=====================================================
-
-@media(max-width:780px){
-
-
-  .app-shell {
-
-    flex-direction:column;
-
-    height:auto;
-
-    min-height:100vh;
-
-  }
-
-
-
+// =========================================================
+@media (max-width: 780px) {
   .sidebar {
-
-    width:100%;
-
-    flex-direction:row;
-
-    align-items:center;
-
-    flex-wrap:wrap;
-
-    gap:8px;
-
-    padding:16px;
-
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: $sidebar-width;
+    opacity: 1;
+    transform: translateX(0);
+    transition: transform .25s ease;
   }
 
-
-
-  .sidebar__brand {
-
-    width:100%;
-
-    padding-bottom:10px;
-
+  .sidebar--collapsed {
+    width: $sidebar-width;
+    padding: 22px 16px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-105%);
   }
 
-
-
-  .sidebar__nav {
-
-    flex-direction:row;
-
-    flex-wrap:wrap;
-
+  .sidebar__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba($navy-deep, .45);
+    backdrop-filter: blur(1px);
+    z-index: 20;
   }
 
+  .app-shell__page { padding: 20px 16px 32px; }
+}
 
-
-  .sidebar__footer {
-
-    flex-direction:row;
-
-    border-top:none;
-
-    padding-top:0;
-
-    width:100%;
-
-  }
-
-
-
-  .sidebar__settings,
-  .sidebar__logout {
-
-    flex:1;
-
-  }
-
+@media (max-width: 480px) {
+  .app-shell__page { padding: 16px 12px 28px; }
 }

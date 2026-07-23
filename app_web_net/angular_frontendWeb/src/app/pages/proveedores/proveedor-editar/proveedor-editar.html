@@ -1,0 +1,82 @@
+<div class="page-body">
+  @if (cargando) {
+    <div class="estado-mensaje">
+      Cargando información...
+    </div>
+  } @else if (error) {
+    <div class="estado-mensaje error">
+      No se pudo cargar el registro.
+    </div>
+  } @else {
+    <div class="form-header">
+      <h2 class="section-title">Editar proveedor</h2>
+      <p class="form-subtitulo">Actualiza la información del registro</p>
+    </div>
+
+    <form class="form-card" [formGroup]="form" (ngSubmit)="guardar()">
+
+      @if (guardadoExitoso) {
+        <div class="alerta-exito">✓ Cambios guardados correctamente</div>
+      }
+
+      <div class="form-grid">
+        <div class="form-field full">
+          <label for="nombre">Nombre del proveedor</label>
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Distribuidora Industrial del Bajío" />
+          @if (f['nombre'].touched && f['nombre'].invalid) {
+            <span class="form-error">Este campo es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="contacto_Principal">Contacto principal</label>
+          <input id="contacto_Principal" type="text" formControlName="contacto_Principal" placeholder="Nombre del contacto" />
+          @if (f['contacto_Principal'].touched && f['contacto_Principal'].invalid) {
+            <span class="form-error">Este campo es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="text" formControlName="telefono" placeholder="Ej. 477 123 4567" />
+        </div>
+
+        <div class="form-field">
+          <label for="email_Contacto">Correo de contacto</label>
+          <input id="email_Contacto" type="email" formControlName="email_Contacto" placeholder="correo@ejemplo.com" />
+          @if (f['email_Contacto'].touched && f['email_Contacto'].invalid) {
+            <span class="form-error">Ingresa un correo válido</span>
+          }
+        </div>
+
+        <div class="form-field full">
+          <label for="direccion">Dirección</label>
+          <input id="direccion" type="text" formControlName="direccion" placeholder="Calle, número, colonia" />
+        </div>
+
+      </div>
+
+      <p class="form-seccion-titulo">Estado</p>
+
+      <div class="form-grid">
+        <div class="form-field toggle-field">
+          <label>Activo</label>
+          <label class="switch">
+            <input type="checkbox" formControlName="estado_Activo" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-texto">
+            {{ f['estado_Activo'].value ? 'Sí' : 'No' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-acciones">
+        <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="btn-guardar" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

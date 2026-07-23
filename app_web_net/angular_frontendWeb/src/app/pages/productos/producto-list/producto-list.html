@@ -1,0 +1,49 @@
+<div class="page-body">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Gestión de productos</h2>
+      <button class="btn-nuevo" [routerLink]="['/productos/nuevo']">
+        + Nuevo
+      </button>
+    </div>
+  </div>
+
+  @if (cargando) {
+  <div class="estado-mensaje">
+    <div class="spinner"></div>
+    Cargando productos...
+  </div>
+  } @else if (error) {
+  <div class="estado-mensaje error">
+    <span class="estado-icono">!</span>
+    <div>
+      <p class="estado-titulo">No se pudo cargar la información</p>
+      <p class="estado-texto">Verifica tu conexión e inténtalo de nuevo.</p>
+    </div>
+    <button (click)="cargarProductos()">Reintentar</button>
+  </div>
+  } @else {
+  <div class="item-grid">
+    @for (item of productos; track item.id) {
+    <div class="item-card">
+      <div class="item-avatar">
+        {{ item.nombre.charAt(0) }}
+      </div>
+      <p class="item-nombre">{{ item.nombre }}</p>
+      <span class="item-badge">{{ item.estado_Activo ? 'Activo' : 'Inactivo' }}</span>
+      <button class="btn-detalles" [routerLink]="['/productos', item.id]">
+        Ver detalles
+      </button>
+    </div>
+    } @empty {
+    <div class="estado-mensaje vacio">
+      <span class="estado-icono">🗂</span>
+      <div>
+        <p class="estado-titulo">No hay productos registrados</p>
+        <p class="estado-texto">Los productos que agregues aparecerán aquí.</p>
+      </div>
+    </div>
+    }
+  </div>
+  }
+</div>
