@@ -1,0 +1,580 @@
+//=====================================================
+// Vision Guard Login
+//=====================================================
+
+$navy-900: #0d1832;
+$navy-800: #16284d;
+$navy-700: #214d89;
+
+$blue: #2c6cff;
+$cyan: #4cc9f0;
+
+$ink: #1c2333;
+$gray: #6b7280;
+$border: #dce5f4;
+$white: #ffffff;
+
+$danger: #d64545;
+$radius: 26px;
+
+
+:host {
+  display: block;
+}
+
+
+//=====================================================
+// Página
+//=====================================================
+
+.login-page {
+
+  min-height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 24px;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(76,201,240,.18),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      $navy-900,
+      $navy-700
+    );
+
+}
+
+
+//=====================================================
+// Card
+//=====================================================
+
+.login-card {
+
+  width: 100%;
+
+  max-width: 920px;
+
+  min-height: 520px;
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  background: $white;
+
+  border-radius: $radius;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 30px 70px rgba(0,0,0,.35);
+
+}
+
+
+//=====================================================
+// Bienvenida
+//=====================================================
+
+.login-card__welcome {
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  padding: 55px 45px;
+
+  color: $white;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      150deg,
+      $navy-900,
+      $navy-700
+    );
+
+}
+
+
+.login-card__blob {
+
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+
+  height: 100%;
+
+  opacity: .15;
+
+
+  path {
+
+    fill: $cyan;
+
+  }
+
+}
+
+
+.login-card__welcome-content {
+
+  position: relative;
+
+  z-index: 1;
+
+
+  h1 {
+
+    margin: 0 0 15px;
+
+    font-size: 2.7rem;
+
+    font-weight: 700;
+
+    letter-spacing: -1px;
+
+  }
+
+
+  p {
+
+    margin: 0;
+
+    max-width: 280px;
+
+    line-height: 1.6;
+
+    color: rgba(255,255,255,.8);
+
+  }
+
+}
+
+
+//=====================================================
+// Panel formulario
+//=====================================================
+
+.login-card__form-panel {
+
+  padding: 55px 45px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+}
+
+
+//=====================================================
+// Marca Vision Guard
+//=====================================================
+
+.login-card__brand {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 15px;
+
+}
+
+
+// Logo SVG original
+
+.login-card__logo-icon {
+
+  width: 38px;
+
+  height: 38px;
+
+
+  path {
+
+    fill: $navy-700;
+
+  }
+
+
+  .login-card__logo-icon-eye {
+
+    fill: $white;
+
+  }
+
+
+  .login-card__logo-icon-pupil {
+
+    fill: $navy-700;
+
+  }
+
+}
+
+
+// Logo imagen PNG
+.login-card__image {
+
+ width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 10px;
+
+}
+
+
+// Nombre
+
+.login-card__brand {
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  width:100%;
+
+  margin-bottom:20px;
+
+}
+
+
+.login-card__brand-name {
+
+  font-weight:700;
+
+  letter-spacing:.15em;
+
+  color:$navy-700;
+
+  font-size:1.2rem;
+
+  text-align:center;
+
+}
+
+
+
+// Descripción
+
+.login-card__tagline {
+
+  margin: 0 0 30px;
+
+  color: $gray;
+
+  font-size: .9rem;
+
+  line-height: 1.6;
+
+}
+
+
+//=====================================================
+// Formulario
+//=====================================================
+
+.login-form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+
+}
+
+
+.login-form__field {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+
+
+  label {
+
+    font-size: .8rem;
+
+    font-weight: 600;
+
+    color: $ink;
+
+  }
+
+
+  input {
+
+    height: 46px;
+
+    padding: 0 15px;
+
+    border-radius: 12px;
+
+    border: 1px solid $border;
+
+    background: #f8faff;
+
+    color: $ink;
+
+    transition: .2s;
+
+
+    &::placeholder {
+
+      color: #9aa5bb;
+
+    }
+
+
+    &:focus {
+
+      outline: none;
+
+      background: $white;
+
+      border-color: $blue;
+
+      box-shadow:
+        0 0 0 3px rgba(44,108,255,.15);
+
+    }
+
+  }
+
+}
+
+
+.login-form__input--error {
+
+  border-color: $danger !important;
+
+}
+
+
+.login-form__error {
+
+  font-size: .75rem;
+
+  color: $danger;
+
+}
+
+
+.login-form__server-error {
+
+  padding: 10px;
+
+  border-radius: 10px;
+
+  background: rgba(214,69,69,.1);
+
+  color: $danger;
+
+  font-size: .8rem;
+
+}
+
+
+//=====================================================
+// Password
+//=====================================================
+
+.login-form__password-wrap {
+
+  position: relative;
+
+
+  input {
+
+    width: 100%;
+
+    padding-right: 45px;
+
+  }
+
+}
+
+
+.login-form__toggle-visibility {
+
+  position: absolute;
+
+  right: 10px;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  border: none;
+
+  background: none;
+
+  cursor: pointer;
+
+  color: $gray;
+
+
+  svg {
+
+    width: 18px;
+
+    height: 18px;
+
+    fill: none;
+
+    stroke: currentColor;
+
+    stroke-width: 2;
+
+  }
+
+}
+
+
+//=====================================================
+// Botón
+//=====================================================
+
+.login-form__submit {
+
+  height: 48px;
+
+  margin-top: 10px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  color: $white;
+
+  font-weight: 600;
+
+
+  background:
+    linear-gradient(
+      135deg,
+      $navy-800,
+      $blue
+    );
+
+
+  transition: .25s;
+
+
+  &:hover:not(:disabled) {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+      0 10px 25px rgba(44,108,255,.3);
+
+  }
+
+
+  &:disabled {
+
+    opacity: .7;
+
+  }
+
+}
+
+
+//=====================================================
+// Loading
+//=====================================================
+
+.login-form__spinner {
+
+  display: inline-block;
+
+  width: 16px;
+
+  height: 16px;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(255,255,255,.4);
+
+  border-top-color: $white;
+
+  animation: spin .7s linear infinite;
+
+}
+
+
+@keyframes spin {
+
+  to {
+
+    transform: rotate(360deg);
+
+  }
+
+}
+
+
+//=====================================================
+// Responsive
+//=====================================================
+
+@media(max-width:780px) {
+
+
+  .login-card {
+
+    grid-template-columns: 1fr;
+
+  }
+
+
+  .login-card__welcome {
+
+    min-height: 220px;
+
+    padding: 35px;
+
+  }
+
+
+  .login-card__welcome-content h1 {
+
+    font-size: 2.2rem;
+
+  }
+
+
+  .login-card__form-panel {
+
+    padding: 35px;
+
+  }
+
+}

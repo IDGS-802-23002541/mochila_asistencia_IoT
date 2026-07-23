@@ -7,8 +7,9 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
-// --- Login ---
+// Login
 data class LoginRequest(
     val correo: String,
     val contrasena: String
@@ -24,43 +25,77 @@ data class LoginResponse(
     val mensaje: String
 )
 
-// 1. Estructura para GET /api/recorridos/{id}
+// Dispositivos
+data class DispositivoResponse(
+    val id: Int,
+    val organizacionId: Int,
+    val macAddress: String,
+    val estado: String,
+    val ultimaConexion: String?,
+    val fechaRegistro: String?,
+    val organizacion: String
+)
+
+// Recorridos
 data class RecorridoDetalleResponse(
     val id: Int,
     val dispositivoMac: String,
+    val organizacion: String? = null,
     val fechaInicio: String,
+    val fechaFin: String? = null,
+    val usuarioEdad: Int? = null,
+    val discapacidad: String? = null,
+    val activo: Boolean = true,
     val totalEventos: Int
 )
 
-// 2. Estructura para GET /api/recorridos/{id}/resumen
+data class RecorridoHistorialResponse(
+    val id: Int,
+    val dispositivoMac: String,
+    val fechaInicio: String,
+    val fechaFin: String?,
+    val duracionSegundos: Double,
+    val totalEventos: Int,
+    val distanciaTotalMetros: Double
+)
+
 data class ResumenRecorridoResponse(
-    val recorridoId: Int,
+    val recorridoId: Int? = null,
+    val totalPuntos: Int = 0,
     val distanciaTotalMetros: Double,
-    val duracionSegundos: Int,
-    val coordenadas: List<CoordenadaResponse>
+    val duracionSegundos: Double? = null,
+    val velocidadPromedioKmh: Double? = null,
+    val coordenadas: List<CoordenadaResponse> = emptyList()
 )
 
 data class CoordenadaResponse(
-    val lat: Double,
-    val lon: Double,
-    val ts: String
+    val latitud: Double? = null,
+    val longitud: Double? = null,
+    val timestamp: String? = null,
+    val lat: Double? = null,
+    val lon: Double? = null,
+    val ts: String? = null
 )
 
-// 3. Interfaz de Retrofit
 interface VisionGuardApiService {
 
     @POST("usuarios/login")
     fun login(@Body request: LoginRequest): Call<LoginResponse>
 
+    @GET("dispositivos")
+    fun obtenerDispositivos(@Query("organizacionId") organizacionId: Int): Call<List<DispositivoResponse>>
+
     @GET("recorridos/{id}")
-    fun obtenerDetalleRecorrido(
-        @Path("id") recorridoId: Int
-    ): Call<RecorridoDetalleResponse>
+    fun obtenerDetalleRecorrido(@Path("id") recorridoId: Int): Call<RecorridoDetalleResponse>
+
+    @GET("recorridos")
+    fun obtenerHistorialPorOrganizacion(@Query("organizacionId") organizacionId: Int): Call<List<RecorridoHistorialResponse>>
+
+    @GET("recorridos/dispositivo/{mac}")
+    fun obtenerHistorialPorDispositivo(@Path("mac") mac: String): Call<List<RecorridoHistorialResponse>>
 
     @GET("recorridos/{id}/resumen")
-    fun obtenerResumenRecorrido(
-        @Path("id") recorridoId: Int
-    ): Call<ResumenRecorridoResponse>
+    fun obtenerResumenRecorrido(@Path("id") recorridoId: Int): Call<ResumenRecorridoResponse>
 
     companion object {
         private const val BASE_URL = "https://lmsidgs902.runasp.net/api/"

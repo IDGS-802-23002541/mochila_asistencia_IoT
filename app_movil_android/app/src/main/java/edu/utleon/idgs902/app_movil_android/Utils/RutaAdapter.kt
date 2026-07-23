@@ -27,9 +27,8 @@ class RutaAdapter(private val listaRutas: List<RutaModels>) :
     override fun onBindViewHolder(holder: RutaViewHolder, position: Int) {
         val ruta = listaRutas[position]
 
-        val listaCompletaOriginal = HistorialHelper.obtenerRutas(holder.itemView.context)
-        val numeroRealRuta = listaCompletaOriginal.indexOfFirst { it.id == ruta.id } + 1
-        val nombreMostrar = if (numeroRealRuta > 0) "Ruta #$numeroRealRuta" else "Ruta registrada"
+        val numeroRealRuta = position + 1
+        val nombreMostrar = "Ruta #$numeroRealRuta"
 
         holder.lblNombre.text = nombreMostrar
         holder.lblDetalles.text = "${ruta.fecha} · ${ruta.duracion} · ${ruta.eventos} eventos"

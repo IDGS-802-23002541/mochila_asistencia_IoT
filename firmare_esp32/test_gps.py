@@ -1,11 +1,6 @@
 # =============================================================================
-# PROYECTO   : Safe-Path AI — Sistema de Navegación Aumentada
+# PROYECTO   : Vision Guard — Sistema de Navegación Aumentada
 # ARCHIVO    : test_gps.py
-# DESCRIPCIÓN: Suite de pruebas para GPSManager.
-#              Incluye pruebas OFFLINE (sin hardware) usando sentencias
-#              NMEA simuladas inyectadas directamente al parser, y
-#              pruebas ONLINE que esperan datos reales del módulo.
-# INTEGRANTES: [Nombres del equipo Safe-Path AI]
 # VERSIÓN    : 1.0
 # =============================================================================
 #
@@ -19,7 +14,7 @@
 import time
 
 # ─ Cambiar a False para probar con hardware real ─────────────────────────────
-TEST_SOLO_OFFLINE = True
+TEST_SOLO_OFFLINE = False
 
 # ─ Importar con manejo de error para poder correr en PC ──────────────────────
 try:
@@ -269,11 +264,11 @@ async def prueba_online_fix():
     Prueba con hardware real: espera un fix GPS durante 60 segundos.
     Solo ejecutar si TEST_SOLO_OFFLINE = False y el módulo está conectado.
     """
-    print("\n[TEST ONLINE] Esperando fix GPS real (60 s máx)")
+    print("\n[TEST ONLINE] Esperando fix GPS real (30 s máx)")
     import uasyncio as asyncio
 
     gps = GPSManager(uart_id=2, pin_tx=17, pin_rx=16)
-    fix_ok = await gps.esperar_fix(timeout_s=60)
+    fix_ok = await gps.esperar_fix(timeout_s=30)
 
     resultado("Fix GPS obtenido antes del timeout", fix_ok)
     if fix_ok:
@@ -290,7 +285,7 @@ async def prueba_online_fix():
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
     print("=" * 55)
-    print("  Safe-Path AI — TEST SUITE GPS")
+    print("  Vision Guard — TEST SUITE GPS")
     print("=" * 55)
 
     prueba_parseo_gpgga()
@@ -314,3 +309,4 @@ def main():
 
 
 main()
+
