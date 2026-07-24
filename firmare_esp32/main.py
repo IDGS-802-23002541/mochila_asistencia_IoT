@@ -4,8 +4,8 @@
 # DESCRIPCIÓN: Controlador asíncrono que orquesta en paralelo la inicialización
 #              vía BLE, detección de eventos de catálogo (Caída, Obstáculos),
 #              memoria de ruta y cierre seguro a través del botón BOOT (GPIO 0).
-# VERSIÓN    : 3.2 (Eliminación comunicación UART con app_movil, únicamente se 
-#              subscribe y publica a los tópicos. Se arregla la comunicación Bluethoot)
+# VERSIÓN    : 3.3 (Corroborar implementación correcta de métodos gps_manager.py
+#				y eliminación de array coordenadas, ya que se maneja en el back)
 # =============================================================================
 
 import uasyncio as asyncio
@@ -30,7 +30,7 @@ from led_rgb import LedRGBManager
 REDES_WIFI = [
     ("INFINITUM8536_2.4", "4696601711"),
     ("POCO_X7_Pro", "123goner456789"),
-    ("Catasi", "papaya10"),
+    ("A54 de Arleth", "12345678"),
     ("CATA", "papantla"), 
 ]
 
@@ -66,20 +66,13 @@ GPS_LON_DEF = -00.000
 # Umbrales operacionales y tiempos de muestreo
 DISTANCIA_ALERTA_FRONTAL_CM = 100.0  # Alerta por debajo de 1 metro
 INTERVALO_ALERTAS_VOZ_MS    = 3000   # Bloqueo de 3 segundos para el altavoz
-INTERVALO_MUESTREO_GPS_S    = 10     # Almacenamiento de ruta cada 10 segundos
 INTERVALO_TELEMETRIA_S      = 5      # Frecuencia de envío de telemetría periódica
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CATÁLOGO DE EVENTOS (Fuente única de verdad — sincronizado con backend)
-# Id | NombreEvento      | Severidad
-#  1 | Trafico           | Media
-#  2 | Obstaculo         | Baja
-#  4 | Caida_Detectada   | Critica
-# ─────────────────────────────────────────────────────────────────────────────
 CATALOGO_EVENTOS = {
-    1: {"nombre": "Trafico",         "severidad": "Media",   "pista": None},  # pista asignada dinámicamente (lateral/frontal)
-    2: {"nombre": "Obstaculo",       "severidad": "Baja",    "pista": None},
-    4: {"nombre": "Caida_Detectada", "severidad": "Critica", "pista": None},
+    2: {"nombre": "Obstaculo",       "severidad": "Baja"},
+    4: {"nombre": "Caida_Detectada", "severidad": "Critica"},
+    5: {"nombre": "Tropiezo",         "severidad": "Media"},
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -92,7 +85,6 @@ estado = {
     "recorrido_id"    : None,   # Se reciben desde el broker MQTT por medio de la app móvil
     "recorrido_activo": False,  # True en cuanto se recibe el RecorridoId
     "solicitud_cierre": False,  # Bandera para finalizar trayecto vía app móvil
-    "ruta_coordenadas": [],     # Array en memoria que almacena el trayecto
     "ultimo_resumen"  : {},
     "ultima_pos_gps"  : {},
     "vinculado": False,
@@ -101,12 +93,15 @@ estado = {
 # Nombre ESP32 para la vinculación bluethoot
 BLE_NOMBRE = "vision_guard_esp32"
 ble = None
+MAC_BLUETOOTH= None
 
 # UUIDs del servicio BLE (solo para identificación)
 UUID_SERVICIO = bluetooth.UUID("12345678-1234-5678-1234-56789abcdef0")
 UUID_CARACTERISTICA = bluetooth.UUID("12345678-1234-5678-1234-56789abcdef1")
 
 _FLAG_READ = bluetooth.FLAG_READ
+_FLAG_WRITE = bluetooth.FLAG_WRITE
+_FLAG_NOTIFY = bluetooth.FLAG_NOTIFY
 
 # Configuración del Botón Físico de Cierre (Botón BOOT / GPIO 0 en ESP32 es Active LOW)
 boton_finalizar = Pin(0, Pin.IN, Pin.PULL_UP)
@@ -129,12 +124,12 @@ def obtener_mac_address():
 # ─────────────────────────────────────────────────────────────────────────────
 # AUXILIAR: Generación de Timestamps en formato ISO 8601 UTC
 # ─────────────────────────────────────────────────────────────────────────────
-def obtener_timestamp_iso():
-    """Genera una cadena de tiempo formateada en formato estándar UTC."""
-    tm = utime.localtime()
-    return "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}Z".format(
-        tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]
-    )
+# def obtener_timestamp_iso():
+#     """Genera una cadena de tiempo formateada en formato estándar UTC."""
+#     tm = utime.localtime()
+#     return "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}Z".format(
+#         tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]
+#     )
 
 def obtener_timestamp_unix():
     """Devuelve el timestamp Unix actual (segundos desde epoch)."""
@@ -146,6 +141,7 @@ def obtener_timestamp_unix():
 
 _IRQ_CENTRAL_CONNECT = 1
 _IRQ_CENTRAL_DISCONNECT = 2
+_IRQ_GATTS_WRITE = 3
 
 ble = None
 conexion = None
@@ -182,6 +178,15 @@ def ble_irq(event, data):
         print("[BLE] Celular desconectado.")
         iniciar_advertising()
 
+    elif event == _IRQ_GATTS_WRITE:
+        conn_handle, value_handle = data
+
+        if value_handle == handle_info:
+            global MAC_BLUETOOTH
+            MAC_BLUETOOTH= ble.gatts_read(handle_info).decode()
+
+            print("MAC BLE guardada:", MAC_BLUETOOTH)
+
 def inicializar_ble():
     global ble
     global handle_info
@@ -190,7 +195,7 @@ def inicializar_ble():
     ble.active(True)
     ble.irq(ble_irq)
 
-    SERVICIO = (UUID_SERVICIO,((UUID_CARACTERISTICA,_FLAG_READ,),),)
+    SERVICIO = (UUID_SERVICIO,((UUID_CARACTERISTICA,_FLAG_READ | _FLAG_WRITE | _FLAG_NOTIFY),),)
 
     ((handle_info,),) = ble.gatts_register_services((SERVICIO,))
 
@@ -231,20 +236,16 @@ def on_comando(topico, mensaje):
         print("[MQTT] JSON inválido:", e)
         return
     accion = datos.get("accion")
+    
+    global MAC_BLUETOOTH
 
     if accion == "vincular":
+        MAC_BLUETOOTH = datos["macAddress"]
         estado["vinculado"] = True
         asyncio.create_task(led.parpadear_azul())
         print("[LED] Mochila vinculada correctamente.")
         return
     
-    mac = datos.get("macAddress")
-    print("MAC recibida :", mac)
-    print("MAC ESP32    :", obtener_mac_address())
-
-    if mac != obtener_mac_address():
-        print("MAC diferente, ignorando comando")
-        return
     if accion == "iniciar":
         if estado["recorrido_activo"]:
             print("[Sistema] Ya existe un recorrido activo.")
@@ -256,7 +257,6 @@ def on_comando(topico, mensaje):
         estado["recorrido_id"] = recorrido
         estado["recorrido_activo"] = True
         asyncio.create_task(led.parpadear_verde())
-        estado["ruta_coordenadas"] = []
         print(f"[Sistema] Recorrido {recorrido} iniciado.")
         actuadores.reproducir_audio(5)
     if accion == "detener":
@@ -266,57 +266,6 @@ def on_comando(topico, mensaje):
         estado["vinculado"] = False
         led.apagar()
         print("[Sistema] Mochila desvinculada.")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# PROCESAMIENTO DE EVENTOS PULL DESDE BACKEND — Tópico 'cangurera/pull'
-# ─────────────────────────────────────────────────────────────────────────────
-# def on_pull_evento(topico, mensaje):
-#     """
-#     Procesa los eventos enviados por el backend y los almacena para que sean
-#     gestionados por el ciclo principal del firmware (loop_sensores).
-#     """
-#     print(f"[MQTT-Pull] Mensaje recibido: {mensaje}")
-#     try:
-#         datos = json.loads(mensaje)
-#     except Exception as e:
-#         print("[MQTT-Pull] Error: el payload recibido no es un JSON válido:", e)
-#         return
-
-#     # Validar que el mensaje esté dirigido a este dispositivo específico
-#     mac_recibida = datos.get("macAddress")
-#     mac_propia   = obtener_mac_address()
-
-#     if mac_recibida != mac_propia:
-#         print(f"[MQTT-Pull] Mensaje ignorado: MAC destino ({mac_recibida}) no coincide con este dispositivo ({mac_propia}).")
-#         return
-
-#     # Validar recorrido activo
-#     recorrido_id = datos.get("recorridoId")
-
-#     if recorrido_id != estado["recorrido_id"]:
-#         print("[MQTT-Pull] Mensaje descartado: recorrido no coincide.")
-#         return
-    
-#     tipo_evento_id = datos.get("tipoEventoid")
-#     texto_mensaje  = datos.get("mensaje", "")
-#     distancia_m    = datos.get("distanciaMetros")
-
-#     if tipo_evento_id not in CATALOGO_EVENTOS:
-#         print(f"[MQTT-Pull] Tipo de evento desconocido: {tipo_evento_id}")
-#         return
-    
-#     estado["evento_pull_pendiente"] = {
-#         "tipoEventoid": tipo_evento_id,
-#         "mensaje": datos.get("mensaje", ""),
-#         "distanciaMetros": datos.get("distanciaMetros"),
-#         "timestamp": obtener_timestamp_unix()
-#     }
-
-#     print(f"[MQTT-Pull] Evento válido recibido -> Id: {tipo_evento_id} | "
-#           f"Nombre: {info_evento['nombre']} | Severidad: {info_evento['severidad']} | "
-#           f"Mensaje: '{texto_mensaje}' | Distancia: {distancia_m} m")
-
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ENVIAR TELEMETRIA AL BROKER (Tópico 'cangurera/telemetria')
@@ -333,14 +282,16 @@ def publicar_telemetria():
     if not estado["recorrido_activo"]:
         return
 
-    pos = estado.get("ultima_pos_gps", {})
-    tiene_fix = pos.get("valido", False)
+    gps.leer_uart()
+
+    pos = gps.obtener_posicion()
+    tiene_fix = pos["valido"]
 
     payload = {
-        "macAddress": obtener_mac_address(),
+        "macAddress": MAC_BLUETOOTH,
         "latitud": float(pos.get("lat") or GPS_LAT_DEF),
         "longitud": float(pos.get("lon") or GPS_LON_DEF),
-        "geoEsEstimado": not tiene_fix,
+        "geoEsEstimado": not pos["valido"],
         "fecha": obtener_timestamp_unix(),
     }
 
@@ -365,12 +316,14 @@ def publicar_evento_anomalo(tipo_evento_id, fuerza_g=None):
         print(f"[MQTT] Advertencia: se intentó publicar un tipoEventoId ({tipo_evento_id}) inexistente en el catálogo.")
         return
 
-    pos = estado.get("ultima_pos_gps", {})
-    tiene_fix = pos.get("valido", False)
+    gps.leer_uart()
+
+    pos = gps.obtener_posicion()
+    tiene_fix = pos["valido"]
     resumen = estado.get("ultimo_resumen", {})
 
     payload = {
-        "macAddress": obtener_mac_address(),
+        "macAddress": MAC_BLUETOOTH,
         "recorridoId": estado["recorrido_id"],
         "tipoEventoId": tipo_evento_id,
         "timeStamp": obtener_timestamp_unix(),
@@ -458,40 +411,12 @@ async def loop_sensores():
         await asyncio.sleep(0.2)  # Muestreo a alta velocidad (200 ms)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CORUTINA 2 — Monitoreo de Señal GPS e Historial de Ruta (Cada 10 segundos)
+# CORUTINA 2 — Manjejo continuo de GPS
 # ─────────────────────────────────────────────────────────────────────────────
-async def loop_gps_tracker():
-    ultimo_tiempo_ruta = 0
-    
+async def loop_gps():
     while True:
-        # Procesamos la UART2 de forma continua sin bloquear el hilo de ejecución
-        if gps.leer_uart():
-            estado["ultima_pos_gps"] = gps.obtener_posicion()
-
-        ahora = int(time())
-        if ahora - ultimo_tiempo_ruta >= INTERVALO_MUESTREO_GPS_S:
-            pos = gps.obtener_posicion()
-            estado["ultima_pos_gps"] = pos
-            
-            # Si el recorrido está activo, vamos almacenando la coordenada en memoria
-            if estado["recorrido_activo"]:
-                coordenada = {
-                    "lat": round(pos.get("lat") or GPS_LAT_DEF, 6),
-                    "lon": round(pos.get("lon") or GPS_LON_DEF, 6),
-                    "ts": obtener_timestamp_iso()
-                }
-                estado["ruta_coordenadas"].append(coordenada)
-                print(f"[Tracker] Posición registrada en ruta ({len(estado['ruta_coordenadas'])} puntos): {coordenada}")
-                
-                # Nota: Id 5 (GPS Sin Señal) no está en el catálogo activo actual;
-                # se conserva el log local pero se omite la publicación MQTT
-                # hasta que el evento sea dado de alta oficialmente en el catálogo.
-                if not pos.get("valido", False):
-                    print("[Tracker] Advertencia local: sin señal GPS válida (evento Id 5 no está en catálogo activo).")
-
-            ultimo_tiempo_ruta = ahora
-            
-        await asyncio.sleep(0.2)
+        gps.leer_uart()
+        await asyncio.sleep_ms(200)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CORUTINA 3 — Escucha Activa de Mensajes MQTT (Comandos + Pull de eventos)
@@ -529,11 +454,10 @@ async def finalizar_recorrido_actual():
         return False
 
     # 3. Construir el payload estructurado directamente en un objeto nativo
-    # Pasamos 'ruta_coordenadas' como lista directa de Python, NO dobles comillas por string separado
     payload = {
-        "macAddress": obtener_mac_address(),
+        "macAddress": MAC_BLUETOOTH,
         "recorridoId": estado["recorrido_id"],
-        "rutaCoordenadas": estado["ruta_coordenadas"],
+        #"rutaCoordenadas": [{"lat": 0.0, "lon": -0.0, "ts": "2026-07-13T19:25:07Z"}, {"lat": 0.0, "lon": -0.0, "ts": "2026-07-13T19:25:17Z"}],
         "fechaFin": obtener_timestamp_unix(),
     }
     
@@ -558,7 +482,6 @@ async def finalizar_recorrido_actual():
               
         
         # 6. Vaciado radical del historial para evitar fugas de memoria
-        estado["ruta_coordenadas"] = []
         estado["recorrido_id"] = None
         gc.collect()
         return True
@@ -568,9 +491,8 @@ async def finalizar_recorrido_actual():
         
         # Payload de rescate para que Diego y Damián sepan en el servidor que el trayecto colapsó
         payload_emergencia = {
-            "macAddress": obtener_mac_address(),
+            "macAddress": MAC_BLUETOOTH,
             "recorridoId": estado["recorrido_id"],
-            "rutaCoordenadas": [],
             "fechaFin": obtener_timestamp_unix(),
             "error": "CRITICAL_ESP32_OUT_OF_MEMORY"
         }
@@ -579,7 +501,6 @@ async def finalizar_recorrido_actual():
         except:
             print("[CRÍTICO] Falló incluso la publicación de emergencia.")
             
-        estado["ruta_coordenadas"] = []
         estado["recorrido_id"] = None
         estado["recorrido_activo"] = False
         gc.collect()
@@ -612,18 +533,22 @@ async def loop_boton_finalizar():
 # ORQUESTRADOR PRINCIPAL (Arranque del Sistema)
 # ─────────────────────────────────────────────────────────────────────────────
 async def main():
-    global sensores, actuadores, mqtt, gps
+    global sensores, actuadores, mqtt, gps, led
+    led = LedRGBManager()
 
     print("=" * 60)
-    print("      VISION GUARD — FIRMWARE DE CONTROL CENTRAL v3.2")
+    print("      VISION GUARD — FIRMWARE DE CONTROL CENTRAL v3.3")
     print("      CONFIG: HC-SR04 | MPU6050 | 2x INFRARROJOS | MOTOR | BUZZER")
     print("=" * 60)
+    
+    # 1. Función estado mochila por led rgb
+    led.apagar()
 
-    # 1. Instanciación de componentes mediante la HAL (Seguridad de Pines)
+    # 2. Instanciación de componentes mediante la HAL (Seguridad de Pines)
     sensores   = SensorBox(umbral_caida=1.5) # Calibrado de tropiezo a 1.5G
     actuadores = ActuatorBox()
     
-    # 2. Inicialización del GPS con velocidad de transmisión validada a 115200 bps
+    # 3. Inicialización del GPS con velocidad de transmisión validada a 115200 bps
     gps        = GPSManager(uart_id=GPS_UART_ID,
                             pin_tx=GPS_PIN_TX,
                             pin_rx=GPS_PIN_RX,
@@ -631,24 +556,21 @@ async def main():
                             lat_defecto=GPS_LAT_DEF,
                             lon_defecto=GPS_LON_DEF)
 
+    print("[Boot] Esperando FIX del GPS...")
+    await gps.esperar_fix(timeout_s=30, led=led)
     
-    # 3. Conectar Red WiFi local
+    # 4. Conectar Red WiFi local
     wifi_ok = await conectar_wifi()
 
-    # 4. Inicializar clientes de Nube (Diego)
+    # 5. Inicializar clientes de Nube (Diego)
     mqtt = MQTTManager(broker=MQTT_BROKER, puerto=MQTT_PUERTO,
                        usuario=MQTT_USUARIO, contrasena=MQTT_PASSWORD,
                        client_id=MQTT_CLIENT_ID)
-    
-    # 5. Función estado mochila por led rgb
-    global led 
-    led = LedRGBManager()
-    led.apagar()
 
-    # Inicializar BLE
+    # 6. Inicializar BLE
     inicializar_ble()
 
-    # 6. Configurar callbacks de comandos, pull de eventos, e iniciar Broker
+    # 7. Configurar callbacks de comandos, pull de eventos, e iniciar Broker
     if wifi_ok:
         mqtt.registrar_callback(TOPICO_COMANDOS, on_comando)
         estado["mqtt_ok"] = mqtt.conectar()
@@ -656,15 +578,16 @@ async def main():
             print("[MQTT] Broker conectado correctamente.")
            
 
-    # 7. Ejecución del pool de tareas en paralelo
+    # 8. Ejecución del pool de tareas en paralelo
     print("[Boot] Iniciando sistema de tareas asíncronas...")
+    asyncio.create_task(loop_gps())   
     asyncio.create_task(loop_sensores())
-    asyncio.create_task(loop_gps_tracker())
     asyncio.create_task(loop_mqtt_recv())
     asyncio.create_task(loop_boton_finalizar())
     asyncio.create_task(loop_telemetria())
 
     print("[Boot] Vision Guard operando de forma asíncrona exitosamente.\n")
+    led.estado_completado()
 
     # Bucle infinito para monitoreo de estado y reconexión activa de MQTT
     while True:
@@ -679,6 +602,7 @@ try:
     asyncio.run(main())
 except KeyboardInterrupt:
     print("\n[Sistema] Ejecución detenida de manera local.")
+    led.apagar()
 except Exception as e:
     print(f"\n[Sistema] Excepción crítica de sistema: {e} — Reiniciando procesador en 5 s...")
     sleep(5)

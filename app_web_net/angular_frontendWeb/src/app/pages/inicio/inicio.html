@@ -1,17 +1,29 @@
 <div class="inicio">
-  <div class="inicio__content">
+  <div class="inicio__card">
 
-    <img
-      src="images/logo.png"
-      class="inicio__logo-image"
-      alt="Vision Guard"
-    />
+    <!-- Contenedor del Logo (Se adapta perfectamente sobre el fondo blanco) -->
+    <div class="inicio__logo-wrapper">
+      <img src="images/logo1.1.png" class="inicio__logo" alt="Vision Guard" />
+    </div>
 
+    <!-- Nombre de la Marca (En tonos oscuros de alto contraste) -->
     <h1 class="inicio__brand">
-        <!-- VISION <span>GUARD</span> -->
+      VISION <span class="inicio__brand--highlight">GUARD</span>
     </h1>
-    <p class="inicio__welcome">
-      ¡Bienvenido {{ usuario }}!
-    </p>
+
+    <!-- Mensaje de Bienvenida -->
+    <div class="inicio__welcome-container">
+      <p class="inicio__welcome-text">¡Bienvenido de nuevo!</p>
+      <!-- Aquí Angular renderizará "UTL" o el usuario activo -->
+      <h2 class="inicio__user-name">{{ usuario }}</h2>
+    </div>
+
+    <!-- Indicador de carga sutil -->
+    <div class="inicio__loader">
+      <span class="inicio__loader-dot"></span>
+      <span class="inicio__loader-dot"></span>
+      <span class="inicio__loader-dot"></span>
+    </div>
+
   </div>
 </div>

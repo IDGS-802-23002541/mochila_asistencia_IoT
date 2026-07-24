@@ -1,384 +1,216 @@
-$navy-900: #101c3a;
-$navy-800: #16213f;
-$navy-700: #1e2c52;
+/* --- Variables de Diseño (Estilo Blanco Premium) --- */
+:root {
+  --sidebar-bg: #ffffff; /* Blanco sólido absoluto */
+  --sidebar-border: #e2e8f0; /* Borde gris claro */
+  --sidebar-text: #64748b; /* Gris medio para el menú inactivo */
+  --sidebar-text-active: #0f172a; /* Azul oscuro pizarra para el activo */
+  --sidebar-accent: #0284c7; /* Azul cian corporativo para destacar */
+  --sidebar-hover-bg: #f8fafc; /* Gris sutil para el hover */
 
-$teal: #21b6a8;
-
-$ink: #1c2333;
-$gray-500: #6b7280;
-$gray-200: #e5e8f0;
-$gray-100: #f8f9fc;
-
-$active-bg: #eef1fb;
-$white: #ffffff;
-
-
-:host {
-  display: block;
-  height: 100vh;
+  --content-bg: #f1f5f9; /* Fondo de la app fuera de la barra */
 }
 
-
-//=====================================================
-// Layout
-//=====================================================
-
+/* --- Layout Principal --- */
 .app-shell {
-
-  display:flex;
-
-  height:100vh;
-
-  background:$gray-100;
-
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--content-bg);
 }
 
-
-//=====================================================
-// Sidebar
-//=====================================================
-
+/* --- Barra Lateral Blanca --- */
 .sidebar {
-
-  width:240px;
-
-  flex-shrink:0;
-
-  background:$white;
-
-  border-right:1px solid $gray-200;
-
-  display:flex;
-
-  flex-direction:column;
-
-  padding:28px 18px;
-
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  height: 100%;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  box-shadow: 4px 0 20px rgba(15, 23, 42, 0.05); /* Sombra muy sutil */
+  z-index: 10;
 }
 
-
-
-// Logo
-
+/* --- Header del Sidebar --- */
 .sidebar__brand {
-
-  display:flex;
-
-  align-items:center;
-
-  gap:12px;
-
-  padding:0 8px 28px;
-
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid var(--sidebar-border);
 }
-
-
 
 .sidebar__logo-image {
-
-  width:42px;
-
-  height:42px;
-
-  object-fit:contain;
-
-  border-radius:10px;
-
+  width: 32px;
+  height: auto;
+  filter: drop-shadow(0 2px 4px rgba(2, 132, 199, 0.1));
 }
-
-
 
 .sidebar__brand-name {
-
-  font-family:'Jost', sans-serif;
-
-  font-size:1rem;
-
-  font-weight:700;
-
-  letter-spacing:.10em;
-
-  color:$navy-800;
-
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #0f172a; /* Texto oscuro sobre fondo blanco */
 }
 
+.sidebar__brand-name--highlight {
+  color: var(--sidebar-accent);
+}
 
-
-//=====================================================
-// Navegación
-//=====================================================
-
+/* --- Cuerpo del Menú --- */
 .sidebar__nav {
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:4px;
-
-  flex:1;
-
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
 }
-
-
 
 .sidebar__nav-item {
-
-  display:flex;
-
-  align-items:center;
-
-  gap:12px;
-
-  padding:11px 14px;
-
-  border-radius:10px;
-
-  color:$gray-500;
-
-  font-size:.88rem;
-
-  font-weight:500;
-
-  text-decoration:none;
-
-  transition:.15s;
-
-
-  svg {
-
-    width:18px;
-
-    height:18px;
-
-    fill:none;
-
-    stroke:currentColor;
-
-    stroke-width:1.8;
-
-    stroke-linecap:round;
-
-    stroke-linejoin:round;
-
-  }
-
-
-  &:hover {
-
-    background:$gray-100;
-
-    color:$navy-800;
-
-  }
-
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0.85rem 1rem;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s ease-in-out;
 }
 
+.sidebar__nav-item:hover {
+  color: var(--sidebar-text-active);
+  background: var(--sidebar-hover-bg);
+  transform: translateX(3px);
+}
 
-
+/* Estado Activo (Fondo suave azul cielo con barra lateral de acento) */
 .sidebar__nav-item--active {
-
-  background:$active-bg;
-
-  color:$navy-900;
-
-  font-weight:600;
-
+  color: var(--sidebar-text-active) !important;
+  background: #f0f9ff; /* Fondo celeste sumamente suave */
+  border-left: 4px solid var(--sidebar-accent);
 }
 
-
-
-.sidebar__nav-icon {
-
-  display:flex;
-
+/* Iconos de Navegación */
+.sidebar__nav-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s ease;
 }
 
+.sidebar__nav-item--active .sidebar__nav-icon svg {
+  stroke: var(--sidebar-accent);
+}
 
-
-//=====================================================
-// Footer
-//=====================================================
-
+/* --- Footer de la Barra Lateral --- */
 .sidebar__footer {
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:10px;
-
-  padding-top:16px;
-
-  border-top:1px solid $gray-200;
-
+  padding: 1.5rem 1rem;
+  border-top: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-
-
-.sidebar__settings,
-.sidebar__logout {
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  gap:8px;
-
-  height:42px;
-
-  border-radius:10px;
-
-  font-size:.85rem;
-
-  font-weight:600;
-
-  cursor:pointer;
-
-  border:none;
-
-  transition:.15s;
-
-
-  svg {
-
-    width:16px;
-
-    height:16px;
-
-    fill:none;
-
-    stroke:currentColor;
-
-    stroke-width:1.8;
-
-  }
-
-
-  &:hover {
-
-    opacity:.85;
-
-  }
-
+/* Botones Base del Footer */
+.sidebar__btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--sidebar-text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
 }
 
-
-
-.sidebar__settings {
-
-  background:$gray-100;
-
-  color:$ink;
-
-  border:1px solid $gray-200;
-
+.sidebar__btn-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-
-
-.sidebar__logout {
-
-  background:$navy-900;
-
-  color:$white;
-
+/* Hover de Ajustes */
+.sidebar__btn--settings:hover,
+.sidebar__btn--active {
+  color: var(--sidebar-text-active);
+  background: var(--sidebar-hover-bg);
 }
 
+/* Hover de Cerrar Sesión (Rojo suave de advertencia) */
+.sidebar__btn--logout:hover {
+  color: #dc2626;
+  background: #fef2f2; /* Fondo rojo muy claro */
+}
 
-
-//=====================================================
-// Contenido
-//=====================================================
-
+/* --- Área de Trabajo Derecha --- */
 .app-shell__content {
-
-  flex:1;
-
-  overflow-y:auto;
-
+  flex: 1;
+  height: 100%;
+  background-color: var(--content-bg);
+  overflow-y: auto;
 }
 
 
+/* --- Encabezado de la Marca (Con fondo tecnológico oscuro para contraste) --- */
+.sidebar__brand {
+  display: flex;
+  align-items: center; /* Alinea verticalmente el logo y el texto al centro */
+  gap: 14px; /* Espacio exacto entre el logo y el nombre */
+  padding: 1.5rem 1.25rem;
 
-//=====================================================
-// Responsive
-//=====================================================
+  /* Nuevo color de fondo: Azul oscuro premium */
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 
-@media(max-width:780px){
+  /* Borde inferior sutil para conectar con la barra blanca */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
 
+/* --- Contenedor del Logo (Control total de alineación) --- */
+.sidebar__logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px; /* Caja fija para que no deforme el layout */
+  height: 36px;
+}
 
-  .app-shell {
+/* --- Ajuste Perfecto de la Imagen --- */
+.sidebar__logo-image {
+  width: 100%; /* Ocupa el espacio del contenedor de forma fluida */
+  height: auto; /* Mantiene la proporción original */
+  object-fit: contain; /* Evita que la imagen se estire o se corte */
 
-    flex-direction:column;
+  /* Un leve brillo que resalta de maravilla sobre el fondo oscuro */
+  filter: drop-shadow(0 2px 8px rgba(0, 229, 255, 0.25));
+}
 
-    height:auto;
+/* --- Estilo de los Textos (Cambiados a blanco/cian para el fondo oscuro) --- */
+.sidebar__brand-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #ffffff; /* Blanco puro para "VISION" */
+  line-height: 1; /* Evita espacios extra arriba o abajo del texto */
+}
 
-    min-height:100vh;
-
-  }
-
-
-
-  .sidebar {
-
-    width:100%;
-
-    flex-direction:row;
-
-    align-items:center;
-
-    flex-wrap:wrap;
-
-    gap:8px;
-
-    padding:16px;
-
-  }
-
-
-
-  .sidebar__brand {
-
-    width:100%;
-
-    padding-bottom:10px;
-
-  }
-
-
-
-  .sidebar__nav {
-
-    flex-direction:row;
-
-    flex-wrap:wrap;
-
-  }
-
-
-
-  .sidebar__footer {
-
-    flex-direction:row;
-
-    border-top:none;
-
-    padding-top:0;
-
-    width:100%;
-
-  }
-
-
-
-  .sidebar__settings,
-  .sidebar__logout {
-
-    flex:1;
-
-  }
-
+.sidebar__brand-name--highlight {
+  color: #00e5ff; /* Color cian vibrante para "GUARD" */
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
 }

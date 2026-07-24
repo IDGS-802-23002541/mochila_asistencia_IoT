@@ -16,6 +16,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import edu.utleon.idgs902.app_movil_android.R
 import edu.utleon.idgs902.app_movil_android.Utils.MqttManager
 import edu.utleon.idgs902.app_movil_android.Utils.MqttConfig
+import edu.utleon.idgs902.app_movil_android.Utils.MqttHolder
 import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
@@ -142,6 +143,8 @@ class HomeActivity : AppCompatActivity() {
             mqttManager.conectar()
         }, 1000)
 
+        MqttHolder.mqttManager = mqttManager
+
         verificarEstatusDispositivo()
 
         corriendo = sharedPreferences.getBoolean("cronometro_corriendo", false)
@@ -236,13 +239,16 @@ class HomeActivity : AppCompatActivity() {
                     else
                         conn.errorStream
                 val respuesta = stream?.bufferedReader()?.use { it.readText() }
+
+                Log.d("HTTP", "Código = $code")
                 Log.d("HTTP", "Respuesta = $respuesta")
 
                 if (code == HttpURLConnection.HTTP_OK || code == HttpURLConnection.HTTP_CREATED) {
-                    val respuesta = conn.inputStream.bufferedReader().use { it.readText() }
                     val jsonResponse = JSONObject(respuesta)
+
                     recorridoId = jsonResponse.getInt("recorridoId")
 
+                    Log.d("recorridoId", "JSON recorridoId: $recorridoId")
                     runOnUiThread {
                         iniciarRecorridoLocal(recorridoId)
                     }
@@ -262,12 +268,12 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun iniciarRecorridoLocal(IDrecorrido: Int) {
+    private fun iniciarRecorridoLocal(recorridoId: Int) {
         // Verificamos que esté conectados con el servidor MQTT
         if (!mqttManager.estaConectado()) {
             mqttManager.conectar()
             Handler(Looper.getMainLooper()).postDelayed({
-                iniciarRecorridoLocal(IDrecorrido)
+                iniciarRecorridoLocal(recorridoId)
             },1500)
             return
         }
@@ -276,7 +282,7 @@ class HomeActivity : AppCompatActivity() {
         // Valores para publicar en el topico comandos "cangurera/comandos" que el recorrido inicia
         val json_iniciarR = JSONObject().apply {
             put("accion","iniciar")
-            put("recorridoId", IDrecorrido)
+            put("recorridoId", recorridoId)
             put(
                 "macAddress",
                 globalPreferences.getString(
@@ -296,7 +302,7 @@ class HomeActivity : AppCompatActivity() {
             sharedPreferences.edit().apply {
                 putLong("tiempo_inicio", System.currentTimeMillis())
                 putBoolean("cronometro_corriendo", true)
-                putInt("ultimo_recorrido_id", IDrecorrido)
+                putInt("ultimo_recorrido_id", recorridoId)
                 apply()
             }
             handler.post(runnableCronometro)
