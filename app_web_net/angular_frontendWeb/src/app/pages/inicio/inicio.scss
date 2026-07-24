@@ -1,164 +1,480 @@
-/* --- Variables de diseño (Adaptadas para tarjeta blanca) --- */
-:root {
-  --bg-fallback: #080b11;
-  --card-bg: rgba(255, 255, 255, 0.92); /* Blanco premium con ligera transparencia */
-  --card-border: rgba(255, 255, 255, 0.6); /* Borde blanco sutil */
-  --color-text: #0f172a; /* Azul pizarra oscuro (excelente lectura) */
-  --color-muted: #475569; /* Gris pizarra medio */
-  --color-accent: #0284c7; /* Azul cian más profundo para destacar sobre blanco */
-  --color-brand-muted: #64748b; /* Gris para la marca secundario */
-}
+/* ===========================
+   RESET GLOBAL
+   =========================== */
 
-/* --- Contenedor Principal (Mantiene el fondo tecnológico de internet) --- */
-.inicio {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--color-text);
-  position: relative;
-  overflow: hidden;
-
-  background-color: var(--bg-fallback);
-  background-image: url('https://encrypted-tbn3.gstatic.com/licensed-image?q=tbn:ANd9GcQeaky0Zi20zKmkSmpROLkwaTEFsC48T1ZVOrysw6IEi9f5Guz5osC27BcitYdEN07swA6Fye5KqcPFDFQ');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-/* Capa de contraste oscura para el fondo */
-.inicio::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
+html,
+body {
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(10, 15, 25, 0.4) 0%, rgba(5, 8, 15, 0.85) 100%);
-  z-index: 1;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #080b11;
 }
 
-/* --- TARJETA BLANCA (Glassmorphism Claro) --- */
-.inicio__card {
-  position: relative;
-  z-index: 2;
-  background: #ffffff; /* ¡Blanco puro y sólido! */
-  border: 1px solid rgba(0, 0, 0, 0.05); /* Un borde sumamente sutil para dar definición */
-  border-radius: 24px;
-  padding: 3.5rem 2.5rem;
+app-root {
+  display: block;
   width: 100%;
-  max-width: 400px;
+  height: 100%;
+}
+
+
+/* ===========================
+   VARIABLES
+   =========================== */
+
+:root {
+  --bg-fallback: #080b11;
+  --color-text: #0f172a;
+  --color-accent: #0284c7;
+  --color-brand-muted: #64748b;
+}
+
+
+/* ===========================
+   PANTALLA COMPLETA
+   =========================== */
+
+.inicio {
+
+  width: 100%;
+  height: 100vh;
+
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+
+  position: relative;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+
+
+  color: var(--color-text);
+
+
+  background-color: var(--bg-fallback);
+
+
+  background-image: url('https://encrypted-tbn3.gstatic.com/licensed-image?q=tbn:ANd9GcQeaky0Zi20zKmkSmpROLkwaTEFsC48T1ZVOrysw6IEi9f5Guz5osC27BcitYdEN07swA6Fye5KqcPFDFQ');
+
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-repeat: no-repeat;
+
+}
+
+
+
+/* Capa oscura del fondo */
+
+.inicio::before {
+
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+
+  background:
+
+    radial-gradient(
+      circle at center,
+      rgba(10,15,25,0.35),
+      rgba(5,8,15,0.9)
+    );
+
+
+  z-index: 1;
+
+}
+
+
+
+/* ===========================
+   TARJETA
+   =========================== */
+
+
+.inicio__card {
+
+  position: relative;
+
+  z-index: 2;
+
+
+  width: min(90%, 420px);
+
+
+  padding: 3.5rem 2.5rem;
+
+
+  margin: 0;
+
+
   text-align: center;
 
-  /* Sombra oscura y suave para que el recuadro blanco flote con elegancia sobre el fondo */
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35),
-              0 1px 3px rgba(0, 0, 0, 0.1);
 
-  animation: cardFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  align-items: center;
+
+
+  background:
+
+    rgba(255,255,255,0.96);
+
+
+  border:
+
+    1px solid rgba(0,0,0,0.08);
+
+
+  border-radius: 24px;
+
+
+  box-shadow:
+
+    0 20px 40px rgba(0,0,0,0.35);
+
+
+  animation:
+
+    cardFadeIn
+    .8s
+    ease;
+
 }
 
-/* --- Logo con pulso (Sombra adaptada para fondo blanco) --- */
+
+
+/* ===========================
+   LOGO
+   =========================== */
+
+
 .inicio__logo-wrapper {
+
   margin-bottom: 1.8rem;
+
 }
+
+
 
 .inicio__logo {
+
   width: 230px;
+
+  max-width: 80vw;
+
+
   height: auto;
-  /* Sombra azulada y suave para que resalte sobre el blanco */
-  filter: drop-shadow(0 4px 12px rgba(2, 132, 199, 0.2));
-  animation: floatLogo 4s ease-in-out infinite;
+
+
+  filter:
+
+    drop-shadow(
+      0 4px 12px rgba(2,132,199,.25)
+    );
+
+
+  animation:
+
+    floatLogo
+    4s
+    ease-in-out
+    infinite;
+
 }
 
-/* --- Textos y Títulos (Optimizados para legibilidad) --- */
+
+
+/* ===========================
+   TEXTO MARCA
+   =========================== */
+
+
 .inicio__brand {
+
   font-size: 1.15rem;
+
   font-weight: 800;
+
+
   letter-spacing: 6px;
+
+
   text-transform: uppercase;
-  margin-bottom: 2.2rem;
+
+
+  margin-bottom: 2rem;
+
+
   color: var(--color-brand-muted);
+
 }
+
+
 
 .inicio__brand--highlight {
+
   color: var(--color-accent);
-  font-weight: 900;
+
 }
+
+
+
+/* ===========================
+   BIENVENIDA
+   =========================== */
+
 
 .inicio__welcome-container {
+
   margin-bottom: 2.5rem;
+
 }
+
+
 
 .inicio__welcome-text {
-  font-size: 0.9rem;
-  color: #0369a1; /* Azul tecnológico intermedio */
+
+  font-size: .9rem;
+
+
+  color: #0369a1;
+
+
   text-transform: uppercase;
+
+
   letter-spacing: 2px;
-  margin-bottom: 0.5rem;
+
+
   font-weight: 700;
+
 }
+
+
 
 .inicio__user-name {
-  font-size: 2.1rem;
-  font-weight: 800;
+
   margin: 0;
-  /* Degradado elegante de azul oscuro a azul eléctrico */
-  background: linear-gradient(135deg, #0f172a 30%, #0284c7 100%);
+
+
+  font-size: 2.1rem;
+
+
+  font-weight: 800;
+
+
+  background:
+
+    linear-gradient(
+      135deg,
+      #0f172a,
+      #0284c7
+    );
+
+
   -webkit-background-clip: text;
+
   -webkit-text-fill-color: transparent;
+
 }
 
-/* --- Cargador (Colores adaptados) --- */
+
+
+/* ===========================
+   LOADER
+   =========================== */
+
+
 .inicio__loader {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
+
+  display:flex;
+
+  justify-content:center;
+
+  gap:8px;
+
 }
+
+
 
 .inicio__loader-dot {
-  width: 6px;
-  height: 6px;
-  background-color: var(--color-accent);
-  border-radius: 50%;
-  opacity: 0.4;
-  animation: loaderPulse 1.4s infinite ease-in-out;
+
+  width:6px;
+
+  height:6px;
+
+
+  background:#0284c7;
+
+
+  border-radius:50%;
+
+
+  opacity:.4;
+
+
+  animation:
+
+    loaderPulse
+    1.4s
+    infinite;
+
 }
 
-.inicio__loader-dot:nth-child(2) { animation-delay: 0.2s; }
-.inicio__loader-dot:nth-child(3) { animation-delay: 0.4s; }
 
-/* --- Animaciones Keyframes --- */
+
+.inicio__loader-dot:nth-child(2){
+
+  animation-delay:.2s;
+
+}
+
+
+
+.inicio__loader-dot:nth-child(3){
+
+  animation-delay:.4s;
+
+}
+
+
+
+/* ===========================
+   ANIMACIONES
+   =========================== */
+
+
 @keyframes cardFadeIn {
+
   from {
-    opacity: 0;
-    transform: scale(0.96) translateY(15px);
+
+    opacity:0;
+
+    transform:
+
+      scale(.96)
+      translateY(20px);
+
   }
+
+
   to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
+
+    opacity:1;
+
+    transform:
+
+      scale(1)
+      translateY(0);
+
   }
+
 }
+
+
 
 @keyframes floatLogo {
-  0%, 100% {
-    transform: translateY(0);
-    filter: drop-shadow(0 4px 12px rgba(2, 132, 199, 0.2));
+
+  0%,100% {
+
+    transform:translateY(0);
+
   }
+
+
   50% {
-    transform: translateY(-6px);
-    filter: drop-shadow(0 8px 16px rgba(2, 132, 199, 0.35));
+
+    transform:translateY(-8px);
+
   }
+
 }
 
+
+
 @keyframes loaderPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.4;
+
+  0%,100% {
+
+    transform:scale(1);
+
+    opacity:.4;
+
   }
+
+
   50% {
-    transform: scale(1.5);
-    opacity: 1;
-    box-shadow: 0 0 8px rgba(2, 132, 199, 0.5);
+
+    transform:scale(1.5);
+
+    opacity:1;
+
   }
+
+}
+
+
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
+
+@media(max-width:600px){
+
+
+  .inicio__card {
+
+    width:90%;
+
+    padding:
+
+      2.5rem
+      1.5rem;
+
+  }
+
+
+
+  .inicio__logo {
+
+    width:180px;
+
+  }
+
+
+
+  .inicio__user-name {
+
+    font-size:1.7rem;
+
+  }
+
 }

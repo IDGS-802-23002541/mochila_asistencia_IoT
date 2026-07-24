@@ -6,7 +6,8 @@ import { AfterViewInit, Component } from '@angular/core';
   templateUrl: './hero.html',
   styleUrl: './hero.css',
 })
-export class Hero implements AfterViewInit{
+export class Hero implements AfterViewInit {
+
   ngAfterViewInit(): void {
     this.initCounters();
   }
@@ -20,13 +21,19 @@ export class Hero implements AfterViewInit{
       const suffix = el.dataset['suffix'] || '';
       const decimal = parseInt(el.dataset['decimal'] || '0');
 
-      const duration = 2000;
+      // Duración del contador (5 segundos)
+      const duration = 5000;
       const start = performance.now();
 
       const update = (currentTime: number) => {
 
-        const progress = Math.min((currentTime - start) / duration, 1);
-        const value = target * progress;
+        const elapsed = currentTime - start;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Movimiento más suave del contador
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+
+        const value = target * easeOut;
 
         el.textContent =
           prefix +
@@ -36,15 +43,18 @@ export class Hero implements AfterViewInit{
         if (progress < 1) {
           requestAnimationFrame(update);
         }
+
       };
 
       requestAnimationFrame(update);
 
     };
 
+
     const statsSection = document.querySelector('.hero-stats');
 
     if (!statsSection) return;
+
 
     const observer = new IntersectionObserver((entries) => {
 
@@ -52,7 +62,8 @@ export class Hero implements AfterViewInit{
 
         if (entry.isIntersecting) {
 
-          const counters = statsSection.querySelectorAll<HTMLElement>('.stat-num');
+          const counters =
+            statsSection.querySelectorAll<HTMLElement>('.stat-num');
 
           counters.forEach(counter => {
 
@@ -74,6 +85,7 @@ export class Hero implements AfterViewInit{
     }, {
       threshold: 0.3
     });
+
 
     observer.observe(statsSection);
 

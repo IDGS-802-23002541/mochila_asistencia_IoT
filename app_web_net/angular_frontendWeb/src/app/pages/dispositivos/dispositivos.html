@@ -1,71 +1,84 @@
-<div class="dispositivos-page">
-  <!-- Cabecera de la página -->
-  <header class="dispositivos-header">
-    <div class="dispositivos-header__text">
-      <h1 class="dispositivos-title">Monitoreo de Dispositivos</h1>
-      <p class="dispositivos-subtitle">Gestión y estado en tiempo real de la red Vision Guard</p>
+<div class="devices-page">
+  <div class="devices-header">
+    <div>
+      <h1>Dispositivos</h1>
+      <p>Monitoreo de equipos conectados a Vision Guard</p>
     </div>
-    <button class="btn-primary" type="button">
-      <span>+</span> Registrar Dispositivo
-    </button>
-  </header>
-
-  <!-- Tarjetas de Resumen Rápido -->
-  <section class="metrics-grid">
-    <div class="metric-card">
-      <span class="metric-card__label">Total Dispositivos</span>
-      <span class="metric-card__value">5</span>
+    <div class="header-actions">
+      <div class="devices-counter">
+        <span>{{dispositivos.length}}</span>
+        <small>Equipos registrados</small>
+      </div>
+      <button class="btn-add" (click)="nuevo()">+ Nuevo dispositivo</button>
     </div>
-    <div class="metric-card metric-card--success">
-      <span class="metric-card__label">Activos</span>
-      <span class="metric-card__value">3</span>
-    </div>
-    <div class="metric-card metric-card--warning">
-      <span class="metric-card__label">En Alerta</span>
-      <span class="metric-card__value">1</span>
-    </div>
-    <div class="metric-card metric-card--danger">
-      <span class="metric-card__label">Inactivos</span>
-      <span class="metric-card__value">1</span>
-    </div>
-  </section>
-
-  <!-- Tabla de Dispositivos -->
-  <div class="table-container">
-    <table class="dispositivos-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre del Dispositivo</th>
-          <th>Tipo</th>
-          <th>Ubicación</th>
-          <th>Estado</th>
-          <th>Última Conexión</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (disp of listaDispositivos; track disp.id) {
-          <tr>
-            <td class="td-id">#{{ disp.id }}</td>
-            <td class="td-name"><strong>{{ disp.nombre }}</strong></td>
-            <td>{{ disp.tipo }}</td>
-            <td>{{ disp.ubicacion }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="'status-badge--' + disp.estado">
-                {{ disp.estado | titlecase }}
-              </span>
-            </td>
-            <td class="td-muted">{{ disp.ultimaConexion }}</td>
-            <td>
-              <div class="table-actions">
-                <button class="btn-icon" title="Editar">✏️</button>
-                <button class="btn-icon btn-icon--danger" title="Eliminar">🗑️</button>
-              </div>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
   </div>
+  @if(mensaje){
+  <div class="success-box">{{mensaje}}</div>
+  }
+  @if(error){
+  <div class="error-box">{{error}}</div>
+  }
+  @if(cargando){
+  <div class="loading">Cargando dispositivos...</div>
+  }@else{
+  <div class="devices-grid">
+    @for(dispositivo of dispositivos; track dispositivo.id){
+    <article class="device-card">
+      <div class="device-top">
+        <div class="device-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2v4" />
+            <path d="M8 6h8" />
+            <rect x="5" y="6" width="14" height="15" rx="3" />
+            <circle cx="12" cy="13" r="2" />
+          </svg>
+        </div>
+        <span class="status" [class.offline]="dispositivo.estado!=='Activo'">{{dispositivo.estado}}</span>
+      </div>
+      <div class="device-info">
+        <h2>Dispositivo #{{dispositivo.id}}</h2>
+        <div class="data">
+          <span>MAC Address</span>
+          <strong>{{dispositivo.macAddress}}</strong>
+        </div>
+        <div class="data">
+          <span>Organización</span>
+          <strong>{{dispositivo.organizacion}}</strong>
+        </div>
+        <div class="data">
+          <span>Última conexión</span>
+          <strong>{{dispositivo.ultimaConexion ?? 'Sin conexión'}}</strong>
+        </div>
+      </div>
+      <div class="device-footer">
+        Registrado: {{dispositivo.fechaRegistro | date:'dd/MM/yyyy'}}
+      </div>
+      <div class="device-actions">
+        <button class="btn-edit" (click)="editar(dispositivo)">Editar</button>
+        <button class="btn-delete" (click)="eliminar(dispositivo.id)">Eliminar</button>
+      </div>
+    </article>
+    }
+  </div>
+  }
+  @if(mostrarFormulario){
+  <div class="modal">
+    <div class="modal-card">
+      <h2>{{editando?'Actualizar dispositivo':'Nuevo dispositivo'}}</h2>
+      <label>Organización ID</label>
+      <input type="number" [(ngModel)]="dispositivoActual.organizacionId">
+      <label>MAC Address</label>
+      <input [(ngModel)]="dispositivoActual.macAddress" placeholder="XX:XX:XX:XX:XX:XX">
+      <label>Estado</label>
+      <select [(ngModel)]="dispositivoActual.estado">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+      <div class="modal-actions">
+        <button class="btn-save" (click)="guardar()">Guardar</button>
+        <button class="btn-cancel" (click)="cerrar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  }
 </div>

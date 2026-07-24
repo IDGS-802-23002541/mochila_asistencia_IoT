@@ -1,0 +1,169 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 0;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #16305c;
+  margin: 20px 0 20px;
+}
+
+.estado-mensaje {
+  font-size: 13px;
+  color: #6b7280;
+  padding: 20px;
+}
+
+.estado-mensaje.error {
+  color: #b42318;
+}
+
+.detalle-card {
+  background: #fff;
+  border: 1px solid #e4e6eb;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 420px;
+  margin: 0 20px 20px;
+}
+
+.detalle-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.notificacion-label {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.badge-estado {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.badge-activo {
+  background: #e6f7ee;
+  color: #1a9c5c;
+}
+
+.badge-inactivo {
+  background: #fdecec;
+  color: #e24b4a;
+}
+
+.detalle-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.detalle-avatar {
+  width: 44px;
+  height: 44px;
+  background: #eceef1;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detalle-avatar svg {
+  width: 55%;
+  height: 55%;
+  color: #c4c8ce;
+}
+
+.detalle-label {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 0 0 2px;
+}
+
+.detalle-nombre {
+  font-size: 14px;
+  font-weight: 600;
+  color: #16305c;
+  margin: 0 0 4px;
+}
+
+.detalle-ubicacion {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.detalle-preview {
+  background: #f8f5ec;
+  border: 1px solid #ece7d8;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.detalle-preview-titulo {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #16305c;
+  margin: 0 0 12px;
+}
+
+.detalle-lista {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px 0;
+}
+
+.detalle-lista dt {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 8px;
+}
+
+.detalle-lista dd {
+  font-size: 12.5px;
+  color: #1f2937;
+  margin: 0;
+}
+
+.detalle-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-editar,
+.btn-eliminar {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  cursor: pointer;
+  border: 1px solid #16305c;
+  background: #fff;
+  color: #16305c;
+}
+
+.btn-eliminar {
+  border-color: #e24b4a;
+  color: #e24b4a;
+}
+
+.btn-editar:disabled,
+.btn-eliminar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

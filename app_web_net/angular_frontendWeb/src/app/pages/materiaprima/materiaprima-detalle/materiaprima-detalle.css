@@ -1,0 +1,189 @@
+.page-body {
+  padding: 28px 36px;
+}
+
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1c3a57;
+  margin: 0 0 20px;
+  letter-spacing: -0.2px;
+}
+
+.detalle-card {
+  background: #fff;
+  border: 1px solid #e7eaf0;
+  border-radius: 16px;
+  padding: 26px 30px;
+  max-width: 640px;
+}
+
+.detalle-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.notificacion-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8993a4;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge-estado {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-activo {
+  background: #eaf5f2;
+  color: #17a583;
+}
+
+.badge-inactivo {
+  background: #fdf0ef;
+  color: #d1453d;
+}
+
+.detalle-info {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #eef0f4;
+  margin-bottom: 22px;
+}
+
+.detalle-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1c3a57, #2f5f7a 55%, #7fc2b5);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.detalle-avatar svg {
+  width: 26px;
+  height: 26px;
+}
+
+.detalle-label {
+  font-size: 11px;
+  color: #8993a4;
+  margin: 0 0 2px;
+}
+
+.detalle-nombre {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1c3a57;
+  margin: 0 0 2px;
+}
+
+.detalle-ubicacion {
+  font-size: 11.5px;
+  color: #8993a4;
+  margin: 0;
+}
+
+.detalle-preview-titulo {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #7fc2b5;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 0 0 14px;
+}
+
+.detalle-lista {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+  margin: 0;
+}
+
+.detalle-lista dt {
+  font-size: 11px;
+  color: #8993a4;
+  margin-bottom: 3px;
+}
+
+.detalle-lista dd {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1c3a57;
+  margin: 0;
+}
+
+.detalle-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid #eef0f4;
+}
+
+.btn-editar {
+  background: #f1f3f6;
+  color: #1c3a57;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-editar:hover {
+  background: #e7eaf0;
+}
+
+.btn-eliminar {
+  background: #fdf0ef;
+  color: #d1453d;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-eliminar:hover {
+  background: #f8dedb;
+}
+
+.btn-eliminar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.estado-mensaje {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  color: #6b7280;
+  background: #fff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  max-width: 480px;
+}
+
+.estado-mensaje.error {
+  border-color: #f3d0cb;
+  background: #fdf5f4;
+}

@@ -1,0 +1,87 @@
+<div class="page-body">
+  @if (cargando) {
+    <div class="estado-mensaje">
+      Cargando información...
+    </div>
+  } @else if (error) {
+    <div class="estado-mensaje error">
+      No se pudo cargar el registro.
+    </div>
+  } @else {
+    <div class="form-header">
+      <h2 class="section-title">Editar materia prima</h2>
+      <p class="form-subtitulo">Actualiza la información del registro</p>
+    </div>
+
+    <form class="form-card" [formGroup]="form" (ngSubmit)="guardar()">
+
+      @if (guardadoExitoso) {
+        <div class="alerta-exito">✓ Cambios guardados correctamente</div>
+      }
+
+      <div class="form-grid">
+        <div class="form-field full">
+          <label for="nombre">Nombre del material</label>
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Sensor ultrasónico HC-SR04" />
+          @if (f['nombre'].touched && f['nombre'].invalid) {
+            <span class="form-error">Este campo es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="categoria">Categoría</label>
+          <input id="categoria" type="text" formControlName="categoria" placeholder="Ej. Electrónico" />
+          @if (f['categoria'].touched && f['categoria'].invalid) {
+            <span class="form-error">Este campo es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="unidad_Medida">Unidad de medida</label>
+          <input id="unidad_Medida" type="text" formControlName="unidad_Medida" placeholder="Ej. pieza, kg, metro" />
+          @if (f['unidad_Medida'].touched && f['unidad_Medida'].invalid) {
+            <span class="form-error">Este campo es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="stock_Actual">Stock actual</label>
+          <input id="stock_Actual" type="number" formControlName="stock_Actual" placeholder="0" />
+        </div>
+
+        <div class="form-field">
+          <label for="precio_Unitario">Precio unitario</label>
+          <input id="precio_Unitario" type="number" formControlName="precio_Unitario" placeholder="0.00" />
+        </div>
+
+        <div class="form-field full">
+          <label for="proveedor">Proveedor</label>
+          <input id="proveedor" type="text" formControlName="proveedor" placeholder="Nombre del proveedor" />
+        </div>
+
+      </div>
+
+      <p class="form-seccion-titulo">Estado</p>
+
+      <div class="form-grid">
+        <div class="form-field toggle-field">
+          <label>Activo</label>
+          <label class="switch">
+            <input type="checkbox" formControlName="estado_Activo" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-texto">
+            {{ f['estado_Activo'].value ? 'Sí' : 'No' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-acciones">
+        <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="btn-guardar" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

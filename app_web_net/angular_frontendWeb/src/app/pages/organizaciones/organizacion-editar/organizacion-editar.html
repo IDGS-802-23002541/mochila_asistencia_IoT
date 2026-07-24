@@ -1,0 +1,101 @@
+<header class="topbar">
+  <span class="menu-icon">☰</span>
+  <h1>CLIENTES</h1>
+</header>
+
+<div class="page-body">
+  @if (cargando) {
+    <div class="estado-mensaje">
+      Cargando información de la organización...
+    </div>
+  } @else if (error) {
+    <div class="estado-mensaje error">
+      No se pudo cargar la organización.
+    </div>
+  } @else {
+    <div class="editar-header">
+      <h2 class="section-title">Editar organización</h2>
+      <p class="editar-subtitulo">Actualiza la información de {{ organizacionOriginal?.nombre }}</p>
+    </div>
+
+    <form class="editar-card" [formGroup]="form" (ngSubmit)="guardar()">
+
+      @if (guardadoExitoso) {
+        <div class="alerta-exito">✓ Cambios guardados correctamente</div>
+      }
+
+      <div class="form-grid">
+
+        <div class="form-field full">
+          <label for="nombre">Nombre de la institución</label>
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Universidad Tecnológica de León" />
+          @if (f['nombre'].touched && f['nombre'].invalid) {
+            <span class="form-error">El nombre es obligatorio (mínimo 3 caracteres)</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="sector">Sector</label>
+          <input id="sector" type="text" formControlName="sector" placeholder="Ej. Educación" />
+          @if (f['sector'].touched && f['sector'].invalid) {
+            <span class="form-error">El sector es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="rol">Rol</label>
+          <input id="rol" type="text" formControlName="rol" placeholder="Ej. organizacion" />
+          @if (f['rol'].touched && f['rol'].invalid) {
+            <span class="form-error">El rol es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="contacto_Principal">Contacto principal</label>
+          <input id="contacto_Principal" type="text" formControlName="contacto_Principal" placeholder="Nombre del contacto" />
+          @if (f['contacto_Principal'].touched && f['contacto_Principal'].invalid) {
+            <span class="form-error">El contacto es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="email_Contacto">Correo de contacto</label>
+          <input id="email_Contacto" type="email" formControlName="email_Contacto" placeholder="correo@ejemplo.com" />
+          @if (f['email_Contacto'].touched && f['email_Contacto'].invalid) {
+            <span class="form-error">Ingresa un correo válido</span>
+          }
+        </div>
+
+        <div class="form-field toggle-field">
+          <label>Estado</label>
+          <label class="switch">
+            <input type="checkbox" formControlName="estado_Activo" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-texto">
+            {{ f['estado_Activo'].value ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+
+        <div class="form-field toggle-field">
+          <label>Organización interna</label>
+          <label class="switch">
+            <input type="checkbox" formControlName="es_Interna" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-texto">
+            {{ f['es_Interna'].value ? 'Sí' : 'No' }}
+          </span>
+        </div>
+
+      </div>
+
+      <div class="editar-acciones">
+        <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="btn-guardar" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>
