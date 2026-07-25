@@ -9,7 +9,12 @@ import { Inicio } from './pages/inicio/inicio';
 import { MapaCalor } from './pages/analitica/mapa-calor/mapa-calor';
 import { Graficas } from './pages/graficas/graficas';
 import { Ajustes } from './pages/ajustes/ajustes';
-import { Dispositivos } from './pages/dispositivos/dispositivos';
+
+// Dispositivos
+import { ListDispositivo } from './pages/dispositivos/dispositivo-list/list-dispositivo';
+import { DispositivoDetalle } from './pages/dispositivos/dispositivo-detalle/detalle-dispositivo';
+import { NuevoDispositivo } from './pages/dispositivos/dispositivo-nuevo/nuevo-dispositivo';
+import { EditarDispositivo } from './pages/dispositivos/dispositivo-editar/editar-dispositivo';
 
 // Organizaciones
 import { OrganizacionDetalle } from './pages/organizaciones/organizacion-detalle/organizacion-detalle';
@@ -75,11 +80,25 @@ export const routes: Routes = [
         path: 'ajustes',
         component: Ajustes,
       },
+
+      // Dispositivos
       {
         path: 'dispositivos',
-        component: Dispositivos,
+        component: ListDispositivo,
       },
-
+      {
+        path: 'dispositivos/nuevo',
+        component: NuevoDispositivo,
+      },
+      {
+        path: 'dispositivos/detalle/:id',
+        component: DispositivoDetalle,
+      },
+      {
+        path: 'dispositivos/:id/editar',
+        component: EditarDispositivo,
+      },
+      
       // Organizaciones
       {
         path: 'organizaciones',

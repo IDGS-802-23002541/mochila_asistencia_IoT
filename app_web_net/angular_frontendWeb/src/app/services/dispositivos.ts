@@ -1,81 +1,145 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-
-export interface Dispositivo {
-
-  id:number;
-
-  organizacionId:number;
-
-  macAddress:string;
-
-  estado:string;
-
-  ultimaConexion:string|null;
-
-  fechaRegistro:string;
-
-  organizacion:string|null;
-
-}
-
-
+import { Injectable } from '@angular/core';
+import { Observable, of, tap } from 'rxjs';
+import { Dispositivo } from '../interfaces/dispositivo';
 
 @Injectable({
-  providedIn:'root'
+  providedIn: 'root',
 })
 export class DispositivosService {
 
+  private readonly baseUrl =
+    'https://lmsidgs902.runasp.net/api/dispositivos';
 
-  private http=inject(HttpClient);
+  private dispositivosCache: Dispositivo[] = [];
+
+  constructor(private http: HttpClient) {}
+
+  getAll(): Observable<Dispositivo[]> {
+
+    if (this.dispositivosCache.length > 0) {
+      return of(this.dispositivosCache);
+    }
+
+    return this.http.get<Dispositivo[]>(this.baseUrl)
+      .pipe(
+        tap(data => {
+          this.dispositivosCache = data;
+        })
+      );
+  }
 
 
-  private apiUrl=
-  'https://lmsidgs902.runasp.net/api/dispositivos';
+  getById(id:number): Observable<Dispositivo> {
 
-
-
-  obtenerDispositivos():Observable<Dispositivo[]>{
-
-    return this.http.get<Dispositivo[]>(
-      this.apiUrl
+    const encontrado = this.dispositivosCache.find(
+      d => d.id === id
     );
 
+    if(encontrado){
+      return of(encontrado);
+    }
+
+    return this.http.get<Dispositivo>(
+      `${this.baseUrl}/${id}`
+    )
+    .pipe(
+      tap(data=>{
+        this.actualizarCache(data);
+      })
+    );
   }
 
 
 
-  crear(dispositivo:any){
+  create(dispositivo:Partial<Dispositivo>):Observable<Dispositivo>{
 
     return this.http.post<Dispositivo>(
-      this.apiUrl,
+      this.baseUrl,
       dispositivo
+    )
+    .pipe(
+      tap(nuevo=>{
+        this.dispositivosCache.push(nuevo);
+      })
     );
-
   }
 
 
 
-  actualizar(id:number,dispositivo:any){
+  update(
+    id:number,
+    dispositivo:Partial<Dispositivo>
+  ):Observable<Dispositivo>{
 
     return this.http.put<Dispositivo>(
-      `${this.apiUrl}/${id}`,
+      `${this.baseUrl}/${id}`,
       dispositivo
+    )
+    .pipe(
+      tap(actualizado=>{
+
+        const index =
+          this.dispositivosCache.findIndex(
+            d=>d.id===id
+          );
+
+        if(index !== -1){
+          this.dispositivosCache[index]=actualizado;
+        }
+
+      })
+    );
+  }
+
+
+
+  delete(id:number):Observable<void>{
+
+    return this.http.delete<void>(
+      `${this.baseUrl}/${id}`
+    )
+    .pipe(
+      tap(()=>{
+
+        this.dispositivosCache =
+        this.dispositivosCache.filter(
+          d=>d.id!==id
+        );
+
+      })
     );
 
   }
 
 
 
-  eliminar(id:number){
+  limpiarCache(){
 
-    return this.http.delete(
-      `${this.apiUrl}/${id}`
-    );
+    this.dispositivosCache=[];
 
   }
 
+
+
+  private actualizarCache(data:Dispositivo){
+
+    const existe =
+      this.dispositivosCache.findIndex(
+        d=>d.id===data.id
+      );
+
+
+    if(existe>=0){
+
+      this.dispositivosCache[existe]=data;
+
+    }else{
+
+      this.dispositivosCache.push(data);
+
+    }
+
+  }
 
 }
