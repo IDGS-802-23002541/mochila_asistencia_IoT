@@ -2,7 +2,7 @@
   width: 100%;
   min-height: 100vh;
   background: var(--color-background);
-  padding-top: calc(var(--navbar-height) + 24px);
+  padding-top: 2rem;
   padding-bottom: 40px;
   display: flex;
   justify-content: center;
