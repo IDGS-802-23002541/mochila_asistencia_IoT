@@ -1,12 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { MainLayout } from './layout/main-layout/main-layout';
 import { Home } from './pages/home/home';
 import { Login } from './pages/login/login';
 import { Inicio } from './pages/inicio/inicio';
+import { MainLayout } from './layout/main-layout/main-layout';
 
 // Analítica
-import { MapaCalor } from './pages/analitica/mapa-calor/mapa-calor';
 import { Graficas } from './pages/graficas/graficas';
 import { Ajustes } from './pages/ajustes/ajustes';
 
@@ -69,8 +68,8 @@ export const routes: Routes = [
 
       // Analítica
       {
-        path: 'analitica/mapa-calor',
-        component: MapaCalor,
+        path: 'graficas/dashboard',
+        component: Graficas,
       },
       {
         path: 'graficas',
@@ -98,7 +97,7 @@ export const routes: Routes = [
         path: 'dispositivos/:id/editar',
         component: EditarDispositivo,
       },
-      
+
       // Organizaciones
       {
         path: 'organizaciones',
