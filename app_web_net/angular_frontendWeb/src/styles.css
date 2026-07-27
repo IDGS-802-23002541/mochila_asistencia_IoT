@@ -35,3 +35,7 @@ body{
   background:var(--color-background);
   color:var(--color-text);
 }
+
+section {
+    scroll-margin-top: 75px;
+}
