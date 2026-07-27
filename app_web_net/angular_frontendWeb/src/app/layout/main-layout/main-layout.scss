@@ -1,216 +1,229 @@
-/* --- Variables de Diseño (Estilo Blanco Premium) --- */
-:root {
-  --sidebar-bg: #ffffff; /* Blanco sólido absoluto */
-  --sidebar-border: #e2e8f0; /* Borde gris claro */
-  --sidebar-text: #64748b; /* Gris medio para el menú inactivo */
-  --sidebar-text-active: #0f172a; /* Azul oscuro pizarra para el activo */
-  --sidebar-accent: #0284c7; /* Azul cian corporativo para destacar */
-  --sidebar-hover-bg: #f8fafc; /* Gris sutil para el hover */
+$navy-deep:#0a1730;
+$navy:#16294f;
+$navy-raised:#1e3560;
+$accent-blue:#6ec3ff;
+$accent-blue-wash:rgba(110,195,255,.12);
+$white:#ffffff;
+$text-muted:rgba(255,255,255,.60);
+$divider:rgba(255,255,255,.09);
+$sidebar-width:232px;
+$radius-sm:8px;
 
-  --content-bg: #f1f5f9; /* Fondo de la app fuera de la barra */
+:host{
+  display:block;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
 }
 
-/* --- Layout Principal --- */
-.app-shell {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  background-color: var(--content-bg);
+.app-shell{
+  width:100%;
+  height:100vh;
+  display:flex;
+  overflow:hidden;
+  background:#ffffff;
 }
 
-/* --- Barra Lateral Blanca --- */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  width: 260px;
-  height: 100%;
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
-  box-shadow: 4px 0 20px rgba(15, 23, 42, 0.05); /* Sombra muy sutil */
-  z-index: 10;
+.sidebar{
+  width:$sidebar-width;
+  flex-shrink:0;
+  box-sizing:border-box;
+  background:linear-gradient(180deg,$navy-deep 0%,$navy 100%);
+  color:$text-muted;
+  display:flex;
+  flex-direction:column;
+  padding:22px 16px;
+  overflow:hidden;
+  box-shadow:2px 0 24px rgba(4,10,26,.18);
+  transition:width .22s ease,opacity .18s ease,padding .22s ease;
+  z-index:30;
 }
 
-/* --- Header del Sidebar --- */
-.sidebar__brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 2rem 1.5rem;
-  border-bottom: 1px solid var(--sidebar-border);
+.sidebar--collapsed{
+  width:0;
+  padding-left:0;
+  padding-right:0;
+  opacity:0;
+  pointer-events:none;
 }
 
-.sidebar__logo-image {
-  width: 32px;
-  height: auto;
-  filter: drop-shadow(0 2px 4px rgba(2, 132, 199, 0.1));
+.sidebar__brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:4px 6px 22px;
+  margin-bottom:14px;
+  border-bottom:1px solid $divider;
 }
 
-.sidebar__brand-name {
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: #0f172a; /* Texto oscuro sobre fondo blanco */
+.sidebar__logo-image{
+  width:48px;
+  height:48px;
+  object-fit:contain;
+  border-radius:$radius-sm;
+  background:$white;
+  padding:6px;
+  flex-shrink:0;
+  box-shadow:0 3px 10px rgba(0,0,0,.28);
 }
 
-.sidebar__brand-name--highlight {
-  color: var(--sidebar-accent);
+.sidebar__brand-name{
+  font-size:.95rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  color:$white;
+  white-space:nowrap;
 }
 
-/* --- Cuerpo del Menú --- */
-.sidebar__nav {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 1.5rem 1rem;
-  overflow-y: auto;
+.sidebar__status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 6px 16px;
+  font-size:.66rem;
+  font-weight:700;
+  letter-spacing:.09em;
+  color:$accent-blue;
+  text-transform:uppercase;
 }
 
-.sidebar__nav-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 0.85rem 1rem;
-  color: var(--sidebar-text);
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 12px;
-  transition: all 0.2s ease-in-out;
+.sidebar__status::before{
+  content:'';
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:$accent-blue;
+  animation:pulse 2.2s infinite;
 }
 
-.sidebar__nav-item:hover {
-  color: var(--sidebar-text-active);
-  background: var(--sidebar-hover-bg);
-  transform: translateX(3px);
+@keyframes pulse{
+  0%,100%{opacity:1}
+  50%{opacity:.4}
 }
 
-/* Estado Activo (Fondo suave azul cielo con barra lateral de acento) */
-.sidebar__nav-item--active {
-  color: var(--sidebar-text-active) !important;
-  background: #f0f9ff; /* Fondo celeste sumamente suave */
-  border-left: 4px solid var(--sidebar-accent);
+.sidebar__nav{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  flex:1;
+  width:100%;
 }
 
-/* Iconos de Navegación */
-.sidebar__nav-icon svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: stroke 0.2s ease;
+.sidebar__nav-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:$radius-sm;
+  color:$text-muted;
+  font-size:.84rem;
+  font-weight:500;
+  text-decoration:none;
+  transition:.15s;
+  white-space:nowrap;
 }
 
-.sidebar__nav-item--active .sidebar__nav-icon svg {
-  stroke: var(--sidebar-accent);
+.sidebar__nav-item:hover{
+  background:rgba(255,255,255,.05);
+  color:$white;
 }
 
-/* --- Footer de la Barra Lateral --- */
-.sidebar__footer {
-  padding: 1.5rem 1rem;
-  border-top: 1px solid var(--sidebar-border);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.sidebar__nav-item--active{
+  background:$accent-blue-wash;
+  color:$accent-blue;
+  font-weight:600;
 }
 
-/* Botones Base del Footer */
-.sidebar__btn {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 0.85rem 1rem;
-  background: transparent;
-  border: none;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--sidebar-text);
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s ease;
+.sidebar__footer{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding-top:14px;
+  margin-top:10px;
+  border-top:1px solid $divider;
 }
 
-.sidebar__btn-icon {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.sidebar__settings,
+.sidebar__logout{
+  height:38px;
+  border-radius:$radius-sm;
+  cursor:pointer;
+  font-size:.78rem;
+  font-weight:600;
 }
 
-/* Hover de Ajustes */
-.sidebar__btn--settings:hover,
-.sidebar__btn--active {
-  color: var(--sidebar-text-active);
-  background: var(--sidebar-hover-bg);
+.sidebar__settings{
+  background:transparent;
+  color:$text-muted;
+  border:1px solid $divider;
 }
 
-/* Hover de Cerrar Sesión (Rojo suave de advertencia) */
-.sidebar__btn--logout:hover {
-  color: #dc2626;
-  background: #fef2f2; /* Fondo rojo muy claro */
+.sidebar__logout{
+  background:transparent;
+  color:$accent-blue;
+  border:1px solid rgba($accent-blue,.35);
 }
 
-/* --- Área de Trabajo Derecha --- */
-.app-shell__content {
-  flex: 1;
-  height: 100%;
-  background-color: var(--content-bg);
-  overflow-y: auto;
+.app-shell__content{
+  flex:1;
+  width:100%;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  min-width:0;
+  background:#ffffff;
 }
 
-
-/* --- Encabezado de la Marca (Con fondo tecnológico oscuro para contraste) --- */
-.sidebar__brand {
-  display: flex;
-  align-items: center; /* Alinea verticalmente el logo y el texto al centro */
-  gap: 14px; /* Espacio exacto entre el logo y el nombre */
-  padding: 1.5rem 1.25rem;
-
-  /* Nuevo color de fondo: Azul oscuro premium */
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-
-  /* Borde inferior sutil para conectar con la barra blanca */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.app-shell__page{
+  flex:1;
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  overflow:auto;
+  background:#ffffff;
 }
 
-/* --- Contenedor del Logo (Control total de alineación) --- */
-.sidebar__logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 36px; /* Caja fija para que no deforme el layout */
-  height: 36px;
+.sidebar__backdrop{
+  display:none;
 }
 
-/* --- Ajuste Perfecto de la Imagen --- */
-.sidebar__logo-image {
-  width: 100%; /* Ocupa el espacio del contenedor de forma fluida */
-  height: auto; /* Mantiene la proporción original */
-  object-fit: contain; /* Evita que la imagen se estire o se corte */
+@media(max-width:780px){
 
-  /* Un leve brillo que resalta de maravilla sobre el fondo oscuro */
-  filter: drop-shadow(0 2px 8px rgba(0, 229, 255, 0.25));
+  .sidebar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:100vh;
+    width:$sidebar-width;
+    transition:transform .25s ease;
+  }
+
+  .sidebar--collapsed{
+    width:$sidebar-width;
+    padding:22px 16px;
+    opacity:1;
+    transform:translateX(-105%);
+  }
+
+  .sidebar__backdrop{
+    display:block;
+    position:fixed;
+    inset:0;
+    background:rgba($navy-deep,.45);
+    backdrop-filter:blur(1px);
+    z-index:20;
+  }
+
 }
 
-/* --- Estilo de los Textos (Cambiados a blanco/cian para el fondo oscuro) --- */
-.sidebar__brand-name {
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: #ffffff; /* Blanco puro para "VISION" */
-  line-height: 1; /* Evita espacios extra arriba o abajo del texto */
-}
-
-.sidebar__brand-name--highlight {
-  color: #00e5ff; /* Color cian vibrante para "GUARD" */
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+html,
+body,
+app-root{
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
 }
