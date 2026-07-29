@@ -1,6 +1,8 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import * as L from 'leaflet';
-import 'leaflet.heat'
+import 'leaflet.heat';
+import { ZonaAccesibilidad } from '../models/zona-accesibilidad.model';
+import { ZONAS_MOCK } from '../data/zonas-mock';
 
 @Component({
   selector: 'app-mapa-calor',
@@ -11,66 +13,62 @@ import 'leaflet.heat'
 })
 export class MapaCalor implements AfterViewInit, OnDestroy {
   private map!: L.Map;
-  private readonly CENTRO_UTL: L.LatLngExpression = [ 21.1092, -101.6275];
+  // FIX: centro del geojson real (~21.0637, -101.5817), no el valor viejo
+  // desalineado que traia el componente (hallazgo colateral, ticket 002).
+  // fitBounds() recentra igual, pero se corrige para no dejar dato muerto.
+  private readonly CENTRO_UTL: L.LatLngExpression = [21.0637, -101.5817];
 
- private datosMock = [
-  // Estacionamientos — mayor peso (más tránsito/riesgo típico)
-  { lat: 21.06419,  lon: -101.584016, peso: 9 },  // Estacionamiento 1
-  { lat: 21.062353, lon: -101.579416, peso: 7 },  // Estacionamiento 2
-  { lat: 21.062636, lon: -101.578256, peso: 8 },  // Estacionamiento 3
+  // FIX: se quita el mock aislado (datosMock con 'peso' arbitrario, sin
+  // relacion con el resto del modulo de graficas). Ahora consume
+  // ZonaAccesibilidad, igual que grafica-iaz / grafica-desglose /
+  // interpretacion. TODO: reemplazar ZONAS_MOCK por fetch() a un
+  // endpoint real cuando el backend/Danna lo exponga; mientras tanto
+  // usa el mismo mock compartido del modulo.
+  private zonas: ZonaAccesibilidad[] = ZONAS_MOCK;
 
-  // Entrada principal — alto tránsito
-  { lat: 21.06262,  lon: -101.581889, peso: 10 }, // Entrada
-
-  // Pasillos internos — peso variable
-  { lat: 21.063279, lon: -101.57953,  peso: 5 },
-  { lat: 21.063498, lon: -101.580792, peso: 6 },
-  { lat: 21.064189, lon: -101.58293,  peso: 4 },
-  { lat: 21.063788, lon: -101.581147, peso: 5 },
-  { lat: 21.063645, lon: -101.580767, peso: 3 },
-  { lat: 21.063462, lon: -101.580336, peso: 4 },
-  { lat: 21.062876, lon: -101.578665, peso: 6 },
-  { lat: 21.06385,  lon: -101.581707, peso: 5 },
-  { lat: 21.063523, lon: -101.582475, peso: 4 },
-  { lat: 21.06297,  lon: -101.581861, peso: 7 },
-];
-
-  ngAfterViewInit(): void{
+  ngAfterViewInit(): void {
     this.iniciarMapa();
     this.pintarMapaCalor();
   }
 
-  private iniciarMapa(): void{
-    this.map = L.map('mapa-calor').setView(this.CENTRO_UTL,17);
-    // mapa base de fondo
+  private iniciarMapa(): void {
+    this.map = L.map('mapa-calor').setView(this.CENTRO_UTL, 17);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19,
     }).addTo(this.map);
-    // geojson del campus encima
+
     fetch('utl-campus.geojson')
-  .then(res => res.json())
-  .then(data => {
-    const capa = L.geoJSON(data, {
-      style: { color: '#2563eb', weight: 2, fillOpacity: 0.1 }
-    }).addTo(this.map);
-    // Ajusta el zoom/centro automáticamente al contorno real del geojson
-      this.map.fitBounds(capa.getBounds());
-  }).catch(err => console.error('Error cargando geojson:', err));
+      .then((res) => res.json())
+      .then((data) => {
+        const capa = L.geoJSON(data, {
+          style: { color: '#2563eb', weight: 2, fillOpacity: 0.1 },
+        }).addTo(this.map);
+        this.map.fitBounds(capa.getBounds());
+      })
+      .catch((err) => console.error('Error cargando geojson:', err));
   }
-  private pintarMapaCalor(): void{
-    const puntos: [ number, number, number][] = this.datosMock.map(d => [d.lat, d.lon, d.peso]);
-    ( L as any).heatLayer(puntos, {
-      radius: 30,
-      blur: 20,
-      maxZoom: 17,
-      gradient:{0.2:'blue', 0.5:'lime', 0.8:'orange',1.0:'red'},
-    }).addTo(this.map);
+
+  private pintarMapaCalor(): void {
+    // El peso del heatmap ahora es el IAZ real de cada zona (entre mas
+    // alto el IAZ, mas caliente se ve la zona), en vez del 'peso'
+    // arbitrario que traia el mock viejo.
+    const puntos: [number, number, number][] = this.zonas.map((z) => [
+      z.lat,
+      z.lon,
+      z.iaz,
+    ]);
+    (L as any)
+      .heatLayer(puntos, {
+        radius: 30,
+        blur: 20,
+        maxZoom: 17,
+        gradient: { 0.2: 'blue', 0.5: 'lime', 0.8: 'orange', 1.0: 'red' },
+      })
+      .addTo(this.map);
   }
 
   ngOnDestroy(): void {
-    if(this.map) this.map.remove();
+    if (this.map) this.map.remove();
   }
-
-
 }
