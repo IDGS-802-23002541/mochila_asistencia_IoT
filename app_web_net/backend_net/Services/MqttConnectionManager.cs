@@ -5,6 +5,9 @@ using CangureraInteligente.Models;
 using MQTTnet;
 using MQTTnet.Client;
 using Microsoft.Extensions.Logging;
+using System.Net.Security;
+using System.Linq;                                  // para el .All(...)
+using System.Security.Cryptography.X509Certificates; // para X509ChainStatusFlags
 
 namespace CangureraInteligente.Services;
 
@@ -43,9 +46,36 @@ public class MqttConnectionManager : IAsyncDisposable
 		{
 			_log.LogInformation("Conectando MQTT por TCP: {Host}:{Port}", _cfg.Host, _cfg.Port);
 			mqttClientOptionsBuilder.WithTcpServer(_cfg.Host, _cfg.Port);
+
 			if (_cfg.UseTls)
 			{
-				mqttClientOptionsBuilder.WithTls();
+				mqttClientOptionsBuilder.WithTlsOptions(o =>
+				{
+					o.UseTls();
+					o.WithCertificateValidationHandler(context =>
+{
+	// Solo permitimos el caso específico de "no se pudo verificar revocación",
+	// que es común quntdo el cliente no puede alcanzar el servidor OCSP/CRL.
+	// Cualquier otro error (nombre incorrecto, certificado expirado, cadena rota) se rechaza.
+	if (context.SslPolicyErrors == SslPolicyErrors.None)
+	{
+		return true;
+	}
+
+	if (context.SslPolicyErrors == SslPolicyErrors.RemoteCertificateChainErrors
+		&& context.Chain != null
+		&& context.Chain.ChainStatus.All(s => s.Status == X509ChainStatusFlags.RevocationStatusUnknown
+											  || s.Status == X509ChainStatusFlags.OfflineRevocation))
+	{
+		_log.LogWarning("Aceptando certificado MQTT: no se pudo verificar el estado de revocación (offline/OCSP inalcanzable).");
+		return true;
+	}
+
+	_log.LogError("Certificado MQTT rechazado: {Errors}", context.SslPolicyErrors);
+	return false;
+});
+
+				});
 			}
 		}
 		await Client.ConnectAsync(mqttClientOptionsBuilder.Build(), ct);
