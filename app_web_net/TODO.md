@@ -1,0 +1,5 @@
+- [x] Endurecer parseo de fechas en `backend_net/DTOs/FlexibleUnixDateTimeConverter.cs`
+- [x] Agregar saneamiento y validación de timestamps en `backend_net/Services/MqttTelemetryProcessor.cs`
+- [ ] Compilar proyecto con .NET 10 para validar cambios
+- [ ] Ejecutar pruebas de ruta crítica sobre manejo de fechas (evento, telemetría, finalizar recorrido)
+- [ ] Actualizar TODO.md marcando avances y completar entrega

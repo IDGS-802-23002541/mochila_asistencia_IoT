@@ -17,23 +17,27 @@ namespace CangureraInteligente.DTOs;
 public class FlexibleUnixDateTimeConverter : JsonConverter<DateTime>
 {
 	private const long MillisecondsThreshold = 100000000000L;
+	private static readonly DateTime MinReasonableUtc = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+	private static readonly DateTime MaxReasonableUtc = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 	public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
 		if (reader.TokenType == JsonTokenType.Number)
 		{
-			return FromUnix(reader.GetInt64());
+			return FromUnixStrict(reader.GetInt64());
 		}
 		if (reader.TokenType == JsonTokenType.String)
 		{
-			string s = reader.GetString();
-			if (long.TryParse(s, out var result))
+			string text = reader.GetString()?.Trim() ?? string.Empty;
+			if (long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var numericValue))
 			{
-				return FromUnix(result);
+				return FromUnixStrict(numericValue);
 			}
-			if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var result2))
+			if (DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind | DateTimeStyles.AllowWhiteSpaces, out var parsedOffset))
 			{
-				return result2;
+				DateTime utc = parsedOffset.UtcDateTime;
+				EnsureReasonableRange(utc);
+				return utc;
 			}
 		}
 		throw new JsonException($"No se pudo interpretar el valor de fecha/hora (token: {reader.TokenType}).");
@@ -44,12 +48,32 @@ public class FlexibleUnixDateTimeConverter : JsonConverter<DateTime>
 		writer.WriteNumberValue(new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc)).ToUnixTimeSeconds());
 	}
 
-	private static DateTime FromUnix(long value)
+	private static DateTime FromUnixStrict(long value)
 	{
-		if (value < 100000000000L)
+		if (value <= 0)
 		{
-			return DateTimeOffset.FromUnixTimeSeconds(value).UtcDateTime;
+			throw new JsonException("Timestamp Unix inválido: debe ser mayor a cero.");
 		}
-		return DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime;
+
+		DateTime utc;
+		if (Math.Abs(value) < MillisecondsThreshold)
+		{
+			utc = DateTimeOffset.FromUnixTimeSeconds(value).UtcDateTime;
+		}
+		else
+		{
+			utc = DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime;
+		}
+
+		EnsureReasonableRange(utc);
+		return utc;
+	}
+
+	private static void EnsureReasonableRange(DateTime utc)
+	{
+		if (utc < MinReasonableUtc || utc > MaxReasonableUtc)
+		{
+			throw new JsonException($"Timestamp fuera de rango razonable: {utc:O}.");
+		}
 	}
 }
