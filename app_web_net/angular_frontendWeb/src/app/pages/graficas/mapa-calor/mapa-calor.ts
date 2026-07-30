@@ -1,8 +1,7 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import 'leaflet.heat';
 import { ZonaAccesibilidad } from '../models/zona-accesibilidad.model';
-import { ZONAS_MOCK } from '../data/zonas-mock';
 
 @Component({
   selector: 'app-mapa-calor',
@@ -11,24 +10,36 @@ import { ZONAS_MOCK } from '../data/zonas-mock';
   templateUrl: './mapa-calor.html',
   styleUrl: './mapa-calor.css',
 })
-export class MapaCalor implements AfterViewInit, OnDestroy {
-  private map!: L.Map;
-  // FIX: centro del geojson real (~21.0637, -101.5817), no el valor viejo
-  // desalineado que traia el componente (hallazgo colateral, ticket 002).
-  // fitBounds() recentra igual, pero se corrige para no dejar dato muerto.
-  private readonly CENTRO_UTL: L.LatLngExpression = [21.0637, -101.5817];
+export class MapaCalor implements AfterViewInit, OnChanges, OnDestroy {
+  // Ya no hace fetch propio -- recibe las zonas del padre (Graficas),
+  // igual que grafica-iaz / grafica-desglose / interpretacion, para no
+  // duplicar llamadas al API.
+  @Input({ required: true }) zonas: ZonaAccesibilidad[] = [];
 
-  // FIX: se quita el mock aislado (datosMock con 'peso' arbitrario, sin
-  // relacion con el resto del modulo de graficas). Ahora consume
-  // ZonaAccesibilidad, igual que grafica-iaz / grafica-desglose /
-  // interpretacion. TODO: reemplazar ZONAS_MOCK por fetch() a un
-  // endpoint real cuando el backend/Danna lo exponga; mientras tanto
-  // usa el mismo mock compartido del modulo.
-  private zonas: ZonaAccesibilidad[] = ZONAS_MOCK;
+  private map!: L.Map;
+  private heatLayer?: L.Layer;
+  private mapaListo = false;
+
+  // Centro real del geojson (~21.0637, -101.5817). fitBounds() recentra
+  // igual, pero se corrige para no dejar dato muerto (hallazgo colateral,
+  // ticket 002).
+  private readonly CENTRO_UTL: L.LatLngExpression = [21.0637, -101.5817];
 
   ngAfterViewInit(): void {
     this.iniciarMapa();
-    this.pintarMapaCalor();
+    this.mapaListo = true;
+    // Si las zonas ya llegaron antes de que el mapa terminara de montarse
+    // (poco probable, pero por si acaso), pintar de una vez.
+    if (this.zonas.length) this.pintarMapaCalor();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // El fetch del padre es asincrono -- zonas puede llegar DESPUES de
+    // ngAfterViewInit. Aqui se (re)pinta el heatmap cada vez que zonas
+    // cambia, siempre que el mapa ya este listo.
+    if (changes['zonas'] && this.mapaListo && this.zonas.length) {
+      this.pintarMapaCalor();
+    }
   }
 
   private iniciarMapa(): void {
@@ -50,15 +61,19 @@ export class MapaCalor implements AfterViewInit, OnDestroy {
   }
 
   private pintarMapaCalor(): void {
-    // El peso del heatmap ahora es el IAZ real de cada zona (entre mas
-    // alto el IAZ, mas caliente se ve la zona), en vez del 'peso'
-    // arbitrario que traia el mock viejo.
+    // Si ya habia una capa de calor pintada (ej. zonas se actualizo de
+    // nuevo), se quita antes de pintar la nueva -- evita capas
+    // duplicadas encimadas.
+    if (this.heatLayer) {
+      this.map.removeLayer(this.heatLayer);
+    }
+    // Peso del heatmap = IAZ real de cada zona.
     const puntos: [number, number, number][] = this.zonas.map((z) => [
       z.lat,
       z.lon,
       z.iaz,
     ]);
-    (L as any)
+    this.heatLayer = (L as any)
       .heatLayer(puntos, {
         radius: 30,
         blur: 20,
