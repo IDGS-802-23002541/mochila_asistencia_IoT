@@ -1,0 +1,70 @@
+<div class="page-body">
+  <div class="form-header">
+    <h2 class="section-title">Nuevo producto</h2>
+    <p class="form-subtitulo">Registra un nuevo producto en el sistema</p>
+  </div>
+
+  <form class="form-card" [formGroup]="form" (ngSubmit)="guardar()">
+
+    <p class="form-seccion-titulo">Información general</p>
+
+    <div class="form-grid">
+        <div class="form-field full">
+          <label for="nombre">Nombre del producto <span class="req">*</span></label>
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Bastón inteligente V2" />
+          @if (f['nombre'].touched && f['nombre'].invalid) {
+            <span class="form-error">Este campo es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="categoria">Categoría <span class="req">*</span></label>
+          <input id="categoria" type="text" formControlName="categoria" placeholder="Ej. Dispositivo IoT" />
+          @if (f['categoria'].touched && f['categoria'].invalid) {
+            <span class="form-error">Este campo es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="precio">Precio <span class="req">*</span></label>
+          <input id="precio" type="number" formControlName="precio" placeholder="0.00" />
+          @if (f['precio'].touched && f['precio'].invalid) {
+            <span class="form-error">Este campo es obligatorio</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="stock">Stock disponible</label>
+          <input id="stock" type="number" formControlName="stock" placeholder="0" />
+        </div>
+
+        <div class="form-field full">
+          <label for="descripcion">Descripción</label>
+          <input id="descripcion" type="text" formControlName="descripcion" placeholder="Breve descripción del producto" />
+        </div>
+
+    </div>
+
+    <p class="form-seccion-titulo">Estado</p>
+
+    <div class="form-grid">
+      <div class="form-field toggle-field">
+        <label>Activo</label>
+        <label class="switch">
+          <input type="checkbox" formControlName="estado_Activo" />
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-texto">
+          {{ f['estado_Activo'].value ? 'Sí' : 'No' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-acciones">
+      <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="btn-guardar" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Crear producto' }}
+      </button>
+    </div>
+  </form>
+</div>

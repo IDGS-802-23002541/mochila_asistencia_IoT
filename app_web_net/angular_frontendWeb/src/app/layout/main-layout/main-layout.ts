@@ -1,39 +1,80 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { LayoutService } from '../../interfaces/layout';
+import { Topbar } from '../topbar/topbar';
 
 // Definimos la interfaz con los nuevos tipos de iconos válidos tecnicamente
 // son los iconos que se ven
 interface NavItem {
   label: string;
+  titulo: string;
   route: string;
-  icon: 'inicio' | 'dispositivos' | 'mapa' | 'graficas' | 'instituciones' | 'proveedores' | 'materia-prima';
+  icon: 'inicio' | 'dispositivos' | 'organizaciones' | 'mapa' | 'materia-prima' | 'proveedores' | 'productos' | 'graficas';
+  children?: string[];
 }
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterOutlet, Topbar],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
 })
 export class MainLayout {
   private router = inject(Router);
+  layout = inject(LayoutService);
 
-  // Arreglo de navegación con las nuevas rutas incluidas quedan pendientes las de mena
  navItems: NavItem[] = [
-  { label: 'Inicio', route: '/inicio', icon: 'inicio' },
-  { label: 'Dispositivos', route: '/dispositivos', icon: 'dispositivos' },
-  { label: 'Gráficas', route: '/graficas', icon: 'graficas' },
-  { label: 'Mapa de Calor', route: '/analitica/mapa-calor', icon: 'mapa' },
-
-  // Estos se quedarán listos para cuando tengamos las páginas correspondientes
-  { label: 'Instituciones', route: '/instituciones', icon: 'instituciones' },
-  { label: 'Proveedores', route: '/proveedores', icon: 'proveedores' },
-  { label: 'Materia Prima', route: '/materia-prima', icon: 'materia-prima' }
+  { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
+  { label: 'Dispositivos', titulo: 'DISPOSITIVOS', route: '/dispositivos', icon: 'dispositivos' },
+  { label: 'Organizaciones', titulo: 'ORGANIZACIONES', route: '/organizaciones', icon: 'organizaciones' },
+  { label: 'Mapa', titulo: 'MAPA DE CALOR', route: '/analitica/mapa-calor', icon: 'mapa' },
+  { label: 'Materia Prima', titulo: 'MATERIA PRIMA', route: '/materiaprima', icon: 'materia-prima' },
+  { label: 'Proveedores', titulo: 'PROVEEDORES', route: '/proveedores', icon: 'proveedores' },
+  { label: 'Productos', titulo: 'PRODUCTOS', route: '/productos', icon: 'productos' },
+  { label: 'Gráficas', titulo: 'GRÁFICAS', route: '/graficas', icon: 'graficas' },
 ];
+
+  private extraTitles: Record<string, string> = {
+    '/ajustes': 'AJUSTES',
+  };
+
+  constructor() {
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(e => this.actualizarTitulo(e.urlAfterRedirects));
+
+    this.actualizarTitulo(this.router.url);
+  }
+
+  isActive(item: NavItem): boolean {
+    const url = this.router.url;
+    const matchesRoute = item.route === '/' ? url === '/' : url.startsWith(item.route);
+    const matchesChild = item.children?.some(c => url.startsWith(c)) ?? false;
+    return matchesRoute || matchesChild;
+  }
+
+  toggleSidebar(): void {
+    this.layout.toggleSidebar();
+  }
+
+  private actualizarTitulo(url: string): void {
+    const navItem = this.navItems.find(i =>
+      i.route === '/'
+        ? url === '/'
+        : url.startsWith(i.route) || (i.children?.some(c => url.startsWith(c)) ?? false)
+    );
+    if (navItem) {
+      this.layout.setTitle(navItem.titulo);
+      return;
+    }
+    const extraKey = Object.keys(this.extraTitles).find(route => url.startsWith(route));
+    this.layout.setTitle(extraKey ? this.extraTitles[extraKey] : '');
+  }
+
   logout(): void {
-    // TODO: limpiar token / sesión real aquí si es que la hacemos
     this.router.navigate(['/login']);
   }
 }

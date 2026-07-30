@@ -1,7 +1,178 @@
 <div class="pagina-analitica">
+  <div class="analitica-header">
+    <div>
+      <h1>Mapa de Calor</h1>
+      <p>Visualización inteligente de zonas de riesgo y eventos detectados</p>
+    </div>
+    <div class="estado-mapa">
+      <span class="punto-activo"></span>
+      Monitoreo activo
+    </div>
+  </div>
+
   <div class="tarjeta-mapa">
-    <h3 class="titulo-mapa">Mapa de Calor — Zonas de Riesgo</h3>
-    <p class="subtitulo-mapa">Campus UTL · Historial de eventos detectados</p>
-    <div id="mapa-calor" class="lienzo-mapa"></div>
+
+    <div class="mapa-header">
+      <div>
+        <h3>Zonas de Riesgo</h3>
+        <p>Campus UTL · Historial de eventos detectados</p>
+      </div>
+
+      <button class="btn-filtro" (click)="mostrarFiltros=!mostrarFiltros">
+        {{mostrarFiltros ? 'Ocultar filtros':'Filtrar'}}
+      </button>
+    </div>
+
+
+    @if(mostrarFiltros){
+
+    <div class="filtros">
+
+      <div class="filtro-item">
+
+        <label>
+          Zona
+        </label>
+
+        <select [(ngModel)]="filtroZona" (change)="aplicarFiltros()">
+
+          <option value="">
+            Todas
+          </option>
+
+          <option value="Entrada">
+            Entrada
+          </option>
+
+          <option value="Laboratorios">
+            Laboratorios
+          </option>
+
+          <option value="Estacionamiento">
+            Estacionamiento
+          </option>
+
+        </select>
+
+      </div>
+
+
+
+      <div class="filtro-item">
+
+        <label>
+          Nivel de riesgo
+        </label>
+
+        <select [(ngModel)]="filtroRiesgo" (change)="aplicarFiltros()">
+
+          <option value="">
+            Todos
+          </option>
+
+          <option value="Alto">
+            Alto
+          </option>
+
+          <option value="Medio">
+            Medio
+          </option>
+
+          <option value="Bajo">
+            Bajo
+          </option>
+
+        </select>
+
+      </div>
+
+
+
+      <button class="btn-limpiar" (click)="limpiarFiltros()">
+
+        Limpiar filtros
+
+      </button>
+
+
+    </div>
+
+    }
+
+
+
+    <div class="mapa-info">
+
+
+      <div class="indicador">
+
+        <span>
+          Eventos detectados
+        </span>
+
+        <strong>
+          {{eventosFiltrados.length}}
+        </strong>
+
+      </div>
+
+
+
+      <div class="indicador">
+
+        <span>
+          Zonas críticas
+        </span>
+
+        <strong>
+          {{zonasCriticas}}
+        </strong>
+
+      </div>
+
+
+
+      <div class="indicador">
+
+        <span>
+          Dispositivos activos
+        </span>
+
+        <strong>
+          {{dispositivosActivos}}
+        </strong>
+
+      </div>
+
+
+    </div>
+
+
+
+    <div class="leyenda">
+
+      <div>
+        <span class="alto"></span>
+        Alto riesgo
+      </div>
+
+      <div>
+        <span class="medio"></span>
+        Riesgo medio
+      </div>
+
+      <div>
+        <span class="bajo"></span>
+        Bajo riesgo
+      </div>
+
+    </div>
+
+
+
+    <div id="mapa-calor" class="lienzo-mapa">
+    </div>
+
+
   </div>
 </div>
