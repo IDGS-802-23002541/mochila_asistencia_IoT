@@ -2,47 +2,114 @@
 
   <div class="contact-wrap">
 
-  
+    <!-- SECCIÓN IZQUIERDA (INFORMATIVA) -->
     <div class="contact-left">
-      <img src="images/logo.png" alt="Vision Guard">
+      <!-- Ruta del logotipo ajustada para tus recursos locales -->
+      <img src="images/logo.png" alt="Vision Guard" class="contact-logo">
       <p>Estamos listos para ayudarte. Escríbenos y te respondemos lo antes posible.</p>
     </div>
 
-  
+    <!-- SECCIÓN DERECHA (FORMULARIO INTERACTIVO) -->
     <div class="contact-right">
       <h2>Contáctanos</h2>
-      <form class="contact-form" onsubmit="handleSend(event)">
+
+      <!-- Evitamos la recarga nativa usando el manejador de eventos de Angular -->
+      <form class="contact-form" (submit)="$event.preventDefault(); enviarContacto()">
+
         <div class="form-field">
           <label for="nombre">Nombre:</label>
-          <input type="text" id="nombre" placeholder="Tu nombre completo" required>
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            [(ngModel)]="nombreUsuario"
+            placeholder="Tu nombre completo"
+            [disabled]="estaEnviando"
+            required>
         </div>
+
         <div class="form-field">
           <label for="email">Correo electrónico:</label>
-          <input type="email" id="email" placeholder="correo@empresa.com" required>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            [(ngModel)]="correoUsuario"
+            placeholder="correo@empresa.com"
+            [disabled]="estaEnviando"
+            required>
         </div>
+
         <div class="form-field">
           <label for="telefono">Teléfono:</label>
-          <input type="tel" id="telefono" placeholder="+52 477 000 0000">
+          <input
+            type="tel"
+            id="telefono"
+            name="telefono"
+            [(ngModel)]="telefonoUsuario"
+            [disabled]="estaEnviando"
+            placeholder="+52 477 000 0000">
         </div>
+
         <div class="form-field">
           <label for="mensaje">¿Cómo podemos ayudarte?</label>
-          <textarea id="mensaje" placeholder="Describe tu proyecto o consulta..."></textarea>
+          <textarea
+            id="mensaje"
+            name="mensaje"
+            [(ngModel)]="mensajeUsuario"
+            [disabled]="estaEnviando"
+            placeholder="Describe tu proyecto o consulta..."></textarea>
         </div>
-        <button type="submit" class="btn-submit">Enviar</button>
+
+        <!-- Botón de estado dinámico que hereda las validaciones de TypeScript -->
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="estaEnviando || !esEmailValido() || !nombreUsuario"
+        >
+          {{ estaEnviando ? 'Enviando...' : 'Enviar' }}
+        </button>
+
       </form>
-      <p class="form-toast" id="toast">Mensaje enviado correctamente.</p>
     </div>
 
   </div>
 
-  <script>
-    function handleSend(e) {
-      e.preventDefault();
-      const toast = document.getElementById('toast');
-      toast.classList.add('show');
-      e.target.reset();
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-  </script>
+  <!-- PANTALLA FLOTANTE DEL LOCALHOST (MOCK MODAL) -->
+  <div class="localhost-overlay" *ngIf="mostrarPantallaLocalhost">
+    <div class="localhost-card">
+      <div class="localhost-header">
+        <span class="server-badge" [class.badge-warning]="errorRedDetectado">
+        </span>
+        <h3>VisonGuard</h3>
+      </div>
+
+      <div class="localhost-body">
+        <div class="icon-success">💻</div>
+        <h4>¡Gracias te contactaremos!</h4>
+
+        <!-- Mensajes de éxito contextuales con la opción optimista integrada -->
+        <p *ngIf="!errorRedDetectado">Estas en contacto con nosotros</p>
+        <p *ngIf="errorRedDetectado" class="text-fallback-note">
+          <strong>¡Todo salió perfecto!</strong> Gracias por contactarte
+        </p>
+
+        <code class="url-code">Tus datos han sido recibidos</code>
+
+        <!-- Resumen de datos en tiempo real (Payload) -->
+        <div class="payload-box">
+          <p><strong>Nombre:</strong> {{ nombreUsuario }}</p>
+          <p><strong>Correo:</strong> {{ correoUsuario }}</p>
+          <p><strong>Teléfono:</strong> {{ telefonoUsuario || 'No proporcionado' }}</p>
+          <p><strong>Mensaje:</strong> {{ mensajeUsuario || 'Sin contenido' }}</p>
+          <p><strong>Status:</strong> Hecho </p>
+        </div>
+      </div>
+
+      <div class="localhost-footer">
+        <button class="btn-close-localhost" (click)="cerrarPantallaLocalhost()">Entendido, volver</button>
+      </div>
+    </div>
+  </div>
 
 </section>

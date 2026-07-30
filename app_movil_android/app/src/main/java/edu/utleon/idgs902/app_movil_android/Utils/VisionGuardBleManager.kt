@@ -3,21 +3,20 @@ package edu.utleon.idgs902.app_movil_android.Utils
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import java.util.*
+import java.util.UUID
 
 /**
  * =============================================================================
  * PROYECTO   : Vision Guard — Mochila de Navegación Aumentada
  * ARCHIVO    : VisionGuardBleManager.kt
- * DESCRIPCIÓN: Controlador Android para escanear, conectar y enviar
- * comandos seriales UART (START / STOP) por BLE al ESP32.
+ * DESCRIPCIÓN: Controlador Android para escanear y conectar al esp32
+ * VERSION: 2.0 Se dejan los métodos unicos para la conexión BLE con el esp32 únicamente sin UART
  * =============================================================================
  */
 @SuppressLint("MissingPermission")
@@ -29,15 +28,11 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
     }
 
     private var bluetoothGatt: BluetoothGatt? = null
-    private var rxCharacteristic: BluetoothGattCharacteristic? = null
     private var isConnected = false
 
     companion object {
         private const val TAG = "VisionGuardBleManager"
 
-        // UUIDs estándar del servicio UART de perfil nórdico (Soportados por la ESP32)
-        private val SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
-        private val RX_CHAR_UUID = UUID.fromString("6E400002-B5A3-F393-E0A9-E50E24DCCA9E") // Escritura (RX de la ESP32)
     }
 
     interface BleStateListener {
@@ -45,7 +40,6 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
         fun onDesconectado()
         fun onDispositivoEncontrado(nombre: String, mac: String)
         fun onError(mensaje: String)
-        fun onAckRecibido(comando: String)
     }
 
     /**
@@ -68,6 +62,13 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
         // Pasamos filtros en null para recibir todos los paquetes de publicidad del aire
         // y filtrarlos manualmente por código, resolviendo el problema de compatibilidad de marcas.
         scanner.startScan(null, configuraciones, scanCallback)
+        // Busca por 10 segundos
+        Handler(Looper.getMainLooper()).postDelayed({
+            detenerEscaneo()
+            if (!isConnected) {
+                listener.onError("No se encontró ninguna mochila Vision Guard.")
+            }
+        }, 10000) // 10 segundos
     }
 
     /**
@@ -93,7 +94,8 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
             // Filtrado manual altamente tolerante (Busca coincidencias parciales sin distinguir mayúsculas)
             if (nombreDispositivo != null) {
                 val nombreUpper = nombreDispositivo.uppercase()
-                if (nombreUpper.contains("VISIONGUARD") || nombreUpper.contains("SAFEPATH")) {
+                // Filtro nombre esp32
+                if (nombreDispositivo?.equals("vision_guard_esp32", true) == true) {
                     Log.d(TAG, "¡MOCHILA LOCALIZADA CON ÉXITO!: $nombreDispositivo [${device.address}]")
                     listener.onDispositivoEncontrado(nombreDispositivo, device.address)
                     detenerEscaneo()
@@ -119,25 +121,22 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
             bluetoothGatt = null
         }
 
-        val dispositivo = bluetoothAdapter?.getRemoteDevice(direccionMac) ?: return
+        val dispositivo = bluetoothAdapter?.getRemoteDevice(direccionMac)
+        if (dispositivo == null) {
+            listener.onError("Dirección MAC inválida.")
+            return
+        }
         Log.d(TAG, "Conectando con la mochila por GATT a la MAC: $direccionMac...")
 
         // 2. Usar la bandera de autoConnect en false para ejecución inmediata
         bluetoothGatt = dispositivo.connectGatt(context, false, gattCallback)
-//        val device = bluetoothAdapter?.getRemoteDevice(direccionMac)
-//        if (device == null) {
-//            listener.onError("Dirección MAC del dispositivo no válida")
-//            return
-//        }
-//        Log.d(TAG, "Conectando con la mochila por GATT a la MAC: $direccionMac...")
-//        bluetoothGatt = device.connectGatt(context, false, gattCallback)
     }
 
     /**
      * Cierra de forma segura el enlace activo con el hardware
      */
     fun desconectar() {
-        limpiarConexion()
+        bluetoothGatt?.disconnect()
     }
 
     private val gattCallback = object : BluetoothGattCallback() {
@@ -146,7 +145,6 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     Log.i(TAG, "Conexión física establecida. Buscando canales de servicio...")
                     isConnected = true
-                    Handler(Looper.getMainLooper()).post { listener.onConectado() }
                     gatt.discoverServices()
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     Log.i(TAG, "Mochila desconectada.")
@@ -160,83 +158,46 @@ class VisionGuardBleManager(private val context: Context, private val listener: 
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                val service = gatt.getService(SERVICE_UUID)
-                if (service != null) {
-                    rxCharacteristic = service.getCharacteristic(RX_CHAR_UUID)
-                    Log.i(TAG, "Canal de escritura serial UART BLE listo para enviar comandos.")
-                } else {
-                    Log.e(TAG, "El servicio UART de perfil nórdico no está disponible en este dispositivo.")
-                }
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                listener.onError("No fue posible descubrir los servicios BLE.")
+                return
             }
-        }
-
-        override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
-            super.onCharacteristicChanged(gatt, characteristic)
-
-            // 1. Extraer los bytes crudos enviados por la mochila
-            val data = characteristic.value ?: return
-            val mensajeRecibido = String(data, Charsets.UTF_8).trim()
-
-            Log.d(TAG, "[Bluetooth] Mensaje recibido del ESP32: '$mensajeRecibido'")
-
-            // 2. Despachar el mensaje al hilo principal usando el Listener delegado
-            if (mensajeRecibido == "ACK_START:OK" || mensajeRecibido == "ACK_STOP:OK") {
+            val servicio = gatt.getService(
+                UUID.fromString("12345678-1234-5678-1234-56789abcdef0")
+            )
+            if (servicio != null) {
+                Log.i(TAG, "Servicio Vision Guard encontrado.")
                 Handler(Looper.getMainLooper()).post {
-                    listener.onAckRecibido(mensajeRecibido)
+                    listener.onConectado()
                 }
+            } else {
+                listener.onError("El dispositivo encontrado no es una mochila Vision Guard.")
+                gatt.disconnect()
             }
         }
-
     }
-
-    /**
-     * Envía comando de Inicio ("START:recorridoId") al ESP32
-     */
-    fun enviarInicioRecorrido(recorridoId: Int) {
-        val comando = "START:$recorridoId"
-        enviarMensajeRaw(comando)
-        Log.d(TAG, "Comando serial enviado: $comando")
-    }
-
-    /**
-     * Envía comando de Parada ("STOP") al ESP32
-     */
-    fun enviarDetenerRecorrido() {
-        val comando = "STOP"
-        enviarMensajeRaw(comando)
-        Log.d(TAG, "Comando serial enviado: STOP")
-    }
-
-    /**
-     * Escribe bytes de datos UTF-8 directamente sobre la característica del ESP32
-     */
-    private fun enviarMensajeRaw(mensaje: String) {
-        val characteristic = rxCharacteristic
-        val gatt = bluetoothGatt
-        if (characteristic == null || gatt == null || !isConnected) {
-            listener.onError("El dispositivo móvil no está conectado a la mochila por Bluetooth")
-            return
-        }
-
-        val bytes = mensaje.toByteArray(Charsets.UTF_8)
-        characteristic.value = bytes
-        characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-        gatt.writeCharacteristic(characteristic)
-    }
-
     /**
      * Libera los recursos de hardware utilizados por el adaptador GATT
      */
     private fun limpiarConexion() {
         isConnected = false
-        rxCharacteristic = null
+
+        try {
+            bluetoothGatt?.disconnect()
+        } catch (_: Exception) {
+        }
         try {
             bluetoothGatt?.close()
-        } catch (e: Exception) {
-            // Se ignoran fallos menores al liberar sockets cerrados
+        } catch (_: Exception) {
         }
+
         bluetoothGatt = null
-        Handler(Looper.getMainLooper()).post { listener.onDesconectado() }
+
+        Handler(Looper.getMainLooper()).post {
+            listener.onDesconectado()
+        }
+
+        Log.d(TAG, "Conexión BLE liberada.")
     }
 }
+
