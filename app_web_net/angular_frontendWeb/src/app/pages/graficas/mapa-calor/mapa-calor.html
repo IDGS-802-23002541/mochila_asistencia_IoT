@@ -1,7 +1,29 @@
 <div class="pagina-analitica">
+  <div class="analitica-header">
+    <div>
+      <h1>Mapa de Calor</h1>
+      <p>Visualización inteligente de zonas de riesgo y eventos detectados</p>
+    </div>
+    <div class="estado-mapa">
+      <span class="punto-activo"></span>
+      Monitoreo activo
+    </div>
+  </div>
+
   <div class="tarjeta-mapa">
-    <h3 class="titulo-mapa">Mapa de Calor — Zonas de Riesgo</h3>
-    <p class="subtitulo-mapa">Campus UTL · Historial de eventos detectados</p>
+    <div class="mapa-header">
+      <div>
+        <h3>Zonas de Riesgo</h3>
+        <p>Campus UTL · IAZ calculado por zona</p>
+      </div>
+    </div>
+
+    <div class="leyenda">
+      <div><span class="alto"></span> Alto riesgo</div>
+      <div><span class="medio"></span> Riesgo medio</div>
+      <div><span class="bajo"></span> Bajo riesgo</div>
+    </div>
+
     <div id="mapa-calor" class="lienzo-mapa"></div>
   </div>
 </div>

@@ -15,7 +15,7 @@ background: #f5f6f8;
 display: flex;
 flex-direction: column;
 align-items: center;
-padding: 2rem 1rem;
+padding: 1rem 1rem;
 }
 
 /* STREAMING_CHUNK: Styling the section header and main titles /

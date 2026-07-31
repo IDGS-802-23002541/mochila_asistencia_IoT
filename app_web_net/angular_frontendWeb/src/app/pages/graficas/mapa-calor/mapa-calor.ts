@@ -8,7 +8,7 @@ import { ZonaAccesibilidad } from '../models/zona-accesibilidad.model';
   standalone: true,
   imports: [],
   templateUrl: './mapa-calor.html',
-  styleUrl: './mapa-calor.css',
+  styleUrl: './mapa-calor.css'
 })
 export class MapaCalor implements AfterViewInit, OnChanges, OnDestroy {
   // Ya no hace fetch propio -- recibe las zonas del padre (Graficas),

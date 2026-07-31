@@ -17,10 +17,10 @@ public class EventoDetectado
 
 	public DateTime TimestampEvento { get; set; } = DateTime.UtcNow;
 
-	[Column(TypeName = "decimal(10,8)")]
+	[Column(TypeName = "decimal(9,6)")]
 	public decimal? Latitud { get; set; }
 
-	[Column(TypeName = "decimal(10,8)")]
+	[Column(TypeName = "decimal(9,6)")]
 	public decimal? Longitud { get; set; }
 
 	public bool Geo_Es_Estimado { get; set; }
