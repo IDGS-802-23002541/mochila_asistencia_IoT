@@ -1,14 +1,56 @@
 import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
-import { MapaCalor } from './pages/analitica/mapa-calor/mapa-calor';
+import { Login } from './pages/login/login';
+
+// Componentes del Menú son las importaciones paa que jale las pantallas
+import { Inicio } from './pages/inicio/inicio';
+import { MainLayout } from './layout/main-layout/main-layout';
+import { Ajustes } from './pages/ajustes/ajustes';
+import { Graficas } from './pages/graficas/graficas';
+import { Dispositivos } from './pages/dispositivos/dispositivos';
 
 export const routes: Routes = [
   {
-    path: '',
+    path: 'login',
+    component: Login
+  },
+  {
+    path: 'welcome',
     component: Home
   },
   {
-    path: 'analitica/mapa-calor',
-    component: MapaCalor
+    path: '',
+    component: MainLayout,
+    children: [
+      {
+        path: '',
+        redirectTo: 'inicio',
+        pathMatch: 'full'
+      },
+      {
+        path: 'inicio',
+        component: Inicio
+      },
+      {
+        path: 'graficas/dashboard',
+        component: Graficas
+      },
+      {
+        path: 'graficas',
+        component: Graficas
+      },
+      {
+        path: 'ajustes',
+        component: Ajustes
+      },
+      {
+        path: 'dispositivos',
+        component: Dispositivos },
+
+      // Espacio para las demás páginas nuevas:
+      // { path: 'instituciones', component: Instituciones },
+      // { path: 'proveedores', component: Proveedores },
+      // { path: 'materia-prima', component: MateriaPrima }
+    ]
   }
 ];

@@ -1,3 +1,4 @@
+
 -- =====================================================================
 -- CANGURERA INTELIGENTE - Modelo de Base de Datos v4.2 (FINAL)
 -- SQL Server | Esquema OLTP + OLAP (Cumplimiento académico)
