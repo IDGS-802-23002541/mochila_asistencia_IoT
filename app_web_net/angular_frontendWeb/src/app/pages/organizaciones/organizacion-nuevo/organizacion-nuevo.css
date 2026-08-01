@@ -1,0 +1,263 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f7f8fa;
+}
+
+.main-content {
+  flex: 1;
+  padding: 0;
+}
+
+.page-body {
+  padding: 36px 20px;
+}
+
+/* Centrado del contenido */
+.nuevo-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.nuevo-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.nuevo-icono {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1c3a57, #7fc2b5);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1c3a57;
+  margin: 0 0 2px;
+  letter-spacing: -0.2px;
+}
+
+.nuevo-subtitulo {
+  font-size: 12.5px;
+  color: #8993a4;
+  margin: 0;
+}
+
+.nuevo-card {
+  background: #fff;
+  border: 1px solid #e7eaf0;
+  border-radius: 16px;
+  padding: 30px 32px;
+  box-shadow: 0 6px 20px rgba(28, 58, 87, 0.06);
+}
+
+.form-seccion-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1c3a57;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 26px 0 16px;
+}
+
+.form-seccion-titulo::before {
+  content: "";
+  width: 10px;
+  height: 2px;
+  background: #7fc2b5;
+  border-radius: 2px;
+}
+
+.form-seccion-titulo:first-child {
+  margin-top: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field.full {
+  grid-column: 1 / -1;
+}
+
+.form-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1c3a57;
+}
+
+.req {
+  color: #e24b4a;
+}
+
+.form-field input[type="text"],
+.form-field input[type="email"],
+.form-field input[type="password"],
+.form-field select {
+  border: 1px solid #dde1e8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #1f2937;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background: #fbfbfc;
+  font-family: inherit;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  border-color: #7fc2b5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(127, 194, 181, 0.18);
+}
+
+.form-error {
+  font-size: 11px;
+  color: #e24b4a;
+}
+
+.form-hint {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Toggle switch */
+.toggle-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.toggle-field label:first-child {
+  min-width: 130px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 21px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #d1d5db;
+  border-radius: 999px;
+  transition: 0.2s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.switch input:checked + .slider {
+  background-color: #1c3a57;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(17px);
+}
+
+.toggle-texto {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Acciones */
+.nuevo-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid #eef0f3;
+}
+
+.btn-cancelar,
+.btn-guardar {
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s ease;
+}
+
+.btn-cancelar {
+  background: #fff;
+  border: 1px solid #dde1e8;
+  color: #6b7280;
+}
+
+.btn-cancelar:hover {
+  background: #f8f9fb;
+}
+
+.btn-guardar {
+  background: #1c3a57;
+  color: #fff;
+}
+
+.btn-guardar:hover {
+  background: #7fc2b5;
+  color: #1c3a57;
+}
+
+.btn-guardar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .page-body {
+    padding: 24px 16px;
+  }
+  .nuevo-card {
+    padding: 22px 20px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

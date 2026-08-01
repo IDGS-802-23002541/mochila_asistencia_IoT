@@ -4,8 +4,7 @@
 # DESCRIPCIÓN: Controlador asíncrono que orquesta en paralelo la inicialización
 #              vía BLE, detección de eventos de catálogo (Caída, Obstáculos),
 #              memoria de ruta y cierre seguro a través del botón BOOT (GPIO 0).
-# VERSIÓN    : 3.3 (Corroborar implementación correcta de métodos gps_manager.py
-#				y eliminación de array coordenadas, ya que se maneja en el back)
+# VERSIÓN    : 3.4 (correccion flujo de tareas con el GPS)
 # =============================================================================
 
 import uasyncio as asyncio
@@ -28,10 +27,10 @@ from led_rgb import LedRGBManager
 # CONFIGURACIÓN OPERATIVA (Ajustada con WiFi local y Broker HiveMQ)
 # ─────────────────────────────────────────────────────────────────────────────
 REDES_WIFI = [
+    ("Catasi", "papaya10"), 
     ("INFINITUM8536_2.4", "4696601711"),
     ("POCO_X7_Pro", "123goner456789"),
     ("A54 de Arleth", "12345678"),
-    ("CATA", "papantla"), 
 ]
 
 # Configuración del Broker de Diego (HiveMQ Cloud SSL en puerto 8883)
@@ -257,8 +256,9 @@ def on_comando(topico, mensaje):
         estado["recorrido_id"] = recorrido
         estado["recorrido_activo"] = True
         asyncio.create_task(led.parpadear_verde())
+        
         print(f"[Sistema] Recorrido {recorrido} iniciado.")
-        actuadores.reproducir_audio(5)
+        actuadores.reproducir_audio(6)
     if accion == "detener":
         estado["solicitud_cierre"] = True
         print("[Sistema] Solicitud de finalización recibida.")
@@ -351,71 +351,94 @@ async def loop_sensores():
     from utime import ticks_ms, ticks_diff
     
     while True:
-        if estado["silenciado"]:
-            await asyncio.sleep(0.5)
-            continue
-
-        resumen = sensores.obtener_resumen_global()
-        estado["ultimo_resumen"] = resumen
-
-        dist = resumen.get("distancia_cm")
-        ir_izq = resumen.get("ir_izq")
-        ir_der = resumen.get("ir_der")
-        caida = resumen.get("caida")  # True si el tropiezo supera 1.5G
-
-        # Alerta acústica si el peligro está a menos de 30 cm
-        actuadores.actualizar_alerta_distancia(dist)
-
-        # Activación rápida de la vibración (Motor háptico)
-        if (dist is not None and dist <= 50.0) or ir_izq or ir_der or caida:
-            actuadores.activar_alerta_haptica()
-        else:
-            actuadores.desactivar_alerta_haptica()
-
-        # Evaluación de Alertas Físicas por Voz e Inyección Inmediata de Eventos MQTT
-        # (Esto solo corre si el usuario está realizando un recorrido activo)
-        tiempo_actual = ticks_ms()
-        if ticks_diff(tiempo_actual, ultimo_tiempo_alerta_voz) >= INTERVALO_ALERTAS_VOZ_MS:
+        try:
+            # Esperar hasta que exista un recorrido activo
+            if not estado["recorrido_activo"]:
+                actuadores.actualizar_alerta_distancia(None)
+                actuadores.desactivar_alerta_haptica()
+                await asyncio.sleep(0.5)
+                continue
             
-            # Prioridad 1: Impacto/Tropiezo (Catálogo Id 4: Caida_Detectada — Crítica)
-            if caida:
-                actuadores.reproducir_audio(ActuatorBox.PISTA_CAIDA_DETECTADA)
-                # Obtenemos un cálculo de G aproximado
-                try:
-                    ax, ay, az = sensores._mpu.accel.xyz
-                    g_leidos =  math.sqrt(ax**2 + ay**2 + az**2 )/9.80665
-                except:
-                    g_leidos = 1.5
-                publicar_evento_anomalo(tipo_evento_id=4, fuerza_g=round(g_leidos, 2))
-                ultimo_tiempo_alerta_voz = tiempo_actual
-                await asyncio.sleep(2.0) # Retardo para evitar rebote de impacto
+            if estado["silenciado"]:
+                await asyncio.sleep(0.5)
+                continue
 
-            # Prioridad 2: Obstáculo frontal detectado (Catálogo Id 2: Obstaculo — Baja)
-            elif dist is not None and dist <= DISTANCIA_ALERTA_FRONTAL_CM:
-                actuadores.reproducir_audio(ActuatorBox.PISTA_OBSTACULO_FRONTAL)
-                publicar_evento_anomalo(tipo_evento_id=2)
-                ultimo_tiempo_alerta_voz = tiempo_actual
+            resumen = sensores.obtener_resumen_global()
+            estado["ultimo_resumen"] = resumen
 
-            # Prioridad 3: Obstáculo Lateral Izquierdo (Catálogo Id 2: Obstaculo — Baja)
-            elif ir_izq:
-                actuadores.reproducir_audio(ActuatorBox.PISTA_OBSTACULO_IZQ)
-                publicar_evento_anomalo(tipo_evento_id=2)
-                ultimo_tiempo_alerta_voz = tiempo_actual
+            dist = resumen.get("distancia_cm")
+            ir_izq = resumen.get("ir_izq")
+            ir_der = resumen.get("ir_der")
+            caida = resumen.get("caida")  # True si el tropiezo supera 1.5G
 
-            # Prioridad 4: Obstáculo Lateral Derecho (Catálogo Id 2: Obstaculo — Baja)
-            elif ir_der:
-                actuadores.reproducir_audio(ActuatorBox.PISTA_OBSTACULO_DER)
-                publicar_evento_anomalo(tipo_evento_id=2)
-                ultimo_tiempo_alerta_voz = tiempo_actual
+            # Alerta acústica si el peligro está a menos de 30 cm
+            actuadores.actualizar_alerta_distancia(dist)
 
+            # Activación rápida de la vibración (Motor háptico)
+            if (dist is not None and dist <= 50.0) or ir_izq or ir_der or caida:
+                actuadores.activar_alerta_haptica()
+            else:
+                actuadores.desactivar_alerta_haptica()
+
+            # Evaluación de Alertas Físicas por Voz e Inyección Inmediata de Eventos MQTT
+            # (Esto solo corre si el usuario está realizando un recorrido activo)
+            tiempo_actual = ticks_ms()
+            if ticks_diff(tiempo_actual, ultimo_tiempo_alerta_voz) >= INTERVALO_ALERTAS_VOZ_MS:
+                
+                # Prioridad 1: Impacto/Tropiezo 
+                if caida:
+                    # Obtenemos un cálculo de G aproximado
+                    try:
+                        ax, ay, az = sensores._mpu.accel.xyz
+                        g_leidos =  math.sqrt(ax**2 + ay**2 + az**2 )/9.80665
+                    except:
+                        g_leidos = 1.5
+                    if g_leidos >= 2.5:
+                        actuadores.reproducir_audio(ActuatorBox.PISTA_CAIDA_DETECTADA)
+                        publicar_evento_anomalo(tipo_evento_id=4, fuerza_g=round(g_leidos, 2))
+                    else:
+                        actuadores.reproducir_audio(ActuatorBox.PISTA_TROPIEZO_DETECTADO)
+                        publicar_evento_anomalo(tipo_evento_id=5, fuerza_g=round(g_leidos, 2))
+                    ultimo_tiempo_alerta_voz = tiempo_actual
+                    await asyncio.sleep(2.0) # Retardo para evitar rebote de impacto
+
+                # Prioridad 2: Obstáculo frontal detectado (Catálogo Id 2: Obstaculo — Baja)
+                elif dist is not None and dist <= DISTANCIA_ALERTA_FRONTAL_CM:
+                    actuadores.reproducir_audio(ActuatorBox.PISTA_OBSTACULO_FRONTAL)
+                    publicar_evento_anomalo(tipo_evento_id=2)
+                    ultimo_tiempo_alerta_voz = tiempo_actual
+
+                # Prioridad 3: Obstáculo Lateral Izquierdo (Catálogo Id 2: Obstaculo — Baja)
+                elif ir_izq:
+                    actuadores.reproducir_audio(ActuatorBox.PISTA_OBSTACULO_IZQ)
+                    publicar_evento_anomalo(tipo_evento_id=2)
+                    ultimo_tiempo_alerta_voz = tiempo_actual
+
+                # Prioridad 4: Obstáculo Lateral Derecho (Catálogo Id 2: Obstaculo — Baja)
+                elif ir_der:
+                    actuadores.reproducir_audio(ActuatorBox.PISTA_OBSTACULO_DER)
+                    publicar_evento_anomalo(tipo_evento_id=2)
+                    ultimo_tiempo_alerta_voz = tiempo_actual
+        except Exception as e:
+            print("[Sensores] Error:", e)
+            
         await asyncio.sleep(0.2)  # Muestreo a alta velocidad (200 ms)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CORUTINA 2 — Manjejo continuo de GPS
 # ─────────────────────────────────────────────────────────────────────────────
 async def loop_gps():
+    fix_reportado = False
+
     while True:
         gps.leer_uart()
+
+        if gps.tiene_fix and not fix_reportado:
+            pos = gps.obtener_posicion()
+            print(f"[GPS] FIX obtenido ({pos['sats']} satélites)")
+            await led.parpadear_verde_gps(3)
+            fix_reportado = True
+
         await asyncio.sleep_ms(200)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -467,6 +490,8 @@ async def finalizar_recorrido_actual():
         
         print("[MQTT] Publicando payload unificado en 'cangurera/recorrido/finalizar'...")
         mqtt.publicar(TOPICO_FINALIZAR, publicacion_final)
+        
+        actuadores.reproducir_audio(ActuatorBox.PISTA_RECORRIDO_FINALIZAR) #pista 7
         
         # 5. Modificar estados de control de ruta de forma segura
         estado["recorrido_activo"] = False
@@ -537,8 +562,8 @@ async def main():
     led = LedRGBManager()
 
     print("=" * 60)
-    print("      VISION GUARD — FIRMWARE DE CONTROL CENTRAL v3.3")
-    print("      CONFIG: HC-SR04 | MPU6050 | 2x INFRARROJOS | MOTOR | BUZZER")
+    print("      VISION GUARD — FIRMWARE DE CONTROL CENTRAL v3.4")
+    print("      CONFIG: HC-SR04 | MPU6050 | 2x INFRARROJOS  | BUZZER")
     print("=" * 60)
     
     # 1. Función estado mochila por led rgb
@@ -556,8 +581,8 @@ async def main():
                             lat_defecto=GPS_LAT_DEF,
                             lon_defecto=GPS_LON_DEF)
 
-    print("[Boot] Esperando FIX del GPS...")
-    await gps.esperar_fix(timeout_s=30, led=led)
+#     print("[Boot] Esperando FIX del GPS...")
+#     await gps.esperar_fix(timeout_s=30, led=led)
     
     # 4. Conectar Red WiFi local
     wifi_ok = await conectar_wifi()
@@ -576,6 +601,8 @@ async def main():
         estado["mqtt_ok"] = mqtt.conectar()
         if estado["mqtt_ok"]:
             print("[MQTT] Broker conectado correctamente.")
+        else:
+            print("[MQTT] Fallo de conexión:")
            
 
     # 8. Ejecución del pool de tareas en paralelo

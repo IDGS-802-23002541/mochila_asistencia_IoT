@@ -1,0 +1,224 @@
+<div class="detalle-overlay">
+
+  @if (cargando) {
+
+  <div class="estado-mensaje">
+    Cargando dispositivo...
+  </div>
+
+  } @else if (error || !dispositivo) {
+
+  <div class="estado-mensaje error">
+    No se pudo cargar la información del dispositivo.
+  </div>
+
+  } @else {
+
+  <div class="detalle-card">
+
+    <div class="detalle-header">
+
+      <div class="detalle-avatar">
+        📡
+      </div>
+
+      <div class="detalle-titulo">
+
+        <p class="detalle-label">
+          Dirección MAC
+        </p>
+
+        <h2>
+          {{ dispositivo.macAddress }}
+        </h2>
+
+        <span>
+          ID {{ formatearId(dispositivo.id) }}
+        </span>
+
+      </div>
+
+      <div class="badge-estado" [class.badge-activo]="dispositivo.estado === 'Activo'"
+        [class.badge-inactivo]="dispositivo.estado !== 'Activo'">
+
+        {{ dispositivo.estado }}
+
+      </div>
+
+    </div>
+
+
+    <div class="detalle-contenido">
+
+      <div class="bloque-info">
+
+        <h3>
+          Información del dispositivo
+        </h3>
+
+        <div class="fila">
+          <span>
+            MAC Address
+          </span>
+
+          <strong>
+            {{ dispositivo.macAddress }}
+          </strong>
+        </div>
+
+
+        <div class="fila">
+          <span>
+            Estado
+          </span>
+
+          <strong>
+            {{ dispositivo.estado }}
+          </strong>
+        </div>
+
+
+        <div class="fila">
+          <span>
+            Fecha registro
+          </span>
+
+          <strong>
+            {{ dispositivo.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}
+          </strong>
+        </div>
+
+
+        <div class="fila">
+          <span>
+            Última conexión
+          </span>
+
+          <strong>
+            {{ dispositivo.ultimaConexion || 'Sin conexión' }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="bloque-info">
+
+        <h3>
+          Organización asignada
+        </h3>
+
+
+        <div class="fila">
+
+          <span>
+            Nombre
+          </span>
+
+          <strong>
+            {{ obtenerOrganizacion() }}
+          </strong>
+
+        </div>
+
+
+        <div class="fila">
+
+          <span>
+            Organización ID
+          </span>
+
+          <strong>
+            {{ dispositivo.organizacionId }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="detalle-acciones">
+      <button class="btn-cancelar" (click)="cancelar()">
+
+        ← Cancelar
+
+      </button>
+
+      <button class="btn-editar" (click)="editar()">
+
+        ✎ Editar
+
+      </button>
+
+
+      <button class="btn-eliminar" (click)="abrirModalEliminar()">
+
+        🗑 Eliminar
+
+      </button>
+
+    </div>
+
+
+  </div>
+
+  }
+
+</div>
+
+
+@if(mostrarModalEliminar){
+
+<div class="modal-overlay">
+
+  <div class="modal-eliminar">
+
+    <div class="modal-icono">
+      ⚠️
+    </div>
+
+
+    <h2>
+      ¿Eliminar dispositivo?
+    </h2>
+
+
+    <p>
+      Vas a eliminar el dispositivo:
+    </p>
+
+
+    <strong>
+      {{ dispositivo?.macAddress }}
+    </strong>
+
+
+    <p class="modal-aviso">
+      Esta acción no se puede deshacer.
+    </p>
+
+
+    <div class="modal-acciones">
+
+      <button class="btn-cancelar-modal" (click)="cerrarModalEliminar()">
+
+        Cancelar
+
+      </button>
+
+
+      <button class="btn-confirmar-eliminar" (click)="eliminar()" [disabled]="eliminando">
+
+        {{ eliminando ? 'Eliminando...' : 'Sí, eliminar' }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+}
