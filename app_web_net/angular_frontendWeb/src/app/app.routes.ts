@@ -68,6 +68,10 @@ export const routes: Routes = [
 
       // Analítica
       {
+        path: 'analitica/mapa-calor',
+        component: Graficas,
+      },
+      {
         path: 'graficas/dashboard',
         component: Graficas,
       },

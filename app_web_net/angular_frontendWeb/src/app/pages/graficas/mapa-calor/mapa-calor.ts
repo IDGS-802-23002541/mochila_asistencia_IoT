@@ -16,6 +16,14 @@ export class MapaCalor implements AfterViewInit, OnChanges, OnDestroy {
   // duplicar llamadas al API.
   @Input({ required: true }) zonas: ZonaAccesibilidad[] = [];
 
+  get totalEventos(): number {
+    return this.zonas.reduce((acc, z) => acc + z.cantidadEventos, 0);
+  }
+
+  get zonasCriticas(): number {
+    return this.zonas.filter((z) => z.iaz >= 6).length;
+  }
+
   private map!: L.Map;
   private heatLayer?: L.Layer;
   private mapaListo = false;

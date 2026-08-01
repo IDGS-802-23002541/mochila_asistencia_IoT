@@ -20,15 +20,20 @@ export class Graficas implements OnInit {
   // un await/fetch -- hay que usar un signal para que la vista se
   // actualice sola cuando llega el dato real.
   zonas = signal<ZonaAccesibilidad[]>([]);
+  cargando = signal(true);
+  error = signal(false);
 
   async ngOnInit(): Promise<void> {
     try {
       const res = await fetch(`${API_BASE_URL}/api/zonas/accesibilidad`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       this.zonas.set(data);
     } catch (err) {
       console.error('Error cargando zonas desde el API:', err);
-      this.zonas.set([]);
+      this.error.set(true);
+    } finally {
+      this.cargando.set(false);
     }
   }
 }
