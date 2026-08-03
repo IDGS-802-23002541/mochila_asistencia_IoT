@@ -14,6 +14,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+import androidx.recyclerview.widget.LinearLayoutManager
+import edu.utleon.idgs902.app_movil_android.Models.EventoRutaModels
+import edu.utleon.idgs902.app_movil_android.Utils.EventoInternoAdapter
+import edu.utleon.idgs902.app_movil_android.Utils.EventoRecorridoResponse
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 class DetallesRutaActivity : AppCompatActivity() {
 
     private lateinit var apiService: VisionGuardApiService
@@ -56,6 +63,7 @@ class DetallesRutaActivity : AppCompatActivity() {
 
         if (recorridoId != -1) {
             consultarDatosServidor(recorridoId)
+            cargarEventosDeRuta(recorridoId)
         } else {
             // Datos de respaldo por si no viene un ID de red
             lblDetalleFecha.text = intent.getStringExtra("FECHA") ?: "---"
@@ -111,4 +119,40 @@ class DetallesRutaActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun cargarEventosDeRuta(id: Int) {
+    apiService.obtenerEventosRecorrido(id).enqueue(object : Callback<List<EventoRecorridoResponse>> {
+        override fun onResponse(
+            call: Call<List<EventoRecorridoResponse>>,
+            response: Response<List<EventoRecorridoResponse>>
+        ) {
+            if (response.isSuccessful && response.body() != null) {
+                val eventosMapeados = response.body()!!.map { mapearAEventoRuta(it) }
+                rvEventosInternos.layoutManager = LinearLayoutManager(this@DetallesRutaActivity)
+                rvEventosInternos.adapter = EventoInternoAdapter(eventosMapeados)
+            }
+        }
+
+        override fun onFailure(call: Call<List<EventoRecorridoResponse>>, t: Throwable) {
+            // Silencioso por ahora: si falla, el bloque simplemente queda vacío
+        }
+    })
+}
+
+private fun mapearAEventoRuta(e: EventoRecorridoResponse): EventoRutaModels {
+    val color = when (e.severidad) {
+        "Critica" -> "#8B2626"
+        "Media" -> "#705315"
+        else -> "#1E5631" // Baja
+    }
+    val hora = try {
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        val sdf = SimpleDateFormat("hh:mm a", Locale.US)
+        sdf.format(parser.parse(e.timestamp)!!)
+    } catch (_: Exception) {
+        e.timestamp
+    }
+    return EventoRutaModels(tipo = e.tipo, hora = hora, colorHex = color)
+}
+
 }

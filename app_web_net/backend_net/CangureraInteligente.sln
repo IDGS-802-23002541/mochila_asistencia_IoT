@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11819.183 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CangureraInteligente", "CangureraInteligente.csproj", "{225F5382-3E29-C9C1-DA52-86A4DCE2095B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{225F5382-3E29-C9C1-DA52-86A4DCE2095B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{225F5382-3E29-C9C1-DA52-86A4DCE2095B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{225F5382-3E29-C9C1-DA52-86A4DCE2095B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{225F5382-3E29-C9C1-DA52-86A4DCE2095B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8F9E3E51-AD85-4E9F-B0CB-6EE6EAD6FF02}
+	EndGlobalSection
+EndGlobal
