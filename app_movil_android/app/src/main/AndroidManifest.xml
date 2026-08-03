@@ -30,7 +30,7 @@
 
         <!-- Servicio Eclipse Paho para MQTT -->
         <service
-            android:name="org.eclipse.paho.android.service.MqttService"
+            android:name="info.mqtt.android.service.MqttService"
             android:exported="false"/>
 
         <activity

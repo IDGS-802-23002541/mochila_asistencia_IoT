@@ -168,12 +168,17 @@ class HistorialActivity : AppCompatActivity() {
     }
 
     private fun cargarHistorialDesdeServidor() {
-        val organizacionId = sharedPreferences.getInt("organizacion_id", -1)
-        if (organizacionId <= 0) {
+        // TEMPORAL: hardcodeado para pruebas sin mochila física a la mano.
+        // Revertir a esto cuando haya dispositivo real disponible:
+        // val mac = sharedPreferences.getString("dispositivo_mac", null)
+        val mac = "94:B5:55:25:73:76"  // Dispositivo Id 10, mock v5
+
+        if (mac.isNullOrBlank()) {
+            Toast.makeText(this, "No hay dispositivo vinculado", Toast.LENGTH_SHORT).show()
             return
         }
 
-        apiService.obtenerHistorialPorOrganizacion(organizacionId).enqueue(object : Callback<List<RecorridoHistorialResponse>> {
+        apiService.obtenerHistorialPorDispositivo(mac).enqueue(object : Callback<List<RecorridoHistorialResponse>> {
             override fun onResponse(
                 call: Call<List<RecorridoHistorialResponse>>,
                 response: Response<List<RecorridoHistorialResponse>>
@@ -207,7 +212,6 @@ class HistorialActivity : AppCompatActivity() {
             }
         })
     }
-
     private fun formatearFecha(fechaIso: String): String {
         return try {
             val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
