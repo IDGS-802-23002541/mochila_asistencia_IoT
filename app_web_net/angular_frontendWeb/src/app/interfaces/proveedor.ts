@@ -1,15 +1,10 @@
 export interface Proveedor {
-  id: number;
+  idProveedor: number;
   nombre: string;
-  estado_Activo: boolean;
-  contacto_Principal: string | number;
-  telefono: string | number;
-  email_Contacto: string | number;
-  direccion: string | number;
-}
-
-export interface ProveedorResumen {
-  id: number;
-  nombre: string;
-  estado_Activo: boolean;
+  telefono: string;
+  correo: string;
+  direccion: string;
+  activo: boolean;
+  // Loa activan cuando se hace la relación con el proveedor, no es necesario que se muestre en la tabla de proveedores
+  // materiasPrimas?: MateriaPrima[];
 }

@@ -1,7 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ProveedoresService } from '../../../services/proveedores';
 
 @Component({
   selector: 'app-proveedor-editar',
@@ -11,6 +17,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrl: './proveedor-editar.css',
 })
 export class ProveedorEditar implements OnInit {
+
   form!: FormGroup;
   registroId!: number;
 
@@ -22,37 +29,94 @@ export class ProveedorEditar implements OnInit {
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private proveedoresService: ProveedoresService
   ) {}
 
   ngOnInit(): void {
-    this.registroId = Number(this.route.snapshot.paramMap.get('id'));
+
+    this.registroId = Number(
+      this.route.snapshot.paramMap.get('id')
+    );
 
     this.form = this.fb.group({
       nombre: ['', Validators.required],
-      contacto_Principal: ['', Validators.required],
       telefono: [''],
-      email_Contacto: ['', [Validators.required, Validators.email]],
+      correo: ['', [Validators.required, Validators.email]],
       direccion: [''],
-      estado_Activo: [true],
+      activo: [true],
     });
 
-    // TODO: cargar el registro real desde el servicio y usar this.form.patchValue(...)
+    this.cargando = true;
+
+    this.proveedoresService.getById(this.registroId)
+      .subscribe({
+        next: (proveedor) => {
+
+          this.form.patchValue({
+            nombre: proveedor.nombre,
+            telefono: proveedor.telefono,
+            correo: proveedor.correo,
+            direccion: proveedor.direccion,
+            activo: proveedor.activo
+          });
+
+          this.cargando = false;
+
+        },
+        error: (err) => {
+          console.error(err);
+          this.error = true;
+          this.cargando = false;
+        }
+      });
+
   }
 
   guardar(): void {
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    // TODO: conectar con el servicio para actualizar el registro
+
+    this.guardando = true;
+
+    this.proveedoresService.update(
+      this.registroId,
+      this.form.value
+    )
+    .subscribe({
+      next: () => {
+
+        this.guardadoExitoso = true;
+        this.guardando = false;
+
+        this.router.navigate([
+          '/proveedores',
+          this.registroId
+        ]);
+
+      },
+      error: (err) => {
+
+        console.error(err);
+        this.guardando = false;
+
+      }
+    });
+
   }
 
   cancelar(): void {
-    this.router.navigate(['/proveedores', this.registroId]);
+    this.router.navigate([
+      '/proveedores',
+      this.registroId
+    ]);
   }
 
   get f() {
     return this.form.controls;
   }
+
 }
