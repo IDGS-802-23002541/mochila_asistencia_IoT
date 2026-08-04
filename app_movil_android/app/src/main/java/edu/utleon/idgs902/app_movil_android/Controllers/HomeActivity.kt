@@ -261,8 +261,7 @@ class HomeActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e("HomeActivity", "Fallo HTTP", e)
                 runOnUiThread {
-                    Toast.makeText(this, "No se pudo contactar al Backend. Iniciando offline.", Toast.LENGTH_LONG).show()
-                    iniciarRecorridoLocal((System.currentTimeMillis() % 100000).toInt())
+                    Toast.makeText(this, "No se pudo contactar al Backend. Intenta de nuevo.", Toast.LENGTH_LONG).show()
                 }
             }
         }
