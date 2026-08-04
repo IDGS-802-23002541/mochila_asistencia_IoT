@@ -31,7 +31,7 @@ export class ProveedorEditar implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private proveedoresService: ProveedoresService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
 
@@ -51,72 +51,72 @@ export class ProveedorEditar implements OnInit {
 
     this.proveedoresService.getById(this.registroId)
       .subscribe({
+
         next: (proveedor) => {
 
           this.form.patchValue({
+
             nombre: proveedor.nombre,
             telefono: proveedor.telefono,
             correo: proveedor.correo,
             direccion: proveedor.direccion,
             activo: proveedor.activo
+
           });
 
           this.cargando = false;
 
         },
+
         error: (err) => {
+
           console.error(err);
           this.error = true;
           this.cargando = false;
         }
       });
-
   }
 
-  guardar(): void {
 
+  guardar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     this.guardando = true;
-
     this.proveedoresService.update(
       this.registroId,
       this.form.value
     )
-    .subscribe({
-      next: () => {
+      .subscribe({
+        next: () => {
+          this.guardadoExitoso = true;
+          this.guardando = false;
+          this.router.navigate([
+            '/proveedores'
+          ]);
+        },
 
-        this.guardadoExitoso = true;
-        this.guardando = false;
 
-        this.router.navigate([
-          '/proveedores',
-          this.registroId
-        ]);
+        error: (err) => {
+          console.error(err);
+          this.guardando = false;
+        }
 
-      },
-      error: (err) => {
-
-        console.error(err);
-        this.guardando = false;
-
-      }
-    });
+      });
 
   }
+
 
   cancelar(): void {
     this.router.navigate([
-      '/proveedores',
-      this.registroId
+      '/proveedores'
     ]);
   }
+
 
   get f() {
     return this.form.controls;
   }
-
 }
