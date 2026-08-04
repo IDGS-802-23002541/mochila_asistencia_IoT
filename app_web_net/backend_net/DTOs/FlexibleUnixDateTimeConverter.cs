@@ -13,6 +13,9 @@ namespace CangureraInteligente.DTOs;
 /// El formato exacto que usa el firmware no está confirmado, así que se
 /// detecta automáticamente: si el token es numérico, por su magnitud; si es
 /// string, primero se intenta como número y luego como fecha ISO-8601.
+/// Si el valor cae fuera del rango razonable (ej. epoch de 2000 enviado por
+/// el ESP32) se deja pasar para que MqttTelemetryProcessor.SanitizeTimestamp
+/// aplique el fallback a la hora del servidor; no se descarta el mensaje.
 /// </summary>
 public class FlexibleUnixDateTimeConverter : JsonConverter<DateTime>
 {
@@ -35,9 +38,7 @@ public class FlexibleUnixDateTimeConverter : JsonConverter<DateTime>
 			}
 			if (DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind | DateTimeStyles.AllowWhiteSpaces, out var parsedOffset))
 			{
-				DateTime utc = parsedOffset.UtcDateTime;
-				EnsureReasonableRange(utc);
-				return utc;
+				return parsedOffset.UtcDateTime;
 			}
 		}
 		throw new JsonException($"No se pudo interpretar el valor de fecha/hora (token: {reader.TokenType}).");
@@ -50,30 +51,13 @@ public class FlexibleUnixDateTimeConverter : JsonConverter<DateTime>
 
 	private static DateTime FromUnixStrict(long value)
 	{
-		if (value <= 0)
-		{
-			throw new JsonException("Timestamp Unix inválido: debe ser mayor a cero.");
-		}
-
-		DateTime utc;
+		// Valores <= 0 o fuera de rango se devuelven tal cual para que el
+		// procesador aplique el fallback a DateTime.UtcNow. Nunca lanzamos
+		// aquí: lanzar descartaría el mensaje MQTT completo en el listener.
 		if (Math.Abs(value) < MillisecondsThreshold)
 		{
-			utc = DateTimeOffset.FromUnixTimeSeconds(value).UtcDateTime;
+			return DateTimeOffset.FromUnixTimeSeconds(value).UtcDateTime;
 		}
-		else
-		{
-			utc = DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime;
-		}
-
-		EnsureReasonableRange(utc);
-		return utc;
-	}
-
-	private static void EnsureReasonableRange(DateTime utc)
-	{
-		if (utc < MinReasonableUtc || utc > MaxReasonableUtc)
-		{
-			throw new JsonException($"Timestamp fuera de rango razonable: {utc:O}.");
-		}
+		return DateTimeOffset.FromUnixTimeMilliseconds(value).UtcDateTime;
 	}
 }

@@ -6,6 +6,7 @@ using CangureraInteligente.Models;
 using CangureraInteligente.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,8 +65,17 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 
 // Servir archivos estáticos
+// .geojson no esta en la tabla de MIME types por defecto del middleware
+// de archivos estaticos -- sin este mapeo, UseStaticFiles() responde 404
+// aunque el archivo exista en wwwroot (lo que rompe el mapa de graficas).
+var contentTypeProvider = new FileExtensionContentTypeProvider();
+contentTypeProvider.Mappings[".geojson"] = "application/geo+json";
+
 app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = contentTypeProvider
+});
 
 app.UseRouting();
 

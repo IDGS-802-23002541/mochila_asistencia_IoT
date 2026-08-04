@@ -2,14 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of, tap } from 'rxjs';
 import { Dispositivo } from '../interfaces/dispositivo';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DispositivosService {
 
-  private readonly baseUrl =
-    'https://lmsidgs902.runasp.net/api/dispositivos';
+  private readonly baseUrl = `${environment.apiUrl}/api/dispositivos`;
 
   private dispositivosCache: Dispositivo[] = [];
 

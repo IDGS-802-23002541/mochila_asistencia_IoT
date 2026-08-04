@@ -45,6 +45,31 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 				error = $"El dispositivo '{req.DispositivoMac}' no está activo (estado: {dispositivo.Estado})."
 			});
 		}
+		// Auto-cerrar recorridos abiertos "huérfanos": sin ninguna coordenada o
+		// con FechaInicio muy antigua (recorridos fantasma creados por un inicio
+		// que nunca llegó al ESP32 o que quedó atascado). Sin esto, un huérfano
+		// bloquearía para siempre el inicio de nuevos recorridos con 409.
+		List<Recorrido> abiertos = await db.Recorridos
+			.Where((Recorrido r) => r.DispositivoId == dispositivo.Id && r.FechaFin == null)
+			.ToListAsync(ct);
+		DateTime umbralAntiguo = DateTime.UtcNow.AddHours(-12);
+		int cerrados = 0;
+		foreach (Recorrido abierto in abiertos)
+		{
+			bool tieneCoordenadas = await db.RecorridoCoordenadas.AsNoTracking()
+				.AnyAsync((RecorridoCoordenada c) => c.RecorridoId == abierto.Id, ct);
+			bool esHuerfano = !tieneCoordenadas || abierto.FechaInicio < umbralAntiguo;
+			if (esHuerfano)
+			{
+				log.LogWarning("Auto-cerrando recorrido huérfano {RecorridoId} del dispositivo {Mac} (sin coordenadas o extremadamente antiguo).", abierto.Id, dispositivo.MacAddress);
+				abierto.FechaFin = DateTime.UtcNow;
+				cerrados++;
+			}
+		}
+		if (cerrados > 0)
+		{
+			await db.SaveChangesAsync(ct);
+		}
 		if (await db.Recorridos.AnyAsync((Recorrido r) => r.DispositivoId == dispositivo.Id && r.FechaFin == null, ct))
 		{
 			return Conflict(new

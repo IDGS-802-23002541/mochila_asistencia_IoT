@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface LoginResponse {
   id: number;
@@ -17,7 +18,7 @@ export interface LoginResponse {
 })
 export class AuthService {
 
-  private apiUrl = 'https://lmsidgs902.runasp.net/api/usuarios';
+  private apiUrl = `${environment.apiUrl}/api/usuarios`;
 
   constructor(private http: HttpClient) {}
 
