@@ -31,7 +31,7 @@
         "severidadPredominante": "Media"
       }
     ],
-    "fechaUltimaActualizacion": "2026-07-29T17:30:16.617976"
+    "fechaUltimaActualizacion": "2026-08-03T19:50:29.531196"
   },
   {
     "zonaId": "Zona 0",
@@ -65,7 +65,7 @@
         "severidadPredominante": "Media"
       }
     ],
-    "fechaUltimaActualizacion": "2026-07-29T17:30:16.628278"
+    "fechaUltimaActualizacion": "2026-08-03T19:50:29.544634"
   },
   {
     "zonaId": "Zona 2",
@@ -99,7 +99,7 @@
         "severidadPredominante": "Media"
       }
     ],
-    "fechaUltimaActualizacion": "2026-07-29T17:30:16.637543"
+    "fechaUltimaActualizacion": "2026-08-03T19:50:29.558147"
   },
   {
     "zonaId": "Zona 3",
@@ -128,6 +128,6 @@
         "severidadPredominante": "Baja"
       }
     ],
-    "fechaUltimaActualizacion": "2026-07-29T17:30:16.645874"
+    "fechaUltimaActualizacion": "2026-08-03T19:50:29.572901"
   }
 ]
