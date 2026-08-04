@@ -13,6 +13,7 @@ import json
 import gc
 import ubinascii
 import utime
+import ntptime
 import math
 import bluetooth
 import struct
@@ -130,9 +131,21 @@ def obtener_mac_address():
 #         tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]
 #     )
 
+# Diferencias de epoch: MicroPython ESP32 usa 2000-01-01 como referencia (no 1970)
+SEG_EPOCH_2000_A_1970 = 946684800
+
+def sincronizar_tiempo():
+    """Sincroniza el RTC del ESP32 con un servidor NTP público."""
+    try:
+        ntptime.settime()
+        print("[Time] RTC sincronizado con NTP (UTC).")
+    except Exception as e:
+        print("[Time] No se pudo sincronizar el tiempo con NTP:", e)
+
 def obtener_timestamp_unix():
-    """Devuelve el timestamp Unix actual (segundos desde epoch)."""
-    return int(time())
+    """Devuelve el timestamp Unix real (segundos desde epoch 1970-01-01)."""
+    # time() en ESP32 devuelve segundos desde 2000-01-01; corregimos a Unix real.
+    return int(time()) + SEG_EPOCH_2000_A_1970
 
 # -----------------------------------------------------------------------------
 # BLE - Servidor GATT para vinculación
@@ -586,6 +599,10 @@ async def main():
     
     # 4. Conectar Red WiFi local
     wifi_ok = await conectar_wifi()
+
+    # 4.1 Sincronizar RTC con NTP para que los timestamps Unix sean reales
+    if wifi_ok:
+        sincronizar_tiempo()
 
     # 5. Inicializar clientes de Nube (Diego)
     mqtt = MQTTManager(broker=MQTT_BROKER, puerto=MQTT_PUERTO,

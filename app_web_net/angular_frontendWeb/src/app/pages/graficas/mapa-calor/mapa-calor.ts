@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
-import 'leaflet.heat';
 import { ZonaAccesibilidad } from '../models/zona-accesibilidad.model';
 
 @Component({
@@ -33,7 +32,14 @@ export class MapaCalor implements AfterViewInit, OnChanges, OnDestroy {
   // ticket 002).
   private readonly CENTRO_UTL: L.LatLngExpression = [21.0637, -101.5817];
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
+    // leaflet.heat@0.2.0 es un script UMD que se instala en la GLOBAL `L`,
+    // no en el namespace del modulo ES importado. En produccion (build
+    // minificado) el bundle usa un namespace distinto al global y por eso
+    // `L.heatLayer` sale undefined. Se expone window.L con el namespace
+    // real y se carga el plugin despues con import() dinamico (los imports
+    // estaticos se evaluan antes que cualquier asignacion).
+    await this.garantizarPluginHeat();
     this.iniciarMapa();
     this.mapaListo = true;
     // Si las zonas ya llegaron antes de que el mapa terminara de montarse
@@ -47,6 +53,15 @@ export class MapaCalor implements AfterViewInit, OnChanges, OnDestroy {
     // cambia, siempre que el mapa ya este listo.
     if (changes['zonas'] && this.mapaListo && this.zonas.length) {
       this.pintarMapaCalor();
+    }
+  }
+
+  private async garantizarPluginHeat(): Promise<void> {
+    if ((L as any).heatLayer) return;
+    (window as any).L = L;
+    await import('leaflet.heat');
+    if (!(L as any).heatLayer) {
+      console.error('leaflet.heat no quedo disponible como L.heatLayer');
     }
   }
 
