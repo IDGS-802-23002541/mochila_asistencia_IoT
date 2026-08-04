@@ -30,11 +30,10 @@ export class MainLayout {
   { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
   { label: 'Dispositivos', titulo: 'DISPOSITIVOS', route: '/dispositivos', icon: 'dispositivos' },
   { label: 'Organizaciones', titulo: 'ORGANIZACIONES', route: '/organizaciones', icon: 'organizaciones' },
-  { label: 'Mapa', titulo: 'MAPA DE CALOR', route: '/analitica/mapa-calor', icon: 'mapa' },
   { label: 'Materia Prima', titulo: 'MATERIA PRIMA', route: '/materiaprima', icon: 'materia-prima' },
   { label: 'Proveedores', titulo: 'PROVEEDORES', route: '/proveedores', icon: 'proveedores' },
   { label: 'Productos', titulo: 'PRODUCTOS', route: '/productos', icon: 'productos' },
-  { label: 'Gráficas', titulo: 'GRÁFICAS', route: '/graficas', icon: 'graficas' },
+  { label: 'Análisis', titulo: 'ANÁLISIS', route: '/graficas', icon: 'graficas' },
 ];
 
   private extraTitles: Record<string, string> = {

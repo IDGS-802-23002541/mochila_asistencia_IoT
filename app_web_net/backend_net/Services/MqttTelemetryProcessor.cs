@@ -38,14 +38,15 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 				_log.LogWarning("Telemetría: el dispositivo {Id} no existe.", payload.MacAddress);
 				return false;
 			}
-			dispositivo.UltimaConexion = payload.Fecha;
+			DateTime fechaTelemetriaUtc = SanitizeTimestamp(payload.Fecha, "telemetria", recorridoId: null, payload.MacAddress);
+			dispositivo.UltimaConexion = fechaTelemetriaUtc;
 			Recorrido recorrido = await _db.Recorridos.FirstOrDefaultAsync((Recorrido r) => r.DispositivoId == dispositivo.Id && r.FechaFin == null, ct);
 			if (recorrido != null && payload.Latitud.HasValue && payload.Longitud.HasValue)
 			{
 				_db.RecorridoCoordenadas.Add(new RecorridoCoordenada
 				{
 					RecorridoId = recorrido.Id,
-					Fecha = payload.Fecha,
+					Fecha = fechaTelemetriaUtc,
 					Latitud = payload.Latitud.Value,
 					Longitud = payload.Longitud.Value
 				});
@@ -80,11 +81,12 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 				_log.LogWarning("Registrar evento: TipoEventoId {Id} no existe en el catálogo.", payload.TipoEventoId);
 				return false;
 			}
+			DateTime timestampEventoUtc = SanitizeTimestamp(payload.Timestamp, "evento", payload.RecorridoId, macAddress: null);
 			EventoDetectado entity = new EventoDetectado
 			{
 				RecorridoId = payload.RecorridoId,
 				TipoEventoId = payload.TipoEventoId,
-				TimestampEvento = (payload.Timestamp ?? DateTime.UtcNow),
+				TimestampEvento = timestampEventoUtc,
 				Latitud = payload.Latitud,
 				Longitud = payload.Longitud,
 				Geo_Es_Estimado = payload.GeoEsEstimado,
@@ -120,7 +122,8 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 				_log.LogInformation("Finalizar recorrido: el recorrido {Id} ya estaba cerrado; se ignora.", payload.RecorridoId);
 				return true;
 			}
-			recorrido.FechaFin = payload.FechaFin;
+			DateTime fechaFinUtc = SanitizeTimestamp(payload.FechaFin, "finalizar-recorrido", payload.RecorridoId, macAddress: null);
+			recorrido.FechaFin = fechaFinUtc;
 			await _db.SaveChangesAsync(ct);
 			_log.LogInformation("Recorrido {Id} finalizado.", payload.RecorridoId);
 			return true;
@@ -132,4 +135,27 @@ public class MqttTelemetryProcessor : IMqttTelemetryProcessor
 		}
 	}
 
+	private DateTime SanitizeTimestamp(DateTime? value, string source, int? recorridoId, string? macAddress)
+	{
+		DateTime candidate = value ?? DateTime.UtcNow;
+		DateTime utc = candidate.Kind switch
+		{
+			DateTimeKind.Utc => candidate,
+			DateTimeKind.Local => candidate.ToUniversalTime(),
+			_ => DateTime.SpecifyKind(candidate, DateTimeKind.Utc)
+		};
+
+		DateTime minUtc = new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		DateTime maxUtc = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+		if (utc < minUtc || utc > maxUtc)
+		{
+			DateTime fallback = DateTime.UtcNow;
+			_log.LogWarning("Timestamp fuera de rango detectado. source={Source}, recorridoId={RecorridoId}, mac={Mac}, recibidoUtc={ReceivedUtc}, fallbackUtc={FallbackUtc}",
+				source, recorridoId, macAddress, utc, fallback);
+			return fallback;
+		}
+
+		return utc;
+	}
 }

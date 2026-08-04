@@ -14,10 +14,53 @@
 
 
   <div class="tarjeta-mapa">
-    <div id="mapa-calor" class="lienzo-mapa">
+    <div class="mapa-header">
+      <div>
+        <h3>Zonas de Riesgo</h3>
+        <p>Campus UTL · IAZ calculado por zona</p>
+      </div>
     </div>
 
+    <div class="mapa-info">
 
+      <div class="indicador">
+        <span>Zonas analizadas</span>
+        <strong>{{zonas.length}}</strong>
+      </div>
+
+      <div class="indicador">
+        <span>Eventos detectados</span>
+        <strong>{{totalEventos}}</strong>
+      </div>
+
+      <div class="indicador">
+        <span>Zonas críticas</span>
+        <strong>{{zonasCriticas}}</strong>
+      </div>
+
+    </div>
+
+    <div class="leyenda">
+
+      <div>
+        <span class="alto"></span>
+        Alto riesgo
+      </div>
+
+      <div>
+        <span class="medio"></span>
+        Riesgo medio
+      </div>
+
+      <div>
+        <span class="bajo"></span>
+        Bajo riesgo
+      </div>
+
+    </div>
+
+    <div id="mapa-calor" class="lienzo-mapa">
+    </div>
   </div>
 
 </div>
