@@ -3,12 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrganizacionesService } from '../../../services/organizaciones';
-import { Sidebar } from '../../../sidebar/sidebar';
 
 @Component({
   selector: 'app-organizacion-nuevo',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Sidebar],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './organizacion-nuevo.html',
   styleUrl: './organizacion-nuevo.css',
 })

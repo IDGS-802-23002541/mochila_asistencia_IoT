@@ -3,14 +3,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DispositivosService } from '../../../services/dispositivos';
 import { Dispositivo } from '../../../interfaces/dispositivo';
-import { Sidebar } from '../../../sidebar/sidebar';
 
 @Component({
   selector: 'app-editar-dispositivo',
   standalone: true,
   imports: [
-    FormsModule,
-    Sidebar
+    FormsModule
   ],
   templateUrl: './editar-dispositivo.html',
   styleUrl: './editar-dispositivo.css',

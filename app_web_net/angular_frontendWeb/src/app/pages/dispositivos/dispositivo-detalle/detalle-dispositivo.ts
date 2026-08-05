@@ -4,13 +4,11 @@ import { DatePipe } from '@angular/common';
 
 import { DispositivosService } from '../../../services/dispositivos';
 import { Dispositivo } from '../../../interfaces/dispositivo';
-import { Sidebar } from '../../../sidebar/sidebar';
 
 @Component({
   selector: 'app-dispositivo-detalle',
   standalone: true,
   imports: [
-    Sidebar,
     DatePipe
   ],
   templateUrl: './detalle-dispositivo.html',
