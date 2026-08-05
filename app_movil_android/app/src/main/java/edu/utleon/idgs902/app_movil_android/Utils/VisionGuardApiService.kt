@@ -109,7 +109,10 @@ interface VisionGuardApiService {
     companion object {
         // TEMPORAL: apuntando a backend local para pruebas de historial sin mochila física.
         // Revertir a producción antes de subir cualquier commit:
-         private const val BASE_URL = "https://lmsidgs902.runasp.net/api/"
+        private const val BASE_URL = "https://lmsidgs902.runasp.net/api/"
+//        private const val BASE_URL = "http://10.144.147.58/api/"
+
+
 
         fun create(): VisionGuardApiService {
             val retrofit = Retrofit.Builder()
