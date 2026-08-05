@@ -24,8 +24,8 @@ public class Producto
 
     [Column(TypeName = "decimal(5,2)")]
     public decimal MargenGanancia { get; set; } = 20;
-
     public bool Activo { get; set; } = true;
+    public string? FotoUrl { get; set; }
 
     public ICollection<ProductoMateriaPrima> MateriasPrimas { get; set; }
 }

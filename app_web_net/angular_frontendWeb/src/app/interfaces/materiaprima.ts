@@ -1,16 +1,32 @@
-export interface MateriaPrima {
-  id: number;
+export interface Proveedor {
+  idProveedor: number;
   nombre: string;
-  estado_Activo: boolean;
-  categoria: string | number;
-  unidad_Medida: string | number;
-  stock_Actual: string | number;
-  precio_Unitario: string | number;
-  proveedor: string | number;
 }
 
 export interface MateriaPrimaResumen {
-  id: number;
+  idMateriaPrima: number;
   nombre: string;
-  estado_Activo: boolean;
+  stock: number;
+  stockMinimo: number;
+}
+
+export interface MateriaPrima {
+  idMateriaPrima: number;
+  nombre: string;
+  descripcion?: string | null;
+  costoUnitario: number;
+  stock: number;
+  stockMinimo: number;
+  idProveedor: number;
+  proveedor?: Proveedor | null;
+}
+
+// Lo que se envía en POST/PUT api/materias-primas
+export interface MateriaPrimaCreateDto {
+  nombre: string;
+  descripcion?: string | null;
+  costoUnitario: number;
+  stock: number;
+  stockMinimo: number;
+  idProveedor: number;
 }

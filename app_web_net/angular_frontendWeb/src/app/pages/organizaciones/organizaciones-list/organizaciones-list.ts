@@ -2,12 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { OrganizacionesService } from '../../../services/organizaciones';
 import { Organizacion } from '../../../interfaces/organizacion';
-import { Sidebar } from '../../../sidebar/sidebar';
-
 @Component({
   selector: 'app-organizaciones-list',
   standalone: true,
-  imports: [RouterLink, Sidebar],
+  imports: [RouterLink],
   templateUrl: './organizaciones-list.html',
   styleUrl: './organizaciones-list.css',
 })

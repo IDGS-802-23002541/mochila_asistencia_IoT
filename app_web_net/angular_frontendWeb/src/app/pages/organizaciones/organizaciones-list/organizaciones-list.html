@@ -1,8 +1,8 @@
 <div class="page-body">
   <div class="section-header">
     <div>
-      <h2 class="section-title">Gestión de clientes</h2>
-      <button class="btn-nuevo" [routerLink]="['/clientes/nuevo']">
+      <h2 class="section-title">Gestión de Organizaciones</h2>
+      <button class="btn-nuevo" [routerLink]="['/organizaciones/nuevo']">
         + Nuevo
       </button>
     </div>
@@ -11,7 +11,7 @@
   @if (cargando) {
   <div class="estado-mensaje">
     <div class="spinner"></div>
-    Cargando clientes...
+    Cargando organizaciones...
   </div>
   } @else if (error) {
   <div class="estado-mensaje error">
@@ -31,7 +31,7 @@
       </div>
       <p class="cliente-nombre">{{ org.nombre }}</p>
       <span class="cliente-id">ID {{ org.id }}</span>
-      <button class="btn-detalles" [routerLink]="['/clientes', org.id]">
+      <button class="btn-detalles" [routerLink]="['/organizaciones/detalle', org.id]">
         Ver detalles
       </button>
     </div>
@@ -39,8 +39,8 @@
     <div class="estado-mensaje vacio">
       <span class="estado-icono">🗂</span>
       <div>
-        <p class="estado-titulo">No hay clientes registrados</p>
-        <p class="estado-texto">Los clientes que agregues aparecerán aquí.</p>
+        <p class="estado-titulo">No hay organizaciones registradas</p>
+        <p class="estado-texto">Las organizaciones que agregues aparecerán aquí.</p>
       </div>
     </div>
     }

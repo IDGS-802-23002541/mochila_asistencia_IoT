@@ -1,27 +1,41 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProductoResumen } from '../../../interfaces/producto';
+import { ProductosService } from '../../../services/producto';
 
 @Component({
   selector: 'app-producto-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './producto-list.html',
   styleUrl: './producto-list.css',
 })
-export class ProductoList {
-  // TODO: reemplazar por datos reales del servicio
+export class ProductoList implements OnInit {
   cargando = false;
   error = false;
 
-  productos: ProductoResumen[] = [
-    { id: 1, nombre: 'Kit Vision Guard Básico', estado_Activo: true },
-    { id: 2, nombre: 'Bastón inteligente V2', estado_Activo: true },
-    { id: 3, nombre: 'Pulsera de navegación IoT', estado_Activo: true },
-    { id: 4, nombre: 'Módulo de alerta sonora', estado_Activo: false }
-  ];
+  productos: ProductoResumen[] = [];
+
+  constructor(private productosService: ProductosService) {}
+
+  ngOnInit(): void {
+    this.cargarProductos();
+  }
 
   cargarProductos(): void {
-    // TODO: conectar con el servicio
+    this.cargando = true;
+    this.error = false;
+
+    this.productosService.getAll().subscribe({
+      next: (datos) => {
+        this.productos = datos;
+        this.cargando = false;
+      },
+      error: () => {
+        this.error = true;
+        this.cargando = false;
+      },
+    });
   }
 }

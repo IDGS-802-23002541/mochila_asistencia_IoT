@@ -1,5 +1,5 @@
 <header class="topbar">
-  <h1>CLIENTES</h1>
+  <h1>Organizaciones</h1>
 </header>
 
 <div class="page-body">
@@ -103,6 +103,10 @@
         </div>
 
       </div>
+
+      @if (errorGuardar) {
+        <p class="form-error form-error--general">{{ errorGuardar }}</p>
+      }
 
       <div class="nuevo-acciones">
         <button type="button" class="btn-cancelar" (click)="cancelar()">Cancelar</button>

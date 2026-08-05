@@ -2,12 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrganizacionesService } from '../../../services/organizaciones';
 import { Organizacion } from '../../../interfaces/organizacion';
-import { Sidebar } from '../../../sidebar/sidebar';
 
 @Component({
   selector: 'app-organizacion-detalle',
   standalone: true,
-  imports: [Sidebar],
   templateUrl: './organizacion-detalle.html',
   styleUrl: './organizacion-detalle.css',
 })
@@ -52,7 +50,8 @@ export class OrganizacionDetalle implements OnInit {
 
   editar(): void {
     if (!this.organizacion) return;
-    this.router.navigate(['/clientes', this.organizacion.id, 'editar']);
+    // Coincide con la ruta: 'organizaciones/:id/editar'
+    this.router.navigate(['/organizaciones', this.organizacion.id, 'editar']);
   }
 
   eliminar(): void {
@@ -66,7 +65,8 @@ export class OrganizacionDetalle implements OnInit {
     this.eliminando = true;
     this.organizaciones.delete(this.organizacion.id).subscribe({
       next: () => {
-        this.router.navigate(['/clientes']);
+        // Coincide con la ruta: 'organizaciones'
+        this.router.navigate(['/organizaciones']);
       },
       error: (err) => {
         console.error('Error al eliminar la organización', err);

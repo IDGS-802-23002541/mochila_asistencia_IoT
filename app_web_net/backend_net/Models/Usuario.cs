@@ -30,8 +30,8 @@ public class Usuario
 	public string Rol { get; set; } = "usuario";
 
 	public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
-
-	public bool Estado_Activo { get; set; } = true;
+    public string? FotoUrl { get; set; }
+    public bool Estado_Activo { get; set; } = true;
 
 	[ForeignKey("OrganizacionId")]
 	[JsonIgnore]

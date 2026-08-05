@@ -1,27 +1,45 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MateriaPrimaResumen } from '../../../interfaces/materiaprima';
+import { MateriaPrima } from '../../../interfaces/materiaprima';
+import { MateriaPrimaService } from '../../../services/materia-prima';
 
 @Component({
   selector: 'app-materiaprima-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './materiaprima-list.html',
   styleUrl: './materiaprima-list.css',
 })
-export class MateriaPrimaList {
-  // TODO: reemplazar por datos reales del servicio
+export class MateriaPrimaList implements OnInit {
   cargando = false;
   error = false;
 
-  materiaprima: MateriaPrimaResumen[] = [
-    { id: 1, nombre: 'Placa de acero inoxidable', estado_Activo: true },
-    { id: 2, nombre: 'Sensor ultrasónico HC-SR04', estado_Activo: true },
-    { id: 3, nombre: 'Cable UTP Cat 6', estado_Activo: true },
-    { id: 4, nombre: 'Batería Li-Ion 18650', estado_Activo: false }
-  ];
+  materiaprima: MateriaPrima[] = [];
+
+  constructor(private materiaPrimaService: MateriaPrimaService) {}
+
+  ngOnInit(): void {
+    this.cargarMateriaPrima();
+  }
 
   cargarMateriaPrima(): void {
-    // TODO: conectar con el servicio
+    this.cargando = true;
+    this.error = false;
+
+    this.materiaPrimaService.getAll().subscribe({
+      next: (datos) => {
+        this.materiaprima = datos;
+        this.cargando = false;
+      },
+      error: () => {
+        this.error = true;
+        this.cargando = false;
+      },
+    });
+  }
+
+  stockBajo(item: MateriaPrima): boolean {
+    return item.stock <= item.stockMinimo;
   }
 }
