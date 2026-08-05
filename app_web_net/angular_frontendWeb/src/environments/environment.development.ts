@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:5159/api'
+  apiUrl: 'https://lmsidgs902.runasp.net'
 };

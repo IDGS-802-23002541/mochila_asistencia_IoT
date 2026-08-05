@@ -45,6 +45,31 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 				error = $"El dispositivo '{req.DispositivoMac}' no está activo (estado: {dispositivo.Estado})."
 			});
 		}
+		// Auto-cerrar recorridos abiertos "huérfanos": sin ninguna coordenada o
+		// con FechaInicio muy antigua (recorridos fantasma creados por un inicio
+		// que nunca llegó al ESP32 o que quedó atascado). Sin esto, un huérfano
+		// bloquearía para siempre el inicio de nuevos recorridos con 409.
+		List<Recorrido> abiertos = await db.Recorridos
+			.Where((Recorrido r) => r.DispositivoId == dispositivo.Id && r.FechaFin == null)
+			.ToListAsync(ct);
+		DateTime umbralAntiguo = DateTime.UtcNow.AddHours(-12);
+		int cerrados = 0;
+		foreach (Recorrido abierto in abiertos)
+		{
+			bool tieneCoordenadas = await db.RecorridoCoordenadas.AsNoTracking()
+				.AnyAsync((RecorridoCoordenada c) => c.RecorridoId == abierto.Id, ct);
+			bool esHuerfano = !tieneCoordenadas || abierto.FechaInicio < umbralAntiguo;
+			if (esHuerfano)
+			{
+				log.LogWarning("Auto-cerrando recorrido huérfano {RecorridoId} del dispositivo {Mac} (sin coordenadas o extremadamente antiguo).", abierto.Id, dispositivo.MacAddress);
+				abierto.FechaFin = DateTime.UtcNow;
+				cerrados++;
+			}
+		}
+		if (cerrados > 0)
+		{
+			await db.SaveChangesAsync(ct);
+		}
 		if (await db.Recorridos.AnyAsync((Recorrido r) => r.DispositivoId == dispositivo.Id && r.FechaFin == null, ct))
 		{
 			return Conflict(new
@@ -181,4 +206,70 @@ public class RecorridosController(CangureraDbContext db, ILogger<RecorridosContr
 	{
 		return Ok(await db.TiposEvento.Select((CatTipoEvento e) => new { e.Id, e.NombreEvento, e.Severidad }).ToListAsync(ct));
 	}
+
+	[HttpGet("dispositivo/{mac}")]
+	[ProducesResponseType(typeof(List<RecorridoHistorialResponse>), 200)]
+	[ProducesResponseType(404)]
+	public async Task<IActionResult> GetHistorialPorDispositivo(string mac, CancellationToken ct)
+	{
+		var dispositivo = await db.Dispositivos.FirstOrDefaultAsync(d => d.MacAddress == mac, ct);
+		if (dispositivo == null)
+			return NotFound(new { error = $"Dispositivo con MAC '{mac}' no encontrado." });
+
+		var recorridos = await db.Recorridos
+			.Where(r => r.DispositivoId == dispositivo.Id)
+			.Include(r => r.Eventos)
+			.OrderByDescending(r => r.FechaInicio)
+			.ToListAsync(ct);
+
+		var resultado = new List<RecorridoHistorialResponse>();
+		foreach (var r in recorridos)
+		{
+			var coords = await db.RecorridoCoordenadas
+				.Where(c => c.RecorridoId == r.Id)
+				.OrderBy(c => c.Fecha)
+				.ToListAsync(ct);
+
+			var puntos = coords.Select(c => new CoordenadaGps {
+				Latitud = c.Latitud, Longitud = c.Longitud, Timestamp = c.Fecha
+			});
+			var resumen = CalcularResumen(puntos, r.Id); // ya existe, la reusamos
+
+			resultado.Add(new RecorridoHistorialResponse
+			{
+				Id = r.Id,
+				DispositivoMac = mac,
+				FechaInicio = r.FechaInicio,
+				FechaFin = r.FechaFin,
+				DuracionSegundos = resumen.DuracionSegundos ?? 0,
+				TotalEventos = r.Eventos.Count,
+				DistanciaTotalMetros = resumen.DistanciaTotalMetros
+			});
+		}
+		return Ok(resultado);
+	}
+
+    [HttpGet("{id:int}/eventos")]
+    [ProducesResponseType(typeof(List<EventoRecorridoResponse>), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetEventosRecorrido(int id, CancellationToken ct)
+    {
+        var existe = await db.Recorridos.AnyAsync(r => r.Id == id, ct);
+        if (!existe) return NotFound(new { error = $"Recorrido {id} no encontrado." });
+
+        var eventos = await db.EventosDetectados
+            .Where(e => e.RecorridoId == id)
+            .Include(e => e.TipoEvento)
+            .OrderBy(e => e.TimestampEvento)
+            .Select(e => new EventoRecorridoResponse
+            {
+                Tipo = e.TipoEvento.NombreEvento,
+                Severidad = e.TipoEvento.Severidad,
+                Timestamp = e.TimestampEvento
+            })
+            .ToListAsync(ct);
+
+        return Ok(eventos);
+    }
+
 }

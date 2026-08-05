@@ -13,6 +13,7 @@ import json
 import gc
 import ubinascii
 import utime
+import ntptime
 import math
 import bluetooth
 import struct
@@ -130,9 +131,21 @@ def obtener_mac_address():
 #         tm[0], tm[1], tm[2], tm[3], tm[4], tm[5]
 #     )
 
+# Diferencias de epoch: MicroPython ESP32 usa 2000-01-01 como referencia (no 1970)
+SEG_EPOCH_2000_A_1970 = 946684800
+
+def sincronizar_tiempo():
+    """Sincroniza el RTC del ESP32 con un servidor NTP público."""
+    try:
+        ntptime.settime()
+        print("[Time] RTC sincronizado con NTP (UTC).")
+    except Exception as e:
+        print("[Time] No se pudo sincronizar el tiempo con NTP:", e)
+
 def obtener_timestamp_unix():
-    """Devuelve el timestamp Unix actual (segundos desde epoch)."""
-    return int(time())
+    """Devuelve el timestamp Unix real (segundos desde epoch 1970-01-01)."""
+    # time() en ESP32 devuelve segundos desde 2000-01-01; corregimos a Unix real.
+    return int(time()) + SEG_EPOCH_2000_A_1970
 
 # -----------------------------------------------------------------------------
 # BLE - Servidor GATT para vinculación
@@ -246,12 +259,19 @@ def on_comando(topico, mensaje):
         return
     
     if accion == "iniciar":
-        if estado["recorrido_activo"]:
-            print("[Sistema] Ya existe un recorrido activo.")
-            return
+        # Si ya hay un recorrido activo con OTRO id, se cierra el anterior y
+        # después se abre el nuevo en segundo plano (evita el ESP32 atascado
+        # que rechazaba todos los inicios posteriores).
         recorrido = datos.get("recorridoId")
         if recorrido is None:
             print("[MQTT] recorridoId inexistente.")
+            return
+        if estado["recorrido_activo"]:
+            if estado["recorrido_id"] == recorrido:
+                print(f"[Sistema] El recorrido {recorrido} ya está activo; se ignora el duplicado.")
+                return
+            print(f"[Sistema] Recorrido {estado['recorrido_id']} activo; cerrando para iniciar el {recorrido}...")
+            asyncio.create_task(cerrar_y_reiniciar(recorrido))
             return
         estado["recorrido_id"] = recorrido
         estado["recorrido_activo"] = True
@@ -461,10 +481,11 @@ async def loop_telemetria():
 # ─────────────────────────────────────────────────────────────────────────────
 # FUNCIÓN: Cierre y Finalización del Recorrido (Publica en 'cangurera/recorrido/finalizar')
 # ─────────────────────────────────────────────────────────────────────────────
-async def finalizar_recorrido_actual():
+async def finalizar_recorrido_actual(silencioso=False):
     """
     Empaqueta el historial de coordenadas acumulado, lo publica en una única capa
     de serialización JSON hacia el backend por MQTT y libera la memoria RAM del ESP32.
+    Si silencioso=True se omite audio/LED/delay (útil al reiniciar otro recorrido).
     """
     print("[Sistema] Iniciando proceso de empaquetado e instanciación de cierre...")
     
@@ -491,18 +512,17 @@ async def finalizar_recorrido_actual():
         print("[MQTT] Publicando payload unificado en 'cangurera/recorrido/finalizar'...")
         mqtt.publicar(TOPICO_FINALIZAR, publicacion_final)
         
-        actuadores.reproducir_audio(ActuatorBox.PISTA_RECORRIDO_FINALIZAR) #pista 7
-        
         # 5. Modificar estados de control de ruta de forma segura
         estado["recorrido_activo"] = False
-        await led.parpadear_rojo()
 
-        await asyncio.sleep(3)
-
-        if estado["vinculado"]:
-            led.estado_vinculado()
-        else:
-            led.apagar()
+        if not silencioso:
+            actuadores.reproducir_audio(ActuatorBox.PISTA_RECORRIDO_FINALIZAR) #pista 7
+            await led.parpadear_rojo()
+            await asyncio.sleep(3)
+            if estado["vinculado"]:
+                led.estado_vinculado()
+            else:
+                led.apagar()
         print("[MQTT] ¡Datos enviados con éxito a FastAPI!")
               
         
@@ -530,6 +550,24 @@ async def finalizar_recorrido_actual():
         estado["recorrido_activo"] = False
         gc.collect()
         return False
+
+async def cerrar_y_reiniciar(nuevo_recorrido_id):
+    """
+    Cierra el recorrido activo actual (si existe) y arranca uno nuevo.
+    Previene el estado de 'ESP32 atascado' que bloqueaba inicios posteriores.
+    """
+    try:
+        if estado["recorrido_activo"] and estado.get("recorrido_id") is not None:
+            print(f"[Sistema] Finalizando recorrido {estado['recorrido_id']} para reiniciar con {nuevo_recorrido_id}...")
+            await finalizar_recorrido_actual(silencioso=True)
+    except Exception as e:
+        print("[Sistema] Error al cerrar recorrido previo:", e)
+
+    estado["recorrido_id"] = nuevo_recorrido_id
+    estado["recorrido_activo"] = True
+    asyncio.create_task(led.parpadear_verde())
+    actuadores.reproducir_audio(6)
+    print(f"[Sistema] Recorrido {nuevo_recorrido_id} iniciado (tras cierre del anterior).")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CORUTINA 4 — Monitoreo del Botón Físico de Cierre (Botón BOOT / GPIO 0)
@@ -586,6 +624,10 @@ async def main():
     
     # 4. Conectar Red WiFi local
     wifi_ok = await conectar_wifi()
+
+    # 4.1 Sincronizar RTC con NTP para que los timestamps Unix sean reales
+    if wifi_ok:
+        sincronizar_tiempo()
 
     # 5. Inicializar clientes de Nube (Diego)
     mqtt = MQTTManager(broker=MQTT_BROKER, puerto=MQTT_PUERTO,

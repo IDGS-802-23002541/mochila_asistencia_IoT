@@ -77,6 +77,12 @@ data class CoordenadaResponse(
     val ts: String? = null
 )
 
+data class EventoRecorridoResponse(
+    val tipo: String,
+    val severidad: String,
+    val timestamp: String
+)
+
 interface VisionGuardApiService {
 
     @POST("usuarios/login")
@@ -97,11 +103,19 @@ interface VisionGuardApiService {
     @GET("recorridos/{id}/resumen")
     fun obtenerResumenRecorrido(@Path("id") recorridoId: Int): Call<ResumenRecorridoResponse>
 
+    @GET("recorridos/{id}/eventos")
+    fun obtenerEventosRecorrido(@Path("id") recorridoId: Int): Call<List<EventoRecorridoResponse>>
+
     companion object {
-        private const val BASE_URL = "https://lmsidgs902.runasp.net/api/"
+        // TEMPORAL: apuntando a backend local para pruebas de historial sin mochila física.
+        // Revertir a producción antes de subir cualquier commit:
+        // private const val BASE_URL = "https://lmsidgs902.runasp.net/api/"
+        private const val BASE_URL = "http://192.168.1.7:7135/api/"
+
 
         fun create(): VisionGuardApiService {
             val retrofit = Retrofit.Builder()
+
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
