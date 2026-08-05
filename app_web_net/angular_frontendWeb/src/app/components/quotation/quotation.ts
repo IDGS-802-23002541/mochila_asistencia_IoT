@@ -72,7 +72,7 @@ export class Quotation implements OnInit {
   modulosConsultoria: ModuloConsultoria[] = [
     {
       id: 'auditoria',
-      nombre: 'Auditoría Física e Infraestructura Base',
+      nombre: 'Access Insight',
       desc: 'Evaluación técnica inicial y mapeo de barreras arquitectónicas fijas en accesos principales y rutas críticas de desplazamiento.',
       tier: 'essential',
       imagen: 'https://images.unsplash.com/photo-1508313144761-0ea80db40091?auto=format&fit=crop&w=800&q=80',
@@ -82,7 +82,7 @@ export class Quotation implements OnInit {
     },
     {
       id: 'iot',
-      nombre: 'Monitoreo de Continuidad con Sensores IoT',
+      nombre: 'Route Intelligence',
       desc: 'Despliegue temporal de hardware VisionGuard (sensores ultrasónicos y GPS) para registrar la continuidad real y obstáculos dinámicos por 2 semanas.',
       tier: 'professional',
       imagen: 'https://images.unsplash.com/photo-1555589228-135c25ae8cf5?auto=format&fit=crop&w=800&q=80',
@@ -92,7 +92,7 @@ export class Quotation implements OnInit {
     },
     {
       id: 'iaz',
-      nombre: 'Cálculo del Índice de Accesibilidad (IAZ)',
+      nombre: 'Smart Accessibility Analytics',
       desc: 'Procesamiento analítico de la evidencia recolectada por los sensores mediante metodología KDD para construir el panorama del entorno.',
       tier: 'enterprise',
       imagen: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
@@ -102,7 +102,7 @@ export class Quotation implements OnInit {
     },
     {
       id: 'plan',
-      nombre: 'Plan de Mitigación y Entrega Ejecutiva',
+      nombre: 'Strategic Accessibility Consulting',
       desc: 'Desarrollo del plan maestro de adecuaciones institucionales y trazabilidad conforme a la Ley General de Educación Superior.',
       tier: 'signal',
       imagen: 'https://images.unsplash.com/photo-1758873269035-aae0e1fd3422?auto=format&fit=crop&w=800&q=80',
