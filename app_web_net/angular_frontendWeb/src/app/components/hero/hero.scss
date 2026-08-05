@@ -170,6 +170,17 @@ body {
   letter-spacing: 0.03em;
 }
 
+.hero-stats .stat-num {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.hero-stats .stat-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
 /* Visual derecho */
 .hero-visual {
   position: relative;
@@ -184,8 +195,8 @@ body {
   width: 260px;
   height: 260px;
   border-radius: 50%;
-background: #fffffff8;
-border: 1px solid #fffffff1;
+  background: #fffffff8;
+  border: 1px solid #fffffff1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,6 +286,109 @@ border: 1px solid #fffffff1;
   left: 0;
 }
 
+/* ==========================================
+   SECCIÓN DE EVIDENCIA (GALERÍA DE FOTOS)
+========================================== */
+.evidencia-section {
+  width: 100%;
+  padding: 4rem 4rem;
+  background: #f5f6f8;
+}
+
+.evidencia-header {
+  text-align: center;
+  max-width: 650px;
+  margin: 0 auto 3rem;
+}
+
+.evidencia-header .eyebrow {
+  display: inline-block;
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  color: #2563eb;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.evidencia-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0d1f4e;
+  margin: 14px 0 10px;
+}
+
+.evidencia-header h2 .accent {
+  color: #2563eb;
+}
+
+.evidencia-header p {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.evidencia-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.evidencia-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(13, 31, 78, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.evidencia-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(13, 31, 78, 0.08);
+}
+
+.evidencia-card .img-wrapper {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+  background: #e2e8f0;
+}
+
+.evidencia-card .img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.evidencia-card:hover .img-wrapper img {
+  transform: scale(1.05);
+}
+
+.evidencia-card .card-caption {
+  padding: 20px;
+}
+
+.evidencia-card .card-caption h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d1f4e;
+  margin-bottom: 8px;
+}
+
+.evidencia-card .card-caption p {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
 /* =====================
    RESPONSIVE
 ===================== */
@@ -319,6 +433,15 @@ border: 1px solid #fffffff1;
 
   .b-top { top: 10px; right: 20px; }
   .b-bottom { bottom: 10px; left: 20px; }
+
+  /* Responsive Evidencia */
+  .evidencia-section {
+    padding: 3rem 2rem;
+  }
+
+  .evidencia-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 500px) {
@@ -335,15 +458,4 @@ border: 1px solid #fffffff1;
   .hero-stats {
     gap: 20px;
   }
-}
-
-.hero-stats .stat-num{
-  font-size:32px;
-  font-weight:700;
-  color:#233B67;
-}
-
-.hero-stats .stat-label{
-  font-size:14px;
-  color:#666;
 }

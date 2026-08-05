@@ -27,7 +27,6 @@ export class Services {
       'Evaluamos la infraestructura educativa mediante recorridos reales para identificar barreras que afectan la movilidad de personas con discapacidad visual.',
       includes: [
         'Recorridos físicos dentro de la institución',
-        'Identificación de obstáculos',
         'Evaluación de rutas principales',
         'Informe inicial de accesibilidad'
       ],
@@ -45,7 +44,6 @@ export class Services {
       includes: [
         'Uso de sensores inteligentes IoT',
         'Captura de datos en tiempo real',
-        'Análisis de obstáculos',
         'Reporte tecnológico'
       ],
 
