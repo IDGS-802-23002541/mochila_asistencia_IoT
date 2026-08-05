@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Sidebar } from '../../../sidebar/sidebar';
 import { DispositivosService } from '../../../services/dispositivos';
 
 @Component({
   selector: 'app-nuevo-dispositivo',
   standalone: true,
   imports: [
-    FormsModule,
-    Sidebar
+    FormsModule
   ],
   templateUrl: './nuevo-dispositivo.html',
   styleUrl: './nuevo-dispositivo.css',

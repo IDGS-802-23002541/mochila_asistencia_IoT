@@ -2,13 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DispositivosService } from '../../../services/dispositivos';
 import { Dispositivo } from '../../../interfaces/dispositivo';
-import { Sidebar } from '../../../sidebar/sidebar';
-import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-list-dispositivo',
   standalone: true,
-  imports: [RouterLink, Sidebar, DatePipe],
+  imports: [RouterLink],
   templateUrl: './list-dispositivo.html',
   styleUrl: './list-dispositivo.css',
 })
@@ -30,7 +28,6 @@ export class ListDispositivo implements OnInit {
 
     this.dispositivosService.getAll().subscribe({
       next: (data) => {
-        console.log('DISPOSITIVOS RECIBIDOS:', data);
 
         this.dispositivos = data;
         this.cargando = false;

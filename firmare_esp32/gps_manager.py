@@ -340,3 +340,4 @@ async def loop_gps(gps: GPSManager, mqtt=None, topico="safepath/gps",
             gc.collect()
 
         await asyncio.sleep(0.2)
+

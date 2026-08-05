@@ -25,7 +25,7 @@ class SensorBox:
     Ningún script externo a esta clase debe conocer pines ni registros.
     """
 
-    UMBRAL_CAIDA_DEFAULT = 1.5  # Fuerza G para disparar alerta de caída (2.5G)
+    UMBRAL_CAIDA_DEFAULT = 1.7  # Fuerza G para disparar alerta de caída (2.5G)
 
     def __init__(self,
                  pin_trigger=23, pin_echo=13, # Se cambia el trigger al pin 23
@@ -145,7 +145,7 @@ class ActuatorBox:
     def __init__(self, 
                  pin_dfplayer_tx=26, pin_dfplayer_rx=25, 
                  pin_motor=33, pin_buzzer=2, 
-                 volumen=20):
+                 volumen=40):
         
         # 1. Configuración del DFPlayer Mini (MIGRADO A UART1 PARA EVITAR CONFLICTO CON GPS)
         try:

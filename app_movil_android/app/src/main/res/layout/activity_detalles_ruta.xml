@@ -209,13 +209,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lblSeccionMapa">
 
-        <ImageView
-            android:id="@+id/imgMapaRecorrido"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/mapaprueba"
-            tools:ignore="UseAppTint" />
+    <org.osmdroid.views.MapView
+        android:id="@+id/mapaRecorrido"
+        android:layout_width="match_parent"
+        android:layout_height="250dp" />
 
     </FrameLayout>
 

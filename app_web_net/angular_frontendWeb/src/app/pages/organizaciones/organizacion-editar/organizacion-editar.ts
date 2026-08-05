@@ -4,12 +4,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrganizacionesService } from '../../../services/organizaciones';
 import { Organizacion } from '../../../interfaces/organizacion';
-import { Sidebar } from '../../../sidebar/sidebar';
 
 @Component({
   selector: 'app-organizacion-editar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Sidebar],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './organizacion-editar.html',
   styleUrl: './organizacion-editar.css',
 })
