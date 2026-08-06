@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DispositivosService } from '../../../services/dispositivos';
 import { Dispositivo } from '../../../interfaces/dispositivo';
-
 @Component({
   selector: 'app-list-dispositivo',
   standalone: true,
