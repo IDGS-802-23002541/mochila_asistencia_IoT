@@ -171,6 +171,7 @@ class HistorialActivity : AppCompatActivity() {
         // TEMPORAL: hardcodeado para pruebas sin mochila física a la mano.
         // Revertir a esto cuando haya dispositivo real disponible:
         // val mac = sharedPreferences.getString("dispositivo_mac", null)
+
 //        val mac = "94:B5:55:25:73:76"  // Dispositivo Id 10, mock v5
 
         // version chida
