@@ -18,6 +18,7 @@ public class Compra
     [Column(TypeName = "decimal(18,2)")]
     public decimal Total { get; set; }
 
+    [ForeignKey(nameof(IdProveedor))]
     public Proveedor? Proveedor { get; set; }
 
     public ICollection<DetalleCompra> Detalles { get; set; }

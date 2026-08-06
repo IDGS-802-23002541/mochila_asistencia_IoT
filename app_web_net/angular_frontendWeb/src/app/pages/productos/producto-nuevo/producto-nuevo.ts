@@ -128,7 +128,7 @@ export class ProductoNuevo implements OnInit {
     this.productosService.create(dto).subscribe({
       next: (res) => {
         this.guardando = false;
-        this.router.navigate(['/productos', res.idProducto]);
+        this.router.navigate(['/productos/detalle', res.idProducto]);
       },
       error: (err) => {
         this.guardando = false;

@@ -20,7 +20,9 @@ public class DetalleCompra
     [Column(TypeName = "decimal(18,2)")]
     public decimal PrecioUnitario { get; set; }
 
+    [ForeignKey(nameof(IdCompra))]
     public Compra? Compra { get; set; }
 
+    [ForeignKey(nameof(IdMateriaPrima))]
     public MateriaPrima? MateriaPrima { get; set; }
 }

@@ -2,10 +2,10 @@
   <div class="section-header">
     <div>
       <h2 class="section-title">Gestión de materia prima</h2>
-      <button class="btn-nuevo" [routerLink]="['/materiaprima/nuevo']">
-        + Nuevo
-      </button>
     </div>
+    <button class="btn-nuevo" [routerLink]="['/materiaprima/nuevo']">
+      + Nuevo
+    </button>
   </div>
 
   @if (cargando) {
@@ -22,30 +22,107 @@
     </div>
     <button (click)="cargarMateriaPrima()">Reintentar</button>
   </div>
+  } @else if (materiaprima.length === 0) {
+  <div class="estado-mensaje vacio">
+    <span class="estado-icono">🗂</span>
+    <div>
+      <p class="estado-titulo">No hay materia prima registrada</p>
+      <p class="estado-texto">Las materias primas que agregues aparecerán aquí.</p>
+    </div>
+  </div>
   } @else {
-  <div class="item-grid">
-    @for (item of materiaprima; track item.idMateriaPrima) {
-    <div class="item-card">
-      <div class="item-avatar">
-        {{ item.nombre.charAt(0) }}
-      </div>
-      <p class="item-nombre">{{ item.nombre }}</p>
-      <span class="item-badge" [class.item-badge-alerta]="stockBajo(item)">
-        {{ stockBajo(item) ? 'Stock bajo' : 'Stock OK' }} ({{ item.stock }})
-      </span>
-      <button class="btn-detalles" [routerLink]="['/materiaprima', item.idMateriaPrima]">
-        Ver detalles
-      </button>
-    </div>
-    } @empty {
-    <div class="estado-mensaje vacio">
-      <span class="estado-icono">🗂</span>
-      <div>
-        <p class="estado-titulo">No hay materia prima registrada</p>
-        <p class="estado-texto">Las materias primas que agregues aparecerán aquí.</p>
-      </div>
-    </div>
-    }
+  <div class="tabla-container">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Proveedor</th>
+          <th class="col-num">Precio prom.</th>
+          <th class="col-num">Costo</th>
+          <th class="col-num">Stock</th>
+          <th class="col-num">Mínimo</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of materiaprima; track item.idMateriaPrima) {
+        <tr>
+          <td>
+            <span class="avatar">{{ item.nombre.charAt(0) }}</span>
+            {{ item.nombre }}
+          </td>
+          <td>{{ item.proveedor?.nombre ?? '—' }}</td>
+          <td class="col-num">$ {{ precioPromedio(item) | number: '1.2-2' }}</td>
+          <td class="col-num">$ {{ item.costoUnitario | number: '1.2-2' }}</td>
+          <td class="col-num">{{ item.stock }}</td>
+          <td class="col-num">{{ item.stockMinimo }}</td>
+          <td>
+            <span class="badge" [class.badge-alerta]="stockBajo(item)">
+              {{ stockBajo(item) ? 'Stock bajo' : 'Stock OK' }}
+            </span>
+          </td>
+          <td class="acciones">
+            <button class="btn-comprar" (click)="abrirCompra(item)">
+              Comprar
+            </button>
+            <a class="btn-detalles" [routerLink]="['/materiaprima', item.idMateriaPrima]">
+              Ver
+            </a>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
   </div>
   }
 </div>
+
+@if (modalAbierto && itemSeleccionado) {
+<div class="modal-overlay" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Registrar compra</h3>
+      <button class="modal-cerrar" (click)="cerrarModal()">×</button>
+    </div>
+
+    <div class="modal-cuerpo">
+      <p class="modal-titulo-item">{{ itemSeleccionado.nombre }}</p>
+
+      <label class="campo">
+        <span>Proveedor</span>
+        <select [(ngModel)]="proveedorSeleccionado">
+          @for (p of proveedores; track p.idProveedor) {
+          <option [ngValue]="p.idProveedor">{{ p.nombre }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="campo">
+        <span>Cantidad</span>
+        <input type="number" min="1" [(ngModel)]="cantidadCompra" />
+      </label>
+
+      <label class="campo">
+        <span>Precio unitario</span>
+        <input type="number" min="0" step="0.01" [(ngModel)]="precioCompra" />
+      </label>
+
+      <div class="modal-total">
+        Total: $ {{ totalCompra() | number: '1.2-2' }}
+      </div>
+
+      @if (errorCompra) {
+      <p class="modal-error">{{ errorCompra }}</p>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-guardar" (click)="comprar()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar compra' }}
+      </button>
+    </div>
+  </div>
+</div>
+}

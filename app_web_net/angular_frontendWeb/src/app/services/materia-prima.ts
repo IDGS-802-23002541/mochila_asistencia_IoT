@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import {
   MateriaPrima,
   MateriaPrimaCreateDto,
@@ -8,7 +9,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class MateriaPrimaService {
-  private baseUrl = '/api/materias-primas';
+  private readonly baseUrl = `${environment.apiUrl}/api/materias-primas`;
 
   constructor(private http: HttpClient) {}
 
