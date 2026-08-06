@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MateriaPrima } from '../../../interfaces/materiaprima';
 import { MateriaPrimaService } from '../../../services/materia-prima';
 
 @Component({
   selector: 'app-materiaprima-detalle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './materiaprima-detalle.html',
   styleUrl: './materiaprima-detalle.css',
 })

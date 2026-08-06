@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Proveedor } from '../../../interfaces/proveedor';
 import { ProveedoresService } from '../../../services/proveedores';
 
 @Component({
   selector: 'app-proveedor-detalle',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './proveedor-detalle.html',
   styleUrl: './proveedor-detalle.css',
 })

@@ -37,7 +37,7 @@ export class OrganizacionEditar implements OnInit {
       sector: ['', Validators.required],
       contacto_Principal: ['', Validators.required],
       email_Contacto: ['', [Validators.required, Validators.email]],
-      rol: ['', Validators.required],
+      rol: [{ value: '', disabled: true }, Validators.required],
       estado_Activo: [true],
       es_Interna: [false],
     });

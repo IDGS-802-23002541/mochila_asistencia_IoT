@@ -43,10 +43,8 @@
 
         <div class="form-field">
           <label for="rol">Rol</label>
-          <input id="rol" type="text" formControlName="rol" placeholder="Ej. organizacion" />
-          @if (f['rol'].touched && f['rol'].invalid) {
-            <span class="form-error">El rol es obligatorio</span>
-          }
+          <input id="rol" type="text" formControlName="rol" />
+          <span class="form-hint">El rol no se puede modificar.</span>
         </div>
 
         <div class="form-field">

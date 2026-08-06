@@ -24,7 +24,7 @@ export class OrganizacionNuevo {
   readonly form = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(150)]],
     sector: ['', [Validators.required, Validators.maxLength(50)]],
-    rol: ['usuario', [Validators.required]],
+    rol: [{ value: 'organizacion', disabled: true }, [Validators.required]],
     contacto_Principal: ['', [Validators.maxLength(100)]],
     email_Contacto: ['', [Validators.email, Validators.maxLength(100)]],
     contrasena_Hash: ['', [Validators.maxLength(255)]],

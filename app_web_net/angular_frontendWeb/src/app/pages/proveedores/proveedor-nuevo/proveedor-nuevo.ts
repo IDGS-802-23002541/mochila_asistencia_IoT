@@ -81,6 +81,7 @@ export class ProveedorNuevo {
 
           this.router.navigate([
             '/proveedores',
+            'detalle',
             nuevoProveedor.idProveedor
           ]);
 
