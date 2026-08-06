@@ -158,18 +158,6 @@ body {
   gap: 4px;
 }
 
-.stat-num {
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.stat-label {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.03em;
-}
-
 .hero-stats .stat-num {
   font-size: 32px;
   font-weight: 700;
@@ -190,7 +178,7 @@ body {
   height: 380px;
 }
 
-/* Círculo central con logo */
+/* Círculo central con logo y flotación suave */
 .hero-circle {
   width: 260px;
   height: 260px;
@@ -202,6 +190,8 @@ body {
   justify-content: center;
   position: relative;
   z-index: 2;
+  box-shadow: 0 0 30px rgba(37, 99, 235, 0.25);
+  animation: floatCircle 4s ease-in-out infinite;
 }
 
 .hero-circle img {
@@ -209,25 +199,58 @@ body {
   object-fit: contain;
 }
 
-/* Anillos del visual */
+/* ==========================================
+   ANILLOS CON ANIMACIÓN DE PULSO / SONAR
+========================================== */
 .hero-ring {
   position: absolute;
   border-radius: 50%;
+  pointer-events: none;
 }
 
 .r1 {
   width: 318px;
   height: 318px;
-  border: 1px solid rgba(37, 99, 235, 0.18);
+  border: 1.5px solid rgba(37, 99, 235, 0.4);
+  animation: pulseRing 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
 .r2 {
   width: 385px;
   height: 385px;
-  border: 1px solid rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  animation: pulseRing 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  animation-delay: 1.2s; /* Desfase para efecto en cadena */
 }
 
-/* Badges flotantes */
+/* Keyframes de animación de los aros */
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.88);
+    opacity: 0.2;
+    border-color: rgba(37, 99, 235, 0.6);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+    border-color: rgba(91, 156, 246, 0.1);
+  }
+}
+
+/* Animación sutil de levitación para el logo central */
+@keyframes floatCircle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Badges flotantes con sutil animación */
 .hero-badge {
   position: absolute;
   background: #162a6a;
@@ -238,6 +261,7 @@ body {
   align-items: center;
   gap: 10px;
   z-index: 3;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .badge-icon {
@@ -268,22 +292,41 @@ body {
   color: rgba(255, 255, 255, 0.45);
 }
 
+/* Punto verde parpadeante */
 .badge-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: #22c55e;
   flex-shrink: 0;
+  animation: pulseDot 1.8s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
 }
 
 .b-top {
   top: 18px;
   right: 8px;
+  animation: floatBadgeTop 5s ease-in-out infinite;
 }
 
 .b-bottom {
   bottom: 28px;
   left: 0;
+  animation: floatBadgeBottom 4.5s ease-in-out infinite;
+}
+
+@keyframes floatBadgeTop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes floatBadgeBottom {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
 }
 
 /* ==========================================
@@ -434,7 +477,6 @@ body {
   .b-top { top: 10px; right: 20px; }
   .b-bottom { bottom: 10px; left: 20px; }
 
-  /* Responsive Evidencia */
   .evidencia-section {
     padding: 3rem 2rem;
   }

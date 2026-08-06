@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { OrganizacionesService } from '../../../services/organizaciones';
 import { Organizacion } from '../../../interfaces/organizacion';
-
 @Component({
   selector: 'app-organizaciones-list',
   standalone: true,

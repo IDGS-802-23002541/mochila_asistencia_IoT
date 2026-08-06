@@ -24,14 +24,16 @@
   </div>
   } @else {
   <div class="item-grid">
-    @for (item of materiaprima; track item.id) {
+    @for (item of materiaprima; track item.idMateriaPrima) {
     <div class="item-card">
       <div class="item-avatar">
         {{ item.nombre.charAt(0) }}
       </div>
       <p class="item-nombre">{{ item.nombre }}</p>
-      <span class="item-badge">{{ item.estado_Activo ? 'Activo' : 'Inactivo' }}</span>
-      <button class="btn-detalles" [routerLink]="['/materiaprima', item.id]">
+      <span class="item-badge" [class.item-badge-alerta]="stockBajo(item)">
+        {{ stockBajo(item) ? 'Stock bajo' : 'Stock OK' }} ({{ item.stock }})
+      </span>
+      <button class="btn-detalles" [routerLink]="['/materiaprima', item.idMateriaPrima]">
         Ver detalles
       </button>
     </div>
@@ -39,8 +41,8 @@
     <div class="estado-mensaje vacio">
       <span class="estado-icono">🗂</span>
       <div>
-        <p class="estado-titulo">No hay materia prima registrados</p>
-        <p class="estado-texto">Los materia prima que agregues aparecerán aquí.</p>
+        <p class="estado-titulo">No hay materia prima registrada</p>
+        <p class="estado-texto">Las materias primas que agregues aparecerán aquí.</p>
       </div>
     </div>
     }

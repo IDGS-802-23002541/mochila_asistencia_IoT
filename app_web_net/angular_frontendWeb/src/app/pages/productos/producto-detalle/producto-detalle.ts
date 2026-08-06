@@ -1,39 +1,67 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Producto } from '../../../interfaces/producto';
+import { ProductoDetalle as ProductoDetalleModel } from '../../../interfaces/producto';
+import { ProductosService } from '../../../services/producto';
 
 @Component({
   selector: 'app-producto-detalle',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './producto-detalle.html',
   styleUrl: './producto-detalle.css',
 })
-export class ProductoDetalle {
-  // TODO: reemplazar por datos reales del servicio, cargados según route.snapshot.paramMap
+export class ProductoDetalle implements OnInit {
   cargando = false;
   error = false;
   eliminando = false;
 
-  registro: Producto | null = {
-    id: 1,
-    nombre: 'Kit Vision Guard Básico',
-    estado_Activo: true,
-    categoria: '—',
-    precio: '—',
-    stock: '—',
-    descripcion: '—',
-  };
+  registro: ProductoDetalleModel | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private ProductosService: ProductosService
+  ) {}
+
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.cargarProducto(id);
+  }
+
+  cargarProducto(id: number): void {
+    this.cargando = true;
+    this.error = false;
+
+    this.ProductosService.getDetalle(id).subscribe({
+      next: (data) => {
+        this.registro = data;
+        this.cargando = false;
+      },
+      error: () => {
+        this.error = true;
+        this.cargando = false;
+      },
+    });
+  }
 
   editar(): void {
     if (!this.registro) return;
-    this.router.navigate(['/productos', this.registro.id, 'editar']);
+    this.router.navigate(['/productos', this.registro.idProducto, 'editar']);
   }
 
   eliminar(): void {
-    // TODO: conectar con el servicio para eliminar el registro
+    if (!this.registro) return;
+
+    this.eliminando = true;
+    this.ProductosService.delete(this.registro.idProducto).subscribe({
+      next: () => {
+        this.router.navigate(['/productos']);
+      },
+      error: () => {
+        this.eliminando = false;
+      },
+    });
   }
 
   formatearId(id: number): string {
