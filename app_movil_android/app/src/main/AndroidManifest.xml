@@ -49,10 +49,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".Controllers.VerificationActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".Controllers.HomeActivity"
             android:exported="false" />
 

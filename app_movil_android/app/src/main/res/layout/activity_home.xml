@@ -121,63 +121,29 @@
                 android:padding="20dp"
                 android:orientation="vertical">
 
+                <!-- Cronómetro centrado -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/txtTiempo"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:text="00:00"
+                        android:textSize="32sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/vg_text_dark" />
 
-                        <TextView
-                            android:id="@+id/txtTiempo"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="00:00"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/vg_text_dark" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tiempo"
-                            android:textSize="12sp"
-                            android:textColor="@color/vg_text_muted" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="45dp"
-                        android:layout_gravity="center_vertical"
-                        android:background="@color/vg_border_light" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textSize="28sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/vg_text_dark" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Eventos"
-                            android:textSize="12sp"
-                            android:textColor="@color/vg_text_muted" />
-                    </LinearLayout>
+                        android:layout_marginTop="2dp"
+                        android:text="Tiempo"
+                        android:textSize="12sp"
+                        android:textColor="@color/vg_text_muted" />
                 </LinearLayout>
 
                 <androidx.appcompat.widget.AppCompatButton
@@ -196,87 +162,47 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ÚLTIMA ACTIVIDAD"
+                android:text="DISPOSITIVOS"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp"
                 android:textColor="@color/vg_text_muted"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_login_card"
-                android:padding="16dp"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    android:id="@+id/t1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Mochila UTL 1"
-                    android:textStyle="bold"
-                    android:textColor="@color/vg_text_dark"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:layout_below="@id/t1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Hace 1 día"
-                    android:textSize="12sp"
-                    android:textColor="@color/vg_text_muted" />
-
-                <Button
-                    android:id="@+id/btnDetallesHome"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:text="Detalles"
-                    android:textSize="12sp"
-                    android:backgroundTint="#F0F0F0"
-                    android:textColor="@color/vg_text_dark"
-                    android:textAllCaps="false" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_login_card"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/t2"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/t1"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Mochila UTL 5"
-                    android:textStyle="bold"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="12dp"
+                    android:text="Mochila UTL 1"
                     android:textColor="@color/vg_text_dark"
-                    android:textSize="15sp" />
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:layout_below="@id/t2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Hace 1 día"
-                    android:textSize="12sp"
-                    android:textColor="@color/vg_text_muted" />
-
-                <Button
-                    android:id="@+id/btnDetallesHome2"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDesvincularHome"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
-                    android:text="Detalles"
-                    android:textSize="12sp"
                     android:backgroundTint="#F0F0F0"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="Desvincular"
+                    android:textAllCaps="false"
                     android:textColor="@color/vg_text_dark"
-                    android:textAllCaps="false" />
-            </RelativeLayout>
+                    android:textSize="12sp"
+                    app:cornerRadius="18dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
