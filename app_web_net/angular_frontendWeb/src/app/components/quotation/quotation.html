@@ -1,42 +1,134 @@
 <section id="quotation" class="quotation-section">
 
+  <!-- =========================================================================
+       ENCABEZADO DE LA SECCIÓN (Card contenedor con efecto Glassmorphism)
+       ========================================================================= -->
   <div class="section-header">
-    <span class="section-eyebrow">Modelo de Servitización basado en Evidencia</span>
-    <h2>Cotiza con nosotros</h2>
+    
+    <!-- Badge / Eyebrow superior -->
+    <span class="section-eyebrow">● Modelo de Servitización basado en Evidencia</span>
+    
+    <!-- Título principal con acento de color -->
+    <h2>Cotiza <span class="accent">con nosotros</span></h2>
+    
+    <!-- Línea decorativa con gradiente tricromático -->
     <div class="section-divider"></div>
+    
+    <!-- Subtítulo / Descripción normativa -->
     <p class="section-subtitle">
       Diseña un diagnóstico a la medida de tu institución. Alinea tu campus a los marcos normativos
       de la <strong>Ley General de Educación Superior</strong> y la <strong>RENADESI</strong>
       seleccionando los módulos requeridos.
     </p>
+
+    <!-- Selector de Tipo de Institución (Afecta el margen sobre el costo real) -->
+    <div class="institucion-toggle">
+      <span class="institucion-label">Tipo de institución</span>
+      <div class="segmented">
+        <button
+          type="button"
+          [class.active]="tipoInstitucion === 'privada'"
+          (click)="cambiarTipoInstitucion('privada')">
+          Privada
+        </button>
+        <button
+          type="button"
+          [class.active]="tipoInstitucion === 'publica'"
+          (click)="cambiarTipoInstitucion('publica')">
+          Pública
+        </button>
+      </div>
+    </div>
+    
   </div>
 
+
+  <!-- =========================================================================
+       CONTENEDOR PRINCIPAL DEL LAYOUT (Grid de Módulos + Asistente Virtual)
+       ========================================================================= -->
   <div class="quotation-layout-container">
 
-    <!-- GRID DE TARJETAS -->
+    <!-- ---------------------------------------------------------------------
+         COLUMNA IZQUIERDA: GRID DE TARJETAS DE MÓDULOS / PRODUCTOS
+         --------------------------------------------------------------------- -->
     <div class="products-grid">
-      <div class="product-card" *ngFor="let item of modulosConsultoria; let i = index">
+      <div 
+        class="product-card" 
+        [attr.data-tier]="item.tier" 
+        *ngFor="let item of modulosConsultoria; let i = index">
+
+        <!-- Imagen de fondo de la tarjeta -->
         <div class="product-img">
           <img [src]="item.imagen" [alt]="item.nombre" class="card-bg-img">
         </div>
+        
+        <!-- Overlay oscuro para legibilidad sobre la imagen -->
         <div class="card-overlay"></div>
+
+        <!-- Contenido principal de la tarjeta -->
         <div class="card-content">
-          <div class="product-info">
+          <div class="card-top">
+            <span class="tier-swatch"></span>
             <h3 class="product-name">{{ item.nombre }}</h3>
-            <p class="product-price">{{ item.precio | currency:'MXN':'symbol':'1.0-0' }}</p>
-            <p class="product-desc">{{ item.desc }}</p>
           </div>
+
+          <p class="product-price mono">{{ precioFinal(item) | currency:'MXN':'symbol':'1.0-0' }}</p>
+          <p class="product-desc">{{ item.desc }}</p>
+
+          <!-- Enlace para desplegar desglose de costos -->
+          <button type="button" class="link-desglose" (click)="toggleDesglose(i)">
+            {{ desglosesVisibles[i] ? 'Ocultar cálculo ▲' : 'Ver cómo se calculó →' }}
+          </button>
+
+          <!-- Panel desplegable con el detalle financiero -->
+          <div class="desglose-panel" *ngIf="desglosesVisibles[i]">
+            <div class="desglose-row">
+              <span>Hardware</span>
+              <span class="mono">{{ item.costos.hardware | currency:'MXN':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="desglose-row">
+              <span>Software / nube</span>
+              <span class="mono">{{ item.costos.software | currency:'MXN':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="desglose-row">
+              <span>Personal en campo</span>
+              <span class="mono">{{ item.costos.personal | currency:'MXN':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="desglose-row">
+              <span>Logística</span>
+              <span class="mono">{{ item.costos.logistica | currency:'MXN':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="desglose-row total">
+              <span>Costo real</span>
+              <span class="mono">{{ costoBase(item) | currency:'MXN':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="desglose-row margen">
+              <span>Margen ({{ tipoInstitucion === 'publica' ? 'institución pública' : 'institución privada' }})</span>
+              <span class="mono">{{ margenEfectivo(item) * 100 | number:'1.0-0' }}%</span>
+            </div>
+          </div>
+
+          <!-- Botón de acción (Agregar / Quitar concepto) -->
           <div class="product-actions">
-            <button [class.btn-add]="!item.agregado" [class.btn-remove]="item.agregado" (click)="toggleConcepto(i)">
+            <button 
+              [class.btn-add]="!item.agregado" 
+              [class.btn-remove]="item.agregado" 
+              (click)="toggleConcepto(i)">
               {{ item.agregado ? '✓ Seleccionado (Quitar)' : 'Agregar al Proyecto' }}
             </button>
           </div>
         </div>
+
       </div>
     </div>
 
-    <!-- ASISTENTE VIRTUAL -->
+
+    <!-- ---------------------------------------------------------------------
+         COLUMNA DERECHA: ASISTENTE VIRTUAL DE INVERSIÓN (CHAT STICKY)
+         --------------------------------------------------------------------- -->
     <div class="chat-container">
+      
+      <!-- Cabecera del Chat -->
       <div class="chat-header">
         <div class="bot-avatar">VG</div>
         <div class="bot-status">
@@ -44,15 +136,20 @@
           <p>Presupuesto en Línea</p>
         </div>
       </div>
+
+      <!-- Ventana de Mensajes -->
       <div class="chat-window">
-        <div *ngFor="let msg of historialMensajes" [ngClass]="{'msg-bot': msg.emisor === 'bot', 'msg-user': msg.emisor === 'usuario'}">
+        <div 
+          *ngFor="let msg of historialMensajes" 
+          [ngClass]="{'msg-bot': msg.emisor === 'bot', 'msg-user': msg.emisor === 'usuario'}">
+          
           <div class="msg-bubble">
             <p>{{ msg.texto }}</p>
 
-            <!-- RESUMEN DENTRO DEL DIÁLOGO DEL BOT -->
+            <!-- Resumen y Formulario Final (Solo se renderiza si es mensaje de resumen) -->
             <div *ngIf="msg.esResumen" class="chat-summary-inside">
 
-              <!-- Input de correo independiente del formulario nativo con estilos de clase aplicados -->
+              <!-- Input de correo institucional -->
               <div class="email-input-group" style="margin-bottom: 12px; margin-top: 10px;">
                 <input
                   type="email"
@@ -63,7 +160,7 @@
                 >
               </div>
 
-              <!-- Alerta de advertencia de red elegante en el chat (Evita alert nativo) -->
+              <!-- Alerta de respaldo por CORS o Adblock -->
               <div *ngIf="errorRedDetectado" class="network-warning-box">
                 ⚠️ Envío directo bloqueado por el navegador (CORS o Adblock). Mostrando simulación de desarrollo local.
               </div>
@@ -72,12 +169,13 @@
                 Esquema de consultoría externa: exime a la institución de costos fijos de mantenimiento.
               </p>
 
+              <!-- Muestra del total acumulado -->
               <div class="total-display">
                 <span class="total-label">Total Estimado:</span>
-                <span class="total-amount">{{ totalProyecto | currency:'MXN':'symbol':'1.0-0' }}</span>
+                <span class="total-amount mono">{{ totalProyecto | currency:'MXN':'symbol':'1.0-0' }}</span>
               </div>
 
-              <!-- Botón dinámico controlado por Angular con validación de correo robusta -->
+              <!-- Botón de envío de propuesta -->
               <button
                 class="btn-submit-quote"
                 (click)="enviarCotizacionFinal()"
@@ -88,39 +186,51 @@
 
             </div>
           </div>
+
         </div>
       </div>
+
     </div>
+
   </div>
 
+
+  <!-- =========================================================================
+       MODAL / OVERLAY DE CONFIRMACIÓN (SIMULACIÓN LOCALHOST / EXITO)
+       ========================================================================= -->
   <div class="localhost-overlay" *ngIf="mostrarPantallaLocalhost">
     <div class="localhost-card">
+      
       <div class="localhost-header">
-        <!-- El badge cambia de color si el servidor externo falló pero se recuperó localmente -->
-        <span class="server-badge" [class.badge-warning]="errorRedDetectado">
-        </span>
+        <span class="server-badge" [class.badge-warning]="errorRedDetectado"></span>
         <h3>VisionGuard</h3>
       </div>
+
       <div class="localhost-body">
         <div class="icon-success">💻</div>
         <h4>¡Presupuesto Sincronizado Exitosamente!</h4>
 
-        <p *ngIf="!errorRedDetectado">Los datos estructurados han sido procesados y enviados a la Empresa</p>
+        <p *ngIf="!errorRedDetectado">
+          Los datos estructurados han sido procesados y enviados a la Empresa.
+        </p>
         <p *ngIf="errorRedDetectado" class="text-fallback-note">
-          <strong>Nota de simulación activa:</strong> Tu cotización ya está estructurada y guardada con éxito
+          <strong>Nota de simulación activa:</strong> Tu cotización ya está estructurada y guardada con éxito.
         </p>
 
-        <code class="url-code">Gracias, nosotros nos contactamos</code>
+        <code class="url-code">Gracias, nos pondremos en contacto</code>
 
+        <!-- Resumen del Payload procesado -->
         <div class="payload-box">
           <p><strong>Correo del remitente:</strong> {{ correoUsuario }}</p>
           <p><strong>Monto total mapeado:</strong> {{ totalProyecto | currency:'MXN':'symbol':'1.0-0' }}</p>
           <p><strong>Status de comunicación:</strong> En proceso de ser contactada</p>
         </div>
       </div>
+
       <div class="localhost-footer">
         <button class="btn-close-localhost" (click)="cerrarPantallaLocalhost()">Entendido, volver</button>
       </div>
+
     </div>
   </div>
 

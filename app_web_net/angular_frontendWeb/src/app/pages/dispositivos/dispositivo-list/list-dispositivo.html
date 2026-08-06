@@ -2,130 +2,216 @@
 
     <div class="section-header">
         <div>
+
             <h2 class="section-title">
                 Gestión de dispositivos
             </h2>
 
+
             <button class="btn-nuevo" [routerLink]="['/dispositivos/nuevo']">
+
                 + Nuevo
+
             </button>
 
         </div>
     </div>
 
 
+
     @if (cargando) {
 
+
     <div class="estado-mensaje">
+
         <div class="spinner"></div>
+
         Cargando dispositivos...
+
     </div>
+
 
 
     } @else if (error) {
 
 
+
     <div class="estado-mensaje error">
+
 
         <span class="estado-icono">
             !
         </span>
 
+
+
         <div>
+
             <p class="estado-titulo">
+
                 No se pudo cargar la información
+
             </p>
+
+
 
             <p class="estado-texto">
+
                 Verifica tu conexión e inténtalo de nuevo.
+
             </p>
+
+
         </div>
 
+
+
         <button (click)="cargarDispositivos()">
+
             Reintentar
+
         </button>
 
+
     </div>
+
+
 
 
     } @else {
 
 
+
     <div class="clientes-grid">
 
+
+
         @for (dispositivo of dispositivos; track dispositivo.id) {
+
 
 
         <div class="cliente-card">
 
 
+
             <div class="cliente-avatar">
-                📡
+
+                {{ dispositivo.macAddress.charAt(0) }}
+
             </div>
 
 
+
+
             <p class="cliente-nombre">
+
                 {{ dispositivo.macAddress }}
+
             </p>
+
+
 
 
             <span class="cliente-id">
+
                 ID {{ dispositivo.id }}
+
             </span>
 
 
+
+
+
             <p>
+
                 Estado:
+
                 <strong>
+
                     {{ dispositivo.estado }}
+
                 </strong>
+
             </p>
+
+
+
 
 
             <p>
+
                 Organización:
+
                 {{ dispositivo.organizacion || 'Sin asignar' }}
+
             </p>
+
+
+
 
 
             <button class="btn-detalles" [routerLink]="['/dispositivos/detalle', dispositivo.id]">
 
+
                 Ver detalles
+
 
             </button>
 
 
+
         </div>
+
 
 
         } @empty {
 
 
+
         <div class="estado-mensaje vacio">
 
+
             <span class="estado-icono">
+
                 🗂
+
             </span>
+
+
+
 
             <div>
 
+
                 <p class="estado-titulo">
+
                     No hay dispositivos registrados
+
                 </p>
 
+
+
                 <p class="estado-texto">
+
                     Los dispositivos que agregues aparecerán aquí.
+
                 </p>
+
 
             </div>
 
+
+
         </div>
+
 
 
         }
 
 
+
     </div>
+
 
 
     }

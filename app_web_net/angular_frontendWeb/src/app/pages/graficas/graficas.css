@@ -7,6 +7,9 @@
   display: flex;
   justify-content: center;
 }
+.header-graficas {
+  text-align: center;
+}
 
 .tarjeta-graficas {
   width: 100%;

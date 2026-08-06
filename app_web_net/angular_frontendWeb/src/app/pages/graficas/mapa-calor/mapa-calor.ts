@@ -83,6 +83,8 @@ export class MapaCalor implements AfterViewInit, OnChanges, OnDestroy {
       .catch((err) => console.error('Error cargando geojson:', err));
   }
 
+
+
   private pintarMapaCalor(): void {
     // Si ya habia una capa de calor pintada (ej. zonas se actualizo de
     // nuevo), se quita antes de pintar la nueva -- evita capas

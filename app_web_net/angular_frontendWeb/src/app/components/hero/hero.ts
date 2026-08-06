@@ -4,7 +4,7 @@ import { AfterViewInit, Component } from '@angular/core';
   selector: 'app-hero',
   imports: [],
   templateUrl: './hero.html',
-  styleUrl: './hero.css',
+  styleUrl: './hero.scss',
 })
 export class Hero implements AfterViewInit {
 

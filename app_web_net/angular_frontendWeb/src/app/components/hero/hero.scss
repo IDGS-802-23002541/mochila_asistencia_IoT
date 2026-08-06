@@ -158,16 +158,15 @@ body {
   gap: 4px;
 }
 
-.stat-num {
-  font-size: 22px;
+.hero-stats .stat-num {
+  font-size: 32px;
   font-weight: 700;
   color: #ffffff;
 }
 
-.stat-label {
+.hero-stats .stat-label {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 /* Visual derecho */
@@ -179,18 +178,20 @@ body {
   height: 380px;
 }
 
-/* Círculo central con logo */
+/* Círculo central con logo y flotación suave */
 .hero-circle {
   width: 260px;
   height: 260px;
   border-radius: 50%;
-background: #fffffff8;
-border: 1px solid #fffffff1;
+  background: #fffffff8;
+  border: 1px solid #fffffff1;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 2;
+  box-shadow: 0 0 30px rgba(37, 99, 235, 0.25);
+  animation: floatCircle 4s ease-in-out infinite;
 }
 
 .hero-circle img {
@@ -198,25 +199,58 @@ border: 1px solid #fffffff1;
   object-fit: contain;
 }
 
-/* Anillos del visual */
+/* ==========================================
+   ANILLOS CON ANIMACIÓN DE PULSO / SONAR
+========================================== */
 .hero-ring {
   position: absolute;
   border-radius: 50%;
+  pointer-events: none;
 }
 
 .r1 {
   width: 318px;
   height: 318px;
-  border: 1px solid rgba(37, 99, 235, 0.18);
+  border: 1.5px solid rgba(37, 99, 235, 0.4);
+  animation: pulseRing 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
 .r2 {
   width: 385px;
   height: 385px;
-  border: 1px solid rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  animation: pulseRing 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  animation-delay: 1.2s; /* Desfase para efecto en cadena */
 }
 
-/* Badges flotantes */
+/* Keyframes de animación de los aros */
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.88);
+    opacity: 0.2;
+    border-color: rgba(37, 99, 235, 0.6);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+    border-color: rgba(91, 156, 246, 0.1);
+  }
+}
+
+/* Animación sutil de levitación para el logo central */
+@keyframes floatCircle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Badges flotantes con sutil animación */
 .hero-badge {
   position: absolute;
   background: #162a6a;
@@ -227,6 +261,7 @@ border: 1px solid #fffffff1;
   align-items: center;
   gap: 10px;
   z-index: 3;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .badge-icon {
@@ -257,22 +292,144 @@ border: 1px solid #fffffff1;
   color: rgba(255, 255, 255, 0.45);
 }
 
+/* Punto verde parpadeante */
 .badge-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: #22c55e;
   flex-shrink: 0;
+  animation: pulseDot 1.8s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
 }
 
 .b-top {
   top: 18px;
   right: 8px;
+  animation: floatBadgeTop 5s ease-in-out infinite;
 }
 
 .b-bottom {
   bottom: 28px;
   left: 0;
+  animation: floatBadgeBottom 4.5s ease-in-out infinite;
+}
+
+@keyframes floatBadgeTop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes floatBadgeBottom {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* ==========================================
+   SECCIÓN DE EVIDENCIA (GALERÍA DE FOTOS)
+========================================== */
+.evidencia-section {
+  width: 100%;
+  padding: 4rem 4rem;
+  background: #f5f6f8;
+}
+
+.evidencia-header {
+  text-align: center;
+  max-width: 650px;
+  margin: 0 auto 3rem;
+}
+
+.evidencia-header .eyebrow {
+  display: inline-block;
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  color: #2563eb;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.evidencia-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0d1f4e;
+  margin: 14px 0 10px;
+}
+
+.evidencia-header h2 .accent {
+  color: #2563eb;
+}
+
+.evidencia-header p {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.evidencia-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.evidencia-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(13, 31, 78, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.evidencia-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(13, 31, 78, 0.08);
+}
+
+.evidencia-card .img-wrapper {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+  background: #e2e8f0;
+}
+
+.evidencia-card .img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.evidencia-card:hover .img-wrapper img {
+  transform: scale(1.05);
+}
+
+.evidencia-card .card-caption {
+  padding: 20px;
+}
+
+.evidencia-card .card-caption h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d1f4e;
+  margin-bottom: 8px;
+}
+
+.evidencia-card .card-caption p {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
 }
 
 /* =====================
@@ -319,6 +476,14 @@ border: 1px solid #fffffff1;
 
   .b-top { top: 10px; right: 20px; }
   .b-bottom { bottom: 10px; left: 20px; }
+
+  .evidencia-section {
+    padding: 3rem 2rem;
+  }
+
+  .evidencia-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 500px) {
@@ -335,15 +500,4 @@ border: 1px solid #fffffff1;
   .hero-stats {
     gap: 20px;
   }
-}
-
-.hero-stats .stat-num{
-  font-size:32px;
-  font-weight:700;
-  color:#233B67;
-}
-
-.hero-stats .stat-label{
-  font-size:14px;
-  color:#666;
 }
