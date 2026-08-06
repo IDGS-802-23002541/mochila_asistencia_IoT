@@ -1,3 +1,4 @@
+import { SesionService } from './../../services/sesion';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
@@ -25,6 +26,7 @@ interface NavItem {
 export class MainLayout {
   private router = inject(Router);
   layout = inject(LayoutService);
+  sesionService = inject(SesionService);
 
  navItems: NavItem[] = [
   { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
@@ -74,6 +76,7 @@ export class MainLayout {
   }
 
   logout(): void {
+    this.sesionService.cerrarSesion();
     this.router.navigate(['/login']);
   }
 }

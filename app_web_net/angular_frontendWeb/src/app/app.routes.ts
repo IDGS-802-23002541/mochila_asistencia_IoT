@@ -38,7 +38,10 @@ import { MateriaPrimaList } from './pages/materiaprima/materiaprima-list/materia
 import { MateriaPrimaNuevo } from './pages/materiaprima/materiaprima-nuevo/materiaprima-nuevo';
 import { MateriaPrimaDetalle } from './pages/materiaprima/materiaprima-detalle/materiaprima-detalle';
 import { MateriaPrimaEditar } from './pages/materiaprima/materiaprima-editar/materiaprima-editar';
+
+// Proteccion rutas
 import { authGuard } from './guards/auth.guard';
+import { loginGuard } from './guards/login-guard';
 
 export const routes: Routes = [
   {
@@ -48,6 +51,7 @@ export const routes: Routes = [
   {
     path: 'login',
     component: Login,
+    canActivate: [loginGuard]
   },
   {
     path: 'welcome',
@@ -56,6 +60,7 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayout,
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -64,7 +69,7 @@ export const routes: Routes = [
       },
       {
         path: 'inicio',
-        component: Inicio, canActivate: [authGuard]
+        component: Inicio
       },
 
       // Analítica
