@@ -24,9 +24,7 @@ class DevicesActivity : AppCompatActivity() {
     private lateinit var btnContinuarSinVincular: Button
 
     private lateinit var itemMochila1: LinearLayout
-    private lateinit var itemMochila2: LinearLayout
     private var macEncontrada = ""
-
 
     companion object {
         private const val PERMISSION_REQUEST_CODE = 101
@@ -41,8 +39,6 @@ class DevicesActivity : AppCompatActivity() {
         btnContinuarSinVincular = findViewById(R.id.btnContinuarSinVincular)
 
         itemMochila1 = findViewById(R.id.itemMochila1)
-        itemMochila2 = findViewById(R.id.itemMochila2)
-
 
         bleManager = VisionGuardBleManager(this, object : VisionGuardBleManager.BleStateListener {
             override fun onConectado() {
@@ -53,7 +49,6 @@ class DevicesActivity : AppCompatActivity() {
                     .apply()
 
                 Toast.makeText(this@DevicesActivity, "¡Mochila Conectada con Éxito!", Toast.LENGTH_SHORT).show()
-
 
                 bleManager.desconectar()
 
@@ -147,20 +142,9 @@ class DevicesActivity : AppCompatActivity() {
         }
     }
 
-
-    /**
-     * 🛠️ Lógica visual modificada para usar fondos con bordes redondeados
-     */
     private fun setupListInteractions() {
         itemMochila1.setOnClickListener {
-            // Asigna el XML del recurso redondeado
             itemMochila1.setBackgroundResource(R.drawable.bg_item_device_selector)
-            itemMochila2.setBackgroundColor(0) // Remueve el fondo por completo
-        }
-
-        itemMochila2.setOnClickListener {
-            itemMochila2.setBackgroundResource(R.drawable.bg_item_device_selector)
-            itemMochila1.setBackgroundColor(0) // Remueve el fondo por completo
         }
     }
 }

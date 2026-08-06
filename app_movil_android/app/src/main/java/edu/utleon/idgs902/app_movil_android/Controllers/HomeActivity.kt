@@ -35,8 +35,7 @@ class HomeActivity : AppCompatActivity() {
     // Componentes visuales
     private lateinit var txtTiempo: TextView
     private lateinit var btnIniciarRecorrido: Button
-    private lateinit var btnDetalles: Button
-    private lateinit var btnDetalles2: Button
+    private lateinit var btnDesvincular: Button
 
     // Componentes de la tarjeta dinámica
     private lateinit var lblNombreMochilaHome: TextView
@@ -71,7 +70,6 @@ class HomeActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences("CronometroPrefs", Context.MODE_PRIVATE)
         globalPreferences = getSharedPreferences("VisionGuardPrefs", Context.MODE_PRIVATE)
 
-
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNavigation.selectedItemId = R.id.nav_home
 
@@ -91,15 +89,14 @@ class HomeActivity : AppCompatActivity() {
 
         txtTiempo = findViewById(R.id.txtTiempo)
         btnIniciarRecorrido = findViewById(R.id.btnIniciarRecorrido)
-        btnDetalles = findViewById(R.id.btnDetallesHome)
-        btnDetalles2 = findViewById(R.id.btnDetallesHome2)
+        btnDesvincular = findViewById(R.id.btnDesvincularHome)
 
         lblNombreMochilaHome = findViewById(R.id.lblNombreMochilaHome)
         lblStatusSenalHome = findViewById(R.id.lblStatusSenalHome)
         lblBadgeStatusTexto = findViewById(R.id.lblBadgeStatusTexto)
         badgeStatusContainer = findViewById(R.id.badgeStatusContainer)
 
-        //Manejo por MQTT
+        // Manejo por MQTT
         mqttManager = MqttManager(this,
             object : MqttManager.MqttListener {
 
@@ -169,12 +166,42 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        val navegarDetalles = android.view.View.OnClickListener {
-            val intent = Intent(this, MonitoreoActivity::class.java)
-            startActivity(intent)
+        // Acción para desvincular el dispositivo
+        btnDesvincular.setOnClickListener {
+            ejecutarDesvinculacion()
         }
-        btnDetalles.setOnClickListener(navegarDetalles)
-        btnDetalles2.setOnClickListener(navegarDetalles)
+    }
+
+    private fun ejecutarDesvinculacion() {
+        val mac = globalPreferences.getString("dispositivo_mac", "") ?: ""
+
+        if (mac.isNotEmpty()) {
+            val jsonDesvincular = JSONObject().apply {
+                put("accion", "desvincular")
+                put("macAddress", mac)
+            }
+
+            mqttManager.publicar(
+                MqttConfig.TOPICO_COMANDOS,
+                jsonDesvincular.toString()
+            )
+        }
+
+        // Limpiar preferencias locales del dispositivo vinculado
+        globalPreferences.edit().apply {
+            putBoolean("dispositivo_vinculado", false)
+            putString("dispositivo_mac", "")
+            putString("dispositivo_nombre", "")
+            apply()
+        }
+
+        Toast.makeText(this, "Dispositivo desvinculado con éxito", Toast.LENGTH_SHORT).show()
+
+        val intent = Intent(this, DevicesActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+        finish()
     }
 
     private fun verificarEstatusDispositivo() {
