@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import {
   Producto,
   ProductoResumen,
@@ -10,8 +11,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ProductosService {
-  // Ajusta esta base si usas un proxy.conf.json / environment distinto.
-  private baseUrl = '/api/productos';
+  private baseUrl = `${environment.apiUrl}/api/productos`;
 
   constructor(private http: HttpClient) {}
 

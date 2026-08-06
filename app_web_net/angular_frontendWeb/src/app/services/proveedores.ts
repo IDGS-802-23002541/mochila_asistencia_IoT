@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of, tap } from 'rxjs';
 import { Proveedor } from '../interfaces/proveedor';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +10,7 @@ import { Proveedor } from '../interfaces/proveedor';
 export class ProveedoresService {
 
   private readonly baseUrl =
-    'https://lmsidgs902.runasp.net/api/proveedores';
+    `${environment.apiUrl}/api/proveedores`;
 
   private proveedoresCache: Proveedor[] = [];
 
