@@ -15,6 +15,7 @@ export interface MateriaPrima {
   nombre: string;
   descripcion?: string | null;
   costoUnitario: number;
+  precioPromedio?: number | null;
   stock: number;
   stockMinimo: number;
   idProveedor: number;

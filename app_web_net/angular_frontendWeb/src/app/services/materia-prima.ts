@@ -9,7 +9,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class MateriaPrimaService {
-  private baseUrl = `${environment.apiUrl}/api/materias-primas`;
+  private readonly baseUrl = `${environment.apiUrl}/api/materias-primas`;
 
   constructor(private http: HttpClient) {}
 

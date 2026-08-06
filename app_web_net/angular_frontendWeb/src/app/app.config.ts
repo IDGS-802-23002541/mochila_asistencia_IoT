@@ -7,6 +7,7 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideZoneChangeDetection(),
     provideRouter(routes),
     provideHttpClient(),
     provideZoneChangeDetection({

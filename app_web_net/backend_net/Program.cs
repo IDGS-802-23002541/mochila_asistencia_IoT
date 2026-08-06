@@ -28,7 +28,10 @@ builder.Services.AddSingleton(mqttSettings);
 builder.Services.AddScoped<IMqttTelemetryProcessor, MqttTelemetryProcessor>();
 builder.Services.AddHostedService<MqttListenerService>();
 builder.Services.AddSingleton<MqttConnectionManager>();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(o =>
+{
+    o.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

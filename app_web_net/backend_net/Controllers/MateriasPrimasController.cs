@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CangureraInteligente.Data;
+using CangureraInteligente.DTOs;
 using CangureraInteligente.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,21 @@ public class MateriasPrimasController(CangureraDbContext db) : ControllerBase
             .OrderBy(m => m.IdMateriaPrima)
             .ToListAsync(ct);
 
-        return Ok(materias);
+        var respuesta = materias.Select(m =>
+            new MateriaPrimaResponseDto
+            {
+                IdMateriaPrima = m.IdMateriaPrima,
+                Nombre = m.Nombre,
+                Descripcion = m.Descripcion,
+                CostoUnitario = m.CostoUnitario,
+                PrecioPromedio = PrecioPromedioCompra(m.IdMateriaPrima),
+                Stock = m.Stock,
+                StockMinimo = m.StockMinimo,
+                IdProveedor = m.IdProveedor,
+                Proveedor = ToProveedorResumen(m.Proveedor)
+            });
+
+        return Ok(respuesta);
     }
 
 
@@ -47,8 +62,20 @@ public class MateriasPrimasController(CangureraDbContext db) : ControllerBase
             });
         }
 
+        var respuesta = new MateriaPrimaResponseDto
+        {
+            IdMateriaPrima = materiaPrima.IdMateriaPrima,
+            Nombre = materiaPrima.Nombre,
+            Descripcion = materiaPrima.Descripcion,
+            CostoUnitario = materiaPrima.CostoUnitario,
+            PrecioPromedio = PrecioPromedioCompra(materiaPrima.IdMateriaPrima),
+            Stock = materiaPrima.Stock,
+            StockMinimo = materiaPrima.StockMinimo,
+            IdProveedor = materiaPrima.IdProveedor,
+            Proveedor = ToProveedorResumen(materiaPrima.Proveedor)
+        };
 
-        return Ok(materiaPrima);
+        return Ok(respuesta);
     }
 
 
@@ -167,5 +194,32 @@ public class MateriasPrimasController(CangureraDbContext db) : ControllerBase
 
 
         return NoContent();
+    }
+
+    // Promedio del precio de las últimas 5 compras de una materia prima.
+    private decimal? PrecioPromedioCompra(int idMateriaPrima)
+    {
+        var ultimos = db.DetallesCompra
+            .Where(d => d.IdMateriaPrima == idMateriaPrima)
+            .OrderByDescending(d => d.Compra!.FechaCompra)
+            .Take(5)
+            .Select(d => d.PrecioUnitario)
+            .ToList();
+
+        return ultimos.Count == 0 ? null : ultimos.Average();
+    }
+
+    private static ProveedorResumenDto? ToProveedorResumen(Proveedor? proveedor)
+    {
+        if (proveedor == null)
+        {
+            return null;
+        }
+
+        return new ProveedorResumenDto
+        {
+            IdProveedor = proveedor.IdProveedor,
+            Nombre = proveedor.Nombre
+        };
     }
 }

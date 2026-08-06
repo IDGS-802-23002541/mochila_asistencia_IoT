@@ -31,7 +31,7 @@
       </div>
       <p class="item-nombre">{{ item.nombre }}</p>
       <span class="item-badge">{{ item.activo ? 'Activo' : 'Inactivo' }}</span>
-      <button class="btn-detalles" [routerLink]="['/productos', item.idProducto]">
+      <button class="btn-detalles" [routerLink]="['/productos/detalle', item.idProducto]">
         Ver detalles
       </button>
     </div>
