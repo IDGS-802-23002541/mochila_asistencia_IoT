@@ -12,13 +12,13 @@
 
     <div class="detalle-card">
       <div class="detalle-top">
-        <span class="notificacion-label">Notificación</span>
+        <span class="notificacion-label">Materia prima</span>
         <span
           class="badge-estado"
-          [class.badge-activo]="registro.estado_Activo"
-          [class.badge-inactivo]="!registro.estado_Activo"
+          [class.badge-activo]="registro.stock > registro.stockMinimo"
+          [class.badge-inactivo]="registro.stock <= registro.stockMinimo"
         >
-          {{ registro.estado_Activo ? 'Activo' : 'Inactivo' }}
+          {{ registro.stock > registro.stockMinimo ? 'Stock OK' : 'Stock bajo' }}
         </span>
       </div>
 
@@ -33,27 +33,27 @@
         <div>
           <p class="detalle-label">Materia prima:</p>
           <p class="detalle-nombre">{{ registro.nombre }}</p>
-          <p class="detalle-ubicacion">Id: {{ formatearId(registro.id) }}</p>
+          <p class="detalle-ubicacion">Id: {{ formatearId(registro.idMateriaPrima) }}</p>
         </div>
       </div>
 
       <div class="detalle-preview">
         <p class="detalle-preview-titulo">Información del registro</p>
         <dl class="detalle-lista">
-              <dt>Categoría</dt>
-              <dd>{{ registro.categoria || '—' }}</dd>
-
-              <dt>Unidad de medida</dt>
-              <dd>{{ registro.unidad_Medida || '—' }}</dd>
+              <dt>Costo unitario</dt>
+              <dd>{{ registro.costoUnitario | number:'1.2-2' }}</dd>
 
               <dt>Stock actual</dt>
-              <dd>{{ registro.stock_Actual || '—' }}</dd>
+              <dd>{{ registro.stock }}</dd>
 
-              <dt>Precio unitario</dt>
-              <dd>{{ registro.precio_Unitario || '—' }}</dd>
+              <dt>Stock mínimo</dt>
+              <dd>{{ registro.stockMinimo }}</dd>
 
               <dt>Proveedor</dt>
-              <dd>{{ registro.proveedor || '—' }}</dd>
+              <dd>{{ registro.proveedor?.nombre || ('#' + registro.idProveedor) }}</dd>
+
+              <dt>Descripción</dt>
+              <dd>{{ registro.descripcion || '—' }}</dd>
 
         </dl>
       </div>

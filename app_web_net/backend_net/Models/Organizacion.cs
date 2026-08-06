@@ -27,8 +27,8 @@ public class Organizacion
 	public string? Email_Contacto { get; set; }
 
 	public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
-
-	public bool Estado_Activo { get; set; } = true;
+    public string? FotoUrl { get; set; }
+    public bool Estado_Activo { get; set; } = true;
 
 	[MaxLength(255)]
 	public string? Contrasena_Hash { get; set; }

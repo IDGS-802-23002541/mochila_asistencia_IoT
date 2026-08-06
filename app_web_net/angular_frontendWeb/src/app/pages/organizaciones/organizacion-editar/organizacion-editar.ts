@@ -97,7 +97,8 @@ export class OrganizacionEditar implements OnInit {
         this.guardando = false;
         this.guardadoExitoso = true;
         setTimeout(() => {
-          this.router.navigate(['/clientes', this.organizacionId]);
+          // Coincide con la ruta: 'organizaciones/detalle/:id'
+          this.router.navigate(['/organizaciones/detalle', this.organizacionId]);
         }, 800);
       },
       error: (err) => {
@@ -109,7 +110,8 @@ export class OrganizacionEditar implements OnInit {
   }
 
   cancelar(): void {
-    this.router.navigate(['/clientes', this.organizacionId]);
+    // Coincide con la ruta: 'organizaciones/detalle/:id'
+    this.router.navigate(['/organizaciones/detalle', this.organizacionId]);
   }
 
   get f() {

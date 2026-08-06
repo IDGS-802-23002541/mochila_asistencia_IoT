@@ -2,12 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Organizacion } from '../interfaces/organizacion';
+import { NuevaOrganizacion, Organizacion } from '../interfaces/organizacion';
 
 @Injectable({
   providedIn: 'root',
 })
-
 export class OrganizacionesService {
   private readonly baseUrl = `${environment.apiUrl}/api/organizaciones`;
 
@@ -24,11 +23,11 @@ export class OrganizacionesService {
   }
 
   // metodo para crear una nueva organizacion
-  create(organizacion: Partial<Organizacion>): Observable<Organizacion> {
+  create(organizacion: NuevaOrganizacion): Observable<Organizacion> {
     return this.http.post<Organizacion>(this.baseUrl, organizacion);
   }
 
-  // metodo para crear una actualizar una organizacion
+  // metodo para actualizar una organizacion
   update(id: number, organizacion: Organizacion): Observable<Organizacion> {
     return this.http.put<Organizacion>(`${this.baseUrl}/${id}`, organizacion);
   }

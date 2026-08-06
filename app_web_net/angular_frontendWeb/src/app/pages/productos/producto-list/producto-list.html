@@ -24,14 +24,14 @@
   </div>
   } @else {
   <div class="item-grid">
-    @for (item of productos; track item.id) {
+    @for (item of productos; track item.idProducto) {
     <div class="item-card">
       <div class="item-avatar">
         {{ item.nombre.charAt(0) }}
       </div>
       <p class="item-nombre">{{ item.nombre }}</p>
-      <span class="item-badge">{{ item.estado_Activo ? 'Activo' : 'Inactivo' }}</span>
-      <button class="btn-detalles" [routerLink]="['/productos', item.id]">
+      <span class="item-badge">{{ item.activo ? 'Activo' : 'Inactivo' }}</span>
+      <button class="btn-detalles" [routerLink]="['/productos', item.idProducto]">
         Ver detalles
       </button>
     </div>

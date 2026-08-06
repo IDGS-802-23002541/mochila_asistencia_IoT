@@ -1,15 +1,51 @@
-export interface Producto {
-  id: number;
+export interface MateriaPrima {
+  idMateriaPrima: number;
   nombre: string;
-  estado_Activo: boolean;
-  categoria: string | number;
-  precio: string | number;
-  stock: string | number;
-  descripcion: string | number;
+  descripcion?: string | null;
+  costoUnitario: number;
+  stock: number;
+  stockMinimo: number;
+  idProveedor: number;
 }
 
+export interface RecetaItem {
+  idMateriaPrima: number;
+  cantidad: number; // piezas
+}
+
+export interface RecetaDetalleItem {
+  idMateriaPrima: number;
+  nombreMateriaPrima: string;
+  cantidad: number; // piezas
+  costoUnitario: number;
+}
 export interface ProductoResumen {
-  id: number;
+  idProducto: number;
   nombre: string;
-  estado_Activo: boolean;
+  activo: boolean;
+}
+export interface Producto {
+  idProducto: number;
+  nombre: string;
+  descripcion?: string | null;
+  precio: number;
+  stock: number;
+  margenGanancia: number;
+  activo: boolean;
+  fotoUrl?: string | null;
+}
+
+export interface ProductoDetalle extends Producto {
+  receta: RecetaDetalleItem[];
+}
+
+export interface ProductoCreateDto {
+  nombre: string;
+  descripcion?: string | null;
+  precio: number;
+  stock: number;
+  margenGanancia: number;
+  activo: boolean;
+  fotoUrl?: string | null;
+  receta: RecetaItem[];
 }

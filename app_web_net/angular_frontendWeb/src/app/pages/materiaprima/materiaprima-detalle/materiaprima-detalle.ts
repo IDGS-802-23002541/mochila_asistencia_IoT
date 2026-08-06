@@ -1,40 +1,72 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MateriaPrima } from '../../../interfaces/materiaprima';
+import { MateriaPrimaService } from '../../../services/materia-prima';
 
 @Component({
   selector: 'app-materiaprima-detalle',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './materiaprima-detalle.html',
   styleUrl: './materiaprima-detalle.css',
 })
-export class MateriaPrimaDetalle {
-  // TODO: reemplazar por datos reales del servicio, cargados según route.snapshot.paramMap
+export class MateriaPrimaDetalle implements OnInit {
   cargando = false;
   error = false;
   eliminando = false;
 
-  registro: MateriaPrima | null = {
-    id: 1,
-    nombre: 'Placa de acero inoxidable',
-    estado_Activo: true,
-    categoria: '—',
-    unidad_Medida: '—',
-    stock_Actual: '—',
-    precio_Unitario: '—',
-    proveedor: '—',
-  };
+  registro: MateriaPrima | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private materiaPrimaService: MateriaPrimaService
+  ) {}
+
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.cargarRegistro(id);
+  }
+
+  cargarRegistro(id: number): void {
+    this.cargando = true;
+    this.error = false;
+
+    this.materiaPrimaService.getById(id).subscribe({
+      next: (datos) => {
+        this.registro = datos;
+        this.cargando = false;
+      },
+      error: () => {
+        this.error = true;
+        this.cargando = false;
+      },
+    });
+  }
 
   editar(): void {
     if (!this.registro) return;
-    this.router.navigate(['/materiaprima', this.registro.id, 'editar']);
+    this.router.navigate(['/materiaprima', this.registro.idMateriaPrima, 'editar']);
   }
 
   eliminar(): void {
-    // TODO: conectar con el servicio para eliminar el registro
+    if (!this.registro) return;
+
+    const confirmado = confirm(
+      '¿Seguro que quieres eliminar esta materia prima? Esta acción no se puede deshacer.'
+    );
+    if (!confirmado) return;
+
+    this.eliminando = true;
+    this.materiaPrimaService.delete(this.registro.idMateriaPrima).subscribe({
+      next: () => {
+        this.router.navigate(['/materiaprima']);
+      },
+      error: () => {
+        this.eliminando = false;
+      },
+    });
   }
 
   formatearId(id: number): string {
