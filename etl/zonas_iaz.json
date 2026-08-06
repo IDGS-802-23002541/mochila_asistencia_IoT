@@ -31,7 +31,7 @@
         "severidadPredominante": "Media"
       }
     ],
-    "fechaUltimaActualizacion": "2026-08-03T19:50:29.531196"
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.548939"
   },
   {
     "zonaId": "Zona 0",
@@ -65,7 +65,31 @@
         "severidadPredominante": "Media"
       }
     ],
-    "fechaUltimaActualizacion": "2026-08-03T19:50:29.544634"
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.555954"
+  },
+  {
+    "zonaId": "Zona 8",
+    "lat": 21.062932,
+    "lon": -101.581577,
+    "radioMetros": 12,
+    "iaz": 6.6667,
+    "cantidadEventos": 8,
+    "cantidadRecorridosQueCruzaron": 6,
+    "nivelAccesibilidad": "Baja",
+    "tipoEventoPredominante": "Caida_Detectada",
+    "desgloseSeveridad": {
+      "baja": 0,
+      "media": 0,
+      "critica": 8
+    },
+    "desglosePorTipoEvento": [
+      {
+        "tipoEvento": "Caida_Detectada",
+        "cantidad": 8,
+        "severidadPredominante": "Critica"
+      }
+    ],
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.563080"
   },
   {
     "zonaId": "Zona 2",
@@ -99,7 +123,55 @@
         "severidadPredominante": "Media"
       }
     ],
-    "fechaUltimaActualizacion": "2026-08-03T19:50:29.558147"
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.564714"
+  },
+  {
+    "zonaId": "Zona 9",
+    "lat": 21.063371,
+    "lon": -101.581913,
+    "radioMetros": 12,
+    "iaz": 4.5,
+    "cantidadEventos": 9,
+    "cantidadRecorridosQueCruzaron": 6,
+    "nivelAccesibilidad": "Media",
+    "tipoEventoPredominante": "Tropiezo",
+    "desgloseSeveridad": {
+      "baja": 0,
+      "media": 9,
+      "critica": 0
+    },
+    "desglosePorTipoEvento": [
+      {
+        "tipoEvento": "Tropiezo",
+        "cantidad": 9,
+        "severidadPredominante": "Media"
+      }
+    ],
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.575697"
+  },
+  {
+    "zonaId": "Zona 6",
+    "lat": 21.062981,
+    "lon": -101.580493,
+    "radioMetros": 12,
+    "iaz": 4.2,
+    "cantidadEventos": 7,
+    "cantidadRecorridosQueCruzaron": 5,
+    "nivelAccesibilidad": "Media",
+    "tipoEventoPredominante": "Tropiezo",
+    "desgloseSeveridad": {
+      "baja": 0,
+      "media": 7,
+      "critica": 0
+    },
+    "desglosePorTipoEvento": [
+      {
+        "tipoEvento": "Tropiezo",
+        "cantidad": 7,
+        "severidadPredominante": "Media"
+      }
+    ],
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.581941"
   },
   {
     "zonaId": "Zona 3",
@@ -128,6 +200,78 @@
         "severidadPredominante": "Baja"
       }
     ],
-    "fechaUltimaActualizacion": "2026-08-03T19:50:29.572901"
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.587262"
+  },
+  {
+    "zonaId": "Zona 5",
+    "lat": 21.062316,
+    "lon": -101.578194,
+    "radioMetros": 12,
+    "iaz": 4.0,
+    "cantidadEventos": 8,
+    "cantidadRecorridosQueCruzaron": 6,
+    "nivelAccesibilidad": "Media",
+    "tipoEventoPredominante": "Tropiezo",
+    "desgloseSeveridad": {
+      "baja": 0,
+      "media": 8,
+      "critica": 0
+    },
+    "desglosePorTipoEvento": [
+      {
+        "tipoEvento": "Tropiezo",
+        "cantidad": 8,
+        "severidadPredominante": "Media"
+      }
+    ],
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.594007"
+  },
+  {
+    "zonaId": "Zona 4",
+    "lat": 21.063579,
+    "lon": -101.581278,
+    "radioMetros": 12,
+    "iaz": 3.5,
+    "cantidadEventos": 7,
+    "cantidadRecorridosQueCruzaron": 2,
+    "nivelAccesibilidad": "Media",
+    "tipoEventoPredominante": "Obstaculo",
+    "desgloseSeveridad": {
+      "baja": 7,
+      "media": 0,
+      "critica": 0
+    },
+    "desglosePorTipoEvento": [
+      {
+        "tipoEvento": "Obstaculo",
+        "cantidad": 7,
+        "severidadPredominante": "Baja"
+      }
+    ],
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.600335"
+  },
+  {
+    "zonaId": "Zona 7",
+    "lat": 21.063329,
+    "lon": -101.581575,
+    "radioMetros": 12,
+    "iaz": 2.75,
+    "cantidadEventos": 11,
+    "cantidadRecorridosQueCruzaron": 12,
+    "nivelAccesibilidad": "Alta",
+    "tipoEventoPredominante": "Tropiezo",
+    "desgloseSeveridad": {
+      "baja": 0,
+      "media": 11,
+      "critica": 0
+    },
+    "desglosePorTipoEvento": [
+      {
+        "tipoEvento": "Tropiezo",
+        "cantidad": 11,
+        "severidadPredominante": "Media"
+      }
+    ],
+    "fechaUltimaActualizacion": "2026-08-05T20:14:24.606187"
   }
 ]
