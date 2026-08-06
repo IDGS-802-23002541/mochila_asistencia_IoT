@@ -4,12 +4,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrganizacionesService } from '../../../services/organizaciones';
 import { Organizacion } from '../../../interfaces/organizacion';
-import { Sidebar } from '../../../sidebar/sidebar';
 
 @Component({
   selector: 'app-organizacion-editar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Sidebar],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './organizacion-editar.html',
   styleUrl: './organizacion-editar.css',
 })
@@ -98,7 +97,8 @@ export class OrganizacionEditar implements OnInit {
         this.guardando = false;
         this.guardadoExitoso = true;
         setTimeout(() => {
-          this.router.navigate(['/clientes', this.organizacionId]);
+          // Coincide con la ruta: 'organizaciones/detalle/:id'
+          this.router.navigate(['/organizaciones/detalle', this.organizacionId]);
         }, 800);
       },
       error: (err) => {
@@ -110,7 +110,8 @@ export class OrganizacionEditar implements OnInit {
   }
 
   cancelar(): void {
-    this.router.navigate(['/clientes', this.organizacionId]);
+    // Coincide con la ruta: 'organizaciones/detalle/:id'
+    this.router.navigate(['/organizaciones/detalle', this.organizacionId]);
   }
 
   get f() {
