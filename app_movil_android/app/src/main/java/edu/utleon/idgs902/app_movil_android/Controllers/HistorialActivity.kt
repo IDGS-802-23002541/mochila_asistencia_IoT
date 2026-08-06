@@ -24,6 +24,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class HistorialActivity : AppCompatActivity() {
@@ -77,25 +78,28 @@ class HistorialActivity : AppCompatActivity() {
                         "Mostrar todos" -> {
                             listaFiltrada.clear()
                             listaFiltrada.addAll(listaOriginal)
+                            adaptador.notifyDataSetChanged()
                         }
                         "Filtrar por fecha específica 📅" -> {
                             mostrarCalendarioFiltro()
                         }
                         "Rutas de esta semana 🗓️" -> {
                             filtrarRutasEstaSemana()
+                            adaptador.notifyDataSetChanged()
                         }
                         "Con eventos registrados" -> {
                             val resultado = listaOriginal.filter { (it.eventos.toIntOrNull() ?: 0) > 0 }
                             listaFiltrada.clear()
                             listaFiltrada.addAll(resultado)
+                            adaptador.notifyDataSetChanged()
                         }
                         "Sin eventos (Limpias)" -> {
                             val resultado = listaOriginal.filter { (it.eventos.toIntOrNull() ?: 0) == 0 }
                             listaFiltrada.clear()
                             listaFiltrada.addAll(resultado)
+                            adaptador.notifyDataSetChanged()
                         }
                     }
-                    adaptador.notifyDataSetChanged()
                     dismiss()
                 }
             }
@@ -171,7 +175,11 @@ class HistorialActivity : AppCompatActivity() {
         // TEMPORAL: hardcodeado para pruebas sin mochila física a la mano.
         // Revertir a esto cuando haya dispositivo real disponible:
         // val mac = sharedPreferences.getString("dispositivo_mac", null)
-        val mac = "94:B5:55:25:73:76"  // Dispositivo Id 10, mock v5
+
+//        val mac = "94:B5:55:25:73:76"  // Dispositivo Id 10, mock v5
+
+        // version chida
+        val mac = sharedPreferences.getString("dispositivo_mac", null)
 
         if (mac.isNullOrBlank()) {
             Toast.makeText(this, "No hay dispositivo vinculado", Toast.LENGTH_SHORT).show()
@@ -188,6 +196,7 @@ class HistorialActivity : AppCompatActivity() {
                         RutaModels(
                             id = item.id.toString(),
                             fecha = formatearFecha(item.fechaInicio),
+                            fechaRaw = parsearFechaISO(item.fechaInicio),
                             duracion = formatearDuracion(item.duracionSegundos),
                             obstaculos = "0",
                             caidas = "0",
@@ -212,6 +221,7 @@ class HistorialActivity : AppCompatActivity() {
             }
         })
     }
+
     private fun formatearFecha(fechaIso: String): String {
         return try {
             val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
@@ -220,6 +230,16 @@ class HistorialActivity : AppCompatActivity() {
             sdf.format(date)
         } catch (_: Exception) {
             fechaIso
+        }
+    }
+
+    // NUEVO: parseo de la fecha ISO cruda a Date real, para poder comparar rangos con precisión (año incluido)
+    private fun parsearFechaISO(fechaIso: String): Date? {
+        return try {
+            val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+            parser.parse(fechaIso)
+        } catch (_: Exception) {
+            null
         }
     }
 
@@ -236,32 +256,46 @@ class HistorialActivity : AppCompatActivity() {
         }
     }
 
+    // MODIFICADO: ahora pide fecha inicial y fecha final (rango), en vez de una sola fecha exacta.
+    // Se mantiene el mismo punto de entrada del menú ("Filtrar por fecha específica").
     private fun mostrarCalendarioFiltro() {
         val calendario = Calendar.getInstance()
-        val año = calendario.get(Calendar.YEAR)
-        val mes = calendario.get(Calendar.MONTH)
-        val dia = calendario.get(Calendar.DAY_OF_MONTH)
 
-        val datePickerDialog = DatePickerDialog(this, { _, year, month, dayOfMonth ->
-            val calSeleccionado = Calendar.getInstance().apply {
-                set(Calendar.YEAR, year)
-                set(Calendar.MONTH, month)
-                set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            }
-            val sdf = SimpleDateFormat("dd 'de' MMMM", Locale("es", "MX"))
-            val fechaSeleccionadaTexto = sdf.format(calSeleccionado.time)
-
-            val resultado = listaOriginal.filter { ruta ->
-                ruta.fecha.equals(fechaSeleccionadaTexto, ignoreCase = true)
+        // Paso 1: fecha de inicio del rango
+        DatePickerDialog(this, { _, yearInicio, mesInicio, diaInicio ->
+            val calInicio = Calendar.getInstance().apply {
+                set(yearInicio, mesInicio, diaInicio, 0, 0, 0)
+                set(Calendar.MILLISECOND, 0)
             }
 
-            listaFiltrada.clear()
-            listaFiltrada.addAll(resultado)
-            adaptador.notifyDataSetChanged()
+            // Paso 2: fecha de fin del rango (se abre justo después de elegir la de inicio)
+            DatePickerDialog(this, { _, yearFin, mesFin, diaFin ->
+                val calFin = Calendar.getInstance().apply {
+                    set(yearFin, mesFin, diaFin, 23, 59, 59)
+                    set(Calendar.MILLISECOND, 999)
+                }
 
-        }, año, mes, dia)
+                if (calFin.timeInMillis < calInicio.timeInMillis) {
+                    Toast.makeText(this, "La fecha final no puede ser antes que la inicial", Toast.LENGTH_SHORT).show()
+                    return@DatePickerDialog
+                }
 
-        datePickerDialog.show()
+                val resultado = listaOriginal.filter { ruta ->
+                    val f = ruta.fechaRaw ?: return@filter false
+                    f.time in calInicio.timeInMillis..calFin.timeInMillis
+                }
+
+                listaFiltrada.clear()
+                listaFiltrada.addAll(resultado)
+                adaptador.notifyDataSetChanged()
+
+            }, calendario.get(Calendar.YEAR), calendario.get(Calendar.MONTH), calendario.get(Calendar.DAY_OF_MONTH))
+                .apply { setTitle("Selecciona fecha final") }
+                .show()
+
+        }, calendario.get(Calendar.YEAR), calendario.get(Calendar.MONTH), calendario.get(Calendar.DAY_OF_MONTH))
+            .apply { setTitle("Selecciona fecha inicial") }
+            .show()
     }
 
     // Filtra las rutas cuyo ID (Timestamp) pertenezca a los últimos 7 días

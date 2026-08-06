@@ -50,7 +50,7 @@ public class DispositivosController(CangureraDbContext db) : ControllerBase
 		IActionResult result;
 		if (dispositivo != null)
 		{
-			IActionResult actionResult = Ok(dispositivo);
+			IActionResult actionResult = Ok(DispositivoParaJson(dispositivo));
 			result = actionResult;
 		}
 		else
@@ -89,10 +89,21 @@ public class DispositivosController(CangureraDbContext db) : ControllerBase
 		dispositivo.FechaRegistro = ((dispositivo.FechaRegistro == default(DateTime)) ? DateTime.UtcNow : dispositivo.FechaRegistro);
 		db.Dispositivos.Add(dispositivo);
 		await db.SaveChangesAsync(ct);
+
+		Organizacion organizacion = await db.Organizaciones.AsNoTracking().FirstOrDefaultAsync((Organizacion o) => o.Id == dispositivo.OrganizacionId, ct);
 		return CreatedAtAction("GetById", new
 		{
 			id = dispositivo.Id
-		}, dispositivo);
+		}, new
+		{
+			Id = dispositivo.Id,
+			OrganizacionId = dispositivo.OrganizacionId,
+			MacAddress = dispositivo.MacAddress,
+			Estado = dispositivo.Estado,
+			UltimaConexion = dispositivo.UltimaConexion,
+			FechaRegistro = dispositivo.FechaRegistro,
+			Organizacion = organizacion?.Nombre
+		});
 	}
 
 	[HttpPut("{id:int}")]
@@ -132,7 +143,18 @@ public class DispositivosController(CangureraDbContext db) : ControllerBase
 		existing.Estado = dispositivo.Estado;
 		existing.UltimaConexion = dispositivo.UltimaConexion;
 		await db.SaveChangesAsync(ct);
-		return Ok(existing);
+
+		Organizacion organizacion = await db.Organizaciones.AsNoTracking().FirstOrDefaultAsync((Organizacion o) => o.Id == existing.OrganizacionId, ct);
+		return Ok(new
+		{
+			Id = existing.Id,
+			OrganizacionId = existing.OrganizacionId,
+			MacAddress = existing.MacAddress,
+			Estado = existing.Estado,
+			UltimaConexion = existing.UltimaConexion,
+			FechaRegistro = existing.FechaRegistro,
+			Organizacion = organizacion?.Nombre
+		});
 	}
 
 	[HttpDelete("{id:int}")]
@@ -159,5 +181,19 @@ public class DispositivosController(CangureraDbContext db) : ControllerBase
 			});
 		}
 		return NoContent();
+	}
+
+	private static object DispositivoParaJson(Dispositivo d)
+	{
+		return new
+		{
+			Id = d.Id,
+			OrganizacionId = d.OrganizacionId,
+			MacAddress = d.MacAddress,
+			Estado = d.Estado,
+			UltimaConexion = d.UltimaConexion,
+			FechaRegistro = d.FechaRegistro,
+			Organizacion = d.Organizacion?.Nombre
+		};
 	}
 }

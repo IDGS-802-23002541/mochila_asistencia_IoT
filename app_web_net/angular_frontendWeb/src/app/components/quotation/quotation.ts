@@ -9,25 +9,14 @@ interface Mensaje {
   esResumen?: boolean;
 }
 
-// Desglose de costos reales que componen cada módulo.
-// Todo en MXN. Esto es lo que hace que el precio "reaccione" a tus costos
-// en lugar de ser un número fijo escrito a mano.
-interface CostoDesglose {
-  hardware: number;   // equipo, sensores, ESP32, baterías, GPS, etc.
-  software: number;   // hosting, broker MQTT, procesamiento cloud
-  personal: number;   // días-consultor / técnico en campo
-  logistica: number;  // traslados, instalación, retiro de equipo
-}
-
 interface ModuloConsultoria {
   id: string;
   nombre: string;
   desc: string;
-  tier: 'essential' | 'professional' | 'enterprise' | 'signal'; // color de marca
+  precioTexto: string; // Texto estático del precio (ej: "$26,000 MXN")
+  tier: 'essential' | 'professional' | 'enterprise' | 'signal';
   imagen: string;
   agregado: boolean;
-  costos: CostoDesglose;
-  margen: number; // ej. 0.25 = 25% sobre el costo real
 }
 
 type TipoInstitucion = 'privada' | 'publica';
@@ -40,7 +29,7 @@ type TipoInstitucion = 'privada' | 'publica';
   styleUrl: './quotation.scss',
 })
 export class Quotation implements OnInit {
-  totalProyecto: number = 0;
+  totalProyectoTexto: string = '$0 MXN';
   historialMensajes: Mensaje[] = [];
   mostrarPantallaLocalhost: boolean = false;
 
@@ -48,19 +37,8 @@ export class Quotation implements OnInit {
   estaEnviando: boolean = false;
   errorRedDetectado: boolean = false;
 
-  // Controla si cada tarjeta muestra su desglose de costos al cliente.
-  // Índice alineado con modulosConsultoria.
   desglosesVisibles: boolean[] = [];
-
-  // Tipo de institución: afecta el margen aplicado, no el costo real.
   tipoInstitucion: TipoInstitucion = 'privada';
-  // Instituciones públicas reciben un margen reducido (no un costo reducido:
-  // el costo real de sensores y personal no cambia, lo que cambia es cuánto
-  // ganamos nosotros sobre ese costo).
-  private factorMargenPorInstitucion: Record<TipoInstitucion, number> = {
-    privada: 1,
-    publica: 0.6,
-  };
 
   private formspreeEndpoint = 'https://formspree.io/f/xaqryelv';
 
@@ -69,46 +47,43 @@ export class Quotation implements OnInit {
     return emailRegex.test(this.correoUsuario);
   }
 
+  // Módulos con descripciones de m² y precios como TEXTO DIRECTO
   modulosConsultoria: ModuloConsultoria[] = [
     {
       id: 'auditoria',
       nombre: 'Access Insight',
-      desc: 'Evaluación técnica inicial y mapeo de barreras arquitectónicas fijas en accesos principales y rutas críticas de desplazamiento.',
+      desc: 'Cobertura: Hasta 5,000 m². Evaluación técnica inicial y mapeo de barreras arquitectónicas fijas en accesos principales y rutas críticas.',
+      precioTexto: '$26,000 MXN',
       tier: 'essential',
       imagen: 'https://images.unsplash.com/photo-1508313144761-0ea80db40091?auto=format&fit=crop&w=800&q=80',
       agregado: false,
-      costos: { hardware: 1800, software: 700, personal: 14000, logistica: 3500 },
-      margen: 0.25,
     },
     {
       id: 'iot',
       nombre: 'Route Intelligence',
-      desc: 'Despliegue temporal de hardware VisionGuard (sensores ultrasónicos y GPS) para registrar la continuidad real y obstáculos dinámicos por 2 semanas.',
+      desc: 'Cobertura: 5,000 m² a 15,000 m². Despliegue temporal de hardware VisionGuard para registrar la continuidad real y obstáculos dinámicos.',
+      precioTexto: '$48,000 MXN',
       tier: 'professional',
       imagen: 'https://images.unsplash.com/photo-1555589228-135c25ae8cf5?auto=format&fit=crop&w=800&q=80',
       agregado: false,
-      costos: { hardware: 12000, software: 3000, personal: 12000, logistica: 1000 },
-      margen: 0.25,
     },
     {
       id: 'iaz',
       nombre: 'Smart Accessibility Analytics',
-      desc: 'Procesamiento analítico de la evidencia recolectada por los sensores mediante metodología KDD para construir el panorama del entorno.',
+      desc: 'Cobertura: 15,000 m² a 30,000 m². Procesamiento analítico avanzado de la evidencia recolectada por los sensores mediante metodología KDD.',
+      precioTexto: '$75,000 MXN',
       tier: 'enterprise',
       imagen: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
       agregado: false,
-      costos: { hardware: 0, software: 4000, personal: 8000, logistica: 0 },
-      margen: 0.25,
     },
     {
       id: 'plan',
       nombre: 'Strategic Accessibility Consulting',
-      desc: 'Desarrollo del plan maestro de adecuaciones institucionales y trazabilidad conforme a la Ley General de Educación Superior.',
+      desc: 'Cobertura: Más de 30,000 m² (Campus Completo). Plan maestro de adecuaciones institucionales bajo la Ley General de Educación Superior.',
+      precioTexto: '$110,000 MXN',
       tier: 'signal',
       imagen: 'https://images.unsplash.com/photo-1758873269035-aae0e1fd3422?auto=format&fit=crop&w=800&q=80',
       agregado: false,
-      costos: { hardware: 0, software: 1000, personal: 7000, logistica: 0 },
-      margen: 0.25,
     },
   ];
 
@@ -119,24 +94,6 @@ export class Quotation implements OnInit {
     this.actualizarMensajeAsistente();
   }
 
-  // ---------- MOTOR DE PRECIOS ----------
-
-  costoBase(item: ModuloConsultoria): number {
-    const c = item.costos;
-    return c.hardware + c.software + c.personal + c.logistica;
-  }
-
-  margenEfectivo(item: ModuloConsultoria): number {
-    return item.margen * this.factorMargenPorInstitucion[this.tipoInstitucion];
-  }
-
-  // Precio final = costo real + margen (ajustado por tipo de institución),
-  // redondeado a la centena para que se vea como una cotización, no una hoja de cálculo.
-  precioFinal(item: ModuloConsultoria): number {
-    const bruto = this.costoBase(item) * (1 + this.margenEfectivo(item));
-    return Math.round(bruto / 100) * 100;
-  }
-
   toggleDesglose(index: number): void {
     this.desglosesVisibles[index] = !this.desglosesVisibles[index];
   }
@@ -144,22 +101,25 @@ export class Quotation implements OnInit {
   cambiarTipoInstitucion(tipo: TipoInstitucion): void {
     if (this.tipoInstitucion === tipo) return;
     this.tipoInstitucion = tipo;
-    this.recalcularTotal();
   }
 
-  private recalcularTotal(): void {
-    this.totalProyecto = this.modulosConsultoria
-      .filter(m => m.agregado)
-      .reduce((sum, m) => sum + this.precioFinal(m), 0);
-    this.actualizarMensajeAsistente();
-  }
-
-  // ---------- FLUJO EXISTENTE (sin cambios de comportamiento) ----------
+  // ---------- SELECCIÓN ÚNICA DE PAQUETE ----------
 
   toggleConcepto(index: number): void {
-    const concepto = this.modulosConsultoria[index];
-    concepto.agregado = !concepto.agregado;
-    this.recalcularTotal();
+    const estabaAgregado = this.modulosConsultoria[index].agregado;
+
+    // 1. Desmarcamos todos los paquetes
+    this.modulosConsultoria.forEach(m => m.agregado = false);
+
+    // 2. Si no estaba marcado, lo marcamos y tomamos directamente su texto de precio
+    if (!estabaAgregado) {
+      this.modulosConsultoria[index].agregado = true;
+      this.totalProyectoTexto = this.modulosConsultoria[index].precioTexto;
+    } else {
+      this.totalProyectoTexto = '$0 MXN';
+    }
+
+    this.actualizarMensajeAsistente();
   }
 
   actualizarMensajeAsistente() {
@@ -167,14 +127,14 @@ export class Quotation implements OnInit {
     this.historialMensajes = [
       {
         emisor: 'bot',
-        texto: '¡Hola! Selecciona las fases del proyecto en las tarjetas de abajo. Aquí verás el cálculo estimado en tiempo real bajo nuestro modelo de servitización.'
+        texto: '¡Hola! Selecciona el paquete que mejor se adapte a tu proyecto para visualizar el presupuesto estimado en tiempo real.'
       }
     ];
 
-    if (this.totalProyecto > 0) {
+    if (this.totalProyectoTexto !== '$0 MXN') {
       this.historialMensajes.push({
         emisor: 'bot',
-        texto: 'Perfecto. He procesado las fases seleccionadas para tu campus. Por favor, ingresa tu correo electrónico para procesar la cotización:',
+        texto: 'Perfecto. He procesado la fase seleccionada para tu campus. Por favor, ingresa tu correo electrónico para solicitar la cotización formal:',
         esResumen: true
       });
     }
@@ -189,17 +149,15 @@ export class Quotation implements OnInit {
     this.errorRedDetectado = false;
     this.cdr.detectChanges();
 
-    const seleccionados = this.modulosConsultoria.filter(m => m.agregado);
-    const serviciosElegidos = seleccionados.map(m => m.nombre).join(', ');
-    const costoRealTotal = seleccionados.reduce((sum, m) => sum + this.costoBase(m), 0);
+    const seleccionado = this.modulosConsultoria.find(m => m.agregado);
+    const servicioElegido = seleccionado ? seleccionado.nombre : 'Sin Selección';
 
     const payload = new FormData();
     payload.append('email', this.correoUsuario);
     payload.append('proyecto', 'VisionGuard - Consultoría Institucional');
-    payload.append('modulos_seleccionados', serviciosElegidos);
+    payload.append('modulos_seleccionados', servicioElegido);
     payload.append('tipo_institucion', this.tipoInstitucion);
-    payload.append('costo_real_total', `$${costoRealTotal} MXN`);
-    payload.append('total_estimado', `$${this.totalProyecto} MXN`);
+    payload.append('total_estimado', this.totalProyectoTexto);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -237,7 +195,7 @@ export class Quotation implements OnInit {
 
   cerrarPantallaLocalhost(): void {
     this.mostrarPantallaLocalhost = false;
-    this.totalProyecto = 0;
+    this.totalProyectoTexto = '$0 MXN';
     this.correoUsuario = '';
     this.errorRedDetectado = false;
     this.modulosConsultoria.forEach(m => m.agregado = false);

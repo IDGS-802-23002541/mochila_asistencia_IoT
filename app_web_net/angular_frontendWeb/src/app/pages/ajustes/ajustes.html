@@ -7,32 +7,37 @@
 
     <div class="ajustes-header">
       <div>
-        <h2 class="section-title">Ajustes de la organización</h2>
-        <p class="ajustes-subtitulo">Actualiza la información y credenciales de tu organización</p>
+        <h2 class="section-title">
+          {{ esOrganizacion() ? 'Ajustes de la organización' : 'Ajustes de mi cuenta' }}
+        </h2>
+        <p class="ajustes-subtitulo">
+          {{ esOrganizacion()
+            ? 'Actualiza la información y credenciales de tu organización'
+            : 'Actualiza tu información personal y credenciales' }}
+        </p>
       </div>
     </div>
 
     @if (loading()) {
       <div class="state-card">
         <span class="spinner"></span>
-        <span>Cargando información de la organización…</span>
+        <span>Cargando información…</span>
       </div>
     }
 
     @if (!loading() && loadError()) {
       <div class="state-card state-card--error">
         <div>
-          <p class="state-card__title">No pudimos cargar la organización</p>
+          <p class="state-card__title">No pudimos cargar la información</p>
           <p class="state-card__text">{{ loadError() }}</p>
         </div>
-        <button type="button" class="btn-cancelar" (click)="cargarOrganizacion()">Reintentar</button>
       </div>
     }
 
-    @if (!loading() && !loadError() && organizacion(); as org) {
-      <form class="ajustes-grid" [formGroup]="form" (ngSubmit)="guardar()">
+    <!-- ===== Vista Organización ===== -->
+    @if (!loading() && !loadError() && esOrganizacion() && organizacion(); as org) {
+      <form class="ajustes-grid" [formGroup]="orgForm" (ngSubmit)="guardar()">
 
-        <!-- ===== Tarjeta de identidad ===== -->
         <aside class="ajustes-card ajustes-card--identidad">
           <div class="avatar" [class.avatar--empty]="!avatarPreview()">
             @if (avatarPreview()) {
@@ -77,53 +82,44 @@
           </p>
         </aside>
 
-        <!-- ===== Columna derecha ===== -->
         <div class="ajustes-stack">
-
-          <!-- Información general -->
           <section class="ajustes-card">
             <p class="form-seccion-titulo">Información general</p>
-
             <div class="form-grid">
               <div class="form-field full">
                 <label for="nombre">Nombre de la institución <span class="req">*</span></label>
                 <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Universidad Tecnológica de León" />
-                @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+                @if (orgForm.controls.nombre.touched && orgForm.controls.nombre.invalid) {
                   <span class="form-error">El nombre es obligatorio (máx. 150 caracteres)</span>
                 }
               </div>
-
               <div class="form-field full">
                 <label for="sector">Sector <span class="req">*</span></label>
                 <input id="sector" type="text" formControlName="sector" placeholder="Ej. Educación" />
-                @if (form.controls.sector.touched && form.controls.sector.invalid) {
+                @if (orgForm.controls.sector.touched && orgForm.controls.sector.invalid) {
                   <span class="form-error">El sector es obligatorio</span>
                 }
               </div>
             </div>
           </section>
 
-          <!-- Contacto -->
           <section class="ajustes-card">
             <p class="form-seccion-titulo">Contacto</p>
-
             <div class="form-grid">
               <div class="form-field">
                 <label for="contacto_Principal">Contacto principal</label>
                 <input id="contacto_Principal" type="text" formControlName="contacto_Principal" placeholder="Nombre del contacto" />
               </div>
-
               <div class="form-field">
                 <label for="email_Contacto">Correo de contacto</label>
                 <input id="email_Contacto" type="email" formControlName="email_Contacto" placeholder="correo@ejemplo.com" />
-                @if (form.controls.email_Contacto.touched && form.controls.email_Contacto.invalid) {
+                @if (orgForm.controls.email_Contacto.touched && orgForm.controls.email_Contacto.invalid) {
                   <span class="form-error">Ingresa un correo válido</span>
                 }
               </div>
             </div>
           </section>
 
-          <!-- Seguridad -->
           <section class="ajustes-card" formGroupName="seguridad">
             <div class="ajustes-card__header-row">
               <p class="form-seccion-titulo">Contraseña</p>
@@ -131,11 +127,9 @@
                 {{ changingPassword() ? 'Cancelar cambio' : 'Cambiar contraseña' }}
               </button>
             </div>
-
             @if (!changingPassword()) {
               <p class="ajustes-nota">La contraseña actual no se muestra por seguridad.</p>
             }
-
             @if (changingPassword()) {
               <div class="form-grid">
                 <div class="form-field">
@@ -147,7 +141,7 @@
                   <input id="confirmarContrasena" type="password" formControlName="confirmarContrasena" placeholder="Repite la contraseña" />
                 </div>
               </div>
-              @if (form.controls.seguridad.hasError('passwordMismatch') && form.controls.seguridad.controls.confirmarContrasena.touched) {
+              @if (orgForm.controls.seguridad.hasError('passwordMismatch') && orgForm.controls.seguridad.controls.confirmarContrasena.touched) {
                 <span class="form-error">Las contraseñas no coinciden.</span>
               }
             }
@@ -162,7 +156,108 @@
 
           <div class="ajustes-acciones">
             <button type="button" class="btn-cancelar" (click)="cancelar()" [disabled]="saving()">Descartar cambios</button>
-            <button type="submit" class="btn-guardar" [disabled]="saving() || form.invalid">
+            <button type="submit" class="btn-guardar" [disabled]="saving() || orgForm.invalid">
+              {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    }
+
+    <!-- ===== Vista Usuario individual ===== -->
+    @if (!loading() && !loadError() && !esOrganizacion() && usuario(); as u) {
+      <form class="ajustes-grid" [formGroup]="userForm" (ngSubmit)="guardar()">
+
+        <aside class="ajustes-card ajustes-card--identidad">
+          <div class="avatar" [class.avatar--empty]="!avatarPreview()">
+            @if (avatarPreview()) {
+              <img [src]="avatarPreview()" alt="Foto de perfil" />
+            } @else {
+              <span>{{ initials() || '·' }}</span>
+            }
+          </div>
+
+          <label class="btn-cancelar btn-small file-btn">
+            Cambiar foto
+            <input type="file" accept="image/*" class="file-input" (change)="onFotoSeleccionada($event)" />
+          </label>
+
+          <dl class="meta-list">
+            <div class="meta-list__row">
+              <dt>Rol</dt>
+              <dd><span class="badge">{{ u.rol }}</span></dd>
+            </div>
+            <div class="meta-list__row">
+              <dt>Estado</dt>
+              <dd>
+                <span class="badge" [class.badge--active]="u.estado_Activo" [class.badge--inactive]="!u.estado_Activo">
+                  <span class="badge__dot"></span>
+                  {{ u.estado_Activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </dd>
+            </div>
+          </dl>
+          <p class="ajustes-nota">El rol y el estado los administra tu organización.</p>
+        </aside>
+
+        <div class="ajustes-stack">
+          <section class="ajustes-card">
+            <p class="form-seccion-titulo">Información personal</p>
+            <div class="form-grid">
+              <div class="form-field full">
+                <label for="nombreUsuario">Nombre <span class="req">*</span></label>
+                <input id="nombreUsuario" type="text" formControlName="nombre" placeholder="Tu nombre completo" />
+                @if (userForm.controls.nombre.touched && userForm.controls.nombre.invalid) {
+                  <span class="form-error">El nombre es obligatorio (máx. 150 caracteres)</span>
+                }
+              </div>
+              <div class="form-field full">
+                <label for="correoUsuario">Correo <span class="req">*</span></label>
+                <input id="correoUsuario" type="email" formControlName="correo" placeholder="tucorreo@ejemplo.com" />
+                @if (userForm.controls.correo.touched && userForm.controls.correo.invalid) {
+                  <span class="form-error">Ingresa un correo válido</span>
+                }
+              </div>
+            </div>
+          </section>
+
+          <section class="ajustes-card" formGroupName="seguridad">
+            <div class="ajustes-card__header-row">
+              <p class="form-seccion-titulo">Contraseña</p>
+              <button type="button" class="link-btn" (click)="toggleCambiarContrasena()">
+                {{ changingPassword() ? 'Cancelar cambio' : 'Cambiar contraseña' }}
+              </button>
+            </div>
+            @if (!changingPassword()) {
+              <p class="ajustes-nota">La contraseña actual no se muestra por seguridad.</p>
+            }
+            @if (changingPassword()) {
+              <div class="form-grid">
+                <div class="form-field">
+                  <label for="nuevaContrasenaUsuario">Nueva contraseña</label>
+                  <input id="nuevaContrasenaUsuario" type="password" formControlName="nuevaContrasena" placeholder="Mínimo 8 caracteres" />
+                </div>
+                <div class="form-field">
+                  <label for="confirmarContrasenaUsuario">Confirmar contraseña</label>
+                  <input id="confirmarContrasenaUsuario" type="password" formControlName="confirmarContrasena" placeholder="Repite la contraseña" />
+                </div>
+              </div>
+              @if (userForm.controls.seguridad.hasError('passwordMismatch') && userForm.controls.seguridad.controls.confirmarContrasena.touched) {
+                <span class="form-error">Las contraseñas no coinciden.</span>
+              }
+            }
+          </section>
+
+          @if (saveSuccess()) {
+            <p class="form-success">Cambios guardados correctamente.</p>
+          }
+          @if (saveError()) {
+            <p class="form-error form-error--general">{{ saveError() }}</p>
+          }
+
+          <div class="ajustes-acciones">
+            <button type="button" class="btn-cancelar" (click)="cancelar()" [disabled]="saving()">Descartar cambios</button>
+            <button type="submit" class="btn-guardar" [disabled]="saving() || userForm.invalid">
               {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
             </button>
           </div>

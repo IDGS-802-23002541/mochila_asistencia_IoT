@@ -1,27 +1,16 @@
 <section id="quotation" class="quotation-section">
-
-  <!-- =========================================================================
-       ENCABEZADO DE LA SECCIÓN (Card contenedor con efecto Glassmorphism)
-       ========================================================================= -->
   <div class="section-header">
     
-    <!-- Badge / Eyebrow superior -->
     <span class="section-eyebrow">● Modelo de Servitización basado en Evidencia</span>
-    
-    <!-- Título principal con acento de color -->
     <h2>Cotiza <span class="accent">con nosotros</span></h2>
-    
-    <!-- Línea decorativa con gradiente tricromático -->
     <div class="section-divider"></div>
-    
-    <!-- Subtítulo / Descripción normativa -->
     <p class="section-subtitle">
       Diseña un diagnóstico a la medida de tu institución. Alinea tu campus a los marcos normativos
       de la <strong>Ley General de Educación Superior</strong> y la <strong>RENADESI</strong>
-      seleccionando los módulos requeridos.
+      seleccionando el paquete requerido.
     </p>
 
-    <!-- Selector de Tipo de Institución (Afecta el margen sobre el costo real) -->
+    <!-- Selector de Tipo de Institución -->
     <div class="institucion-toggle">
       <span class="institucion-label">Tipo de institución</span>
       <div class="segmented">
@@ -42,15 +31,7 @@
     
   </div>
 
-
-  <!-- =========================================================================
-       CONTENEDOR PRINCIPAL DEL LAYOUT (Grid de Módulos + Asistente Virtual)
-       ========================================================================= -->
   <div class="quotation-layout-container">
-
-    <!-- ---------------------------------------------------------------------
-         COLUMNA IZQUIERDA: GRID DE TARJETAS DE MÓDULOS / PRODUCTOS
-         --------------------------------------------------------------------- -->
     <div class="products-grid">
       <div 
         class="product-card" 
@@ -62,7 +43,7 @@
           <img [src]="item.imagen" [alt]="item.nombre" class="card-bg-img">
         </div>
         
-        <!-- Overlay oscuro para legibilidad sobre la imagen -->
+        <!-- Overlay oscuro para legibilidad -->
         <div class="card-overlay"></div>
 
         <!-- Contenido principal de la tarjeta -->
@@ -72,49 +53,38 @@
             <h3 class="product-name">{{ item.nombre }}</h3>
           </div>
 
-          <p class="product-price mono">{{ precioFinal(item) | currency:'MXN':'symbol':'1.0-0' }}</p>
+          <!-- Muestra directa del texto de precio -->
+          <p class="product-price mono">{{ item.precioTexto }}</p>
           <p class="product-desc">{{ item.desc }}</p>
 
-          <!-- Enlace para desplegar desglose de costos -->
+          <!-- Enlace para desplegar lo que incluye -->
           <button type="button" class="link-desglose" (click)="toggleDesglose(i)">
-            {{ desglosesVisibles[i] ? 'Ocultar cálculo ▲' : 'Ver cómo se calculó →' }}
+            {{ desglosesVisibles[i] ? 'Ocultar detalles ▲' : '¿Qué incluye? →' }}
           </button>
 
-          <!-- Panel desplegable con el detalle financiero -->
+          <!-- Panel desplegable (Solo texto informativo) -->
           <div class="desglose-panel" *ngIf="desglosesVisibles[i]">
             <div class="desglose-row">
-              <span>Hardware</span>
-              <span class="mono">{{ item.costos.hardware | currency:'MXN':'symbol':'1.0-0' }}</span>
+              <span>• Hardware & Sensores IoT</span>
             </div>
             <div class="desglose-row">
-              <span>Software / nube</span>
-              <span class="mono">{{ item.costos.software | currency:'MXN':'symbol':'1.0-0' }}</span>
+              <span>• Plataforma Software / Nube</span>
             </div>
             <div class="desglose-row">
-              <span>Personal en campo</span>
-              <span class="mono">{{ item.costos.personal | currency:'MXN':'symbol':'1.0-0' }}</span>
+              <span>• Personal Técnico en Campo</span>
             </div>
             <div class="desglose-row">
-              <span>Logística</span>
-              <span class="mono">{{ item.costos.logistica | currency:'MXN':'symbol':'1.0-0' }}</span>
-            </div>
-            <div class="desglose-row total">
-              <span>Costo real</span>
-              <span class="mono">{{ costoBase(item) | currency:'MXN':'symbol':'1.0-0' }}</span>
-            </div>
-            <div class="desglose-row margen">
-              <span>Margen ({{ tipoInstitucion === 'publica' ? 'institución pública' : 'institución privada' }})</span>
-              <span class="mono">{{ margenEfectivo(item) * 100 | number:'1.0-0' }}%</span>
+              <span>• Logística y Despliegue</span>
             </div>
           </div>
 
-          <!-- Botón de acción (Agregar / Quitar concepto) -->
+          <!-- Botón de acción (Selección Única) -->
           <div class="product-actions">
             <button 
               [class.btn-add]="!item.agregado" 
               [class.btn-remove]="item.agregado" 
               (click)="toggleConcepto(i)">
-              {{ item.agregado ? '✓ Seleccionado (Quitar)' : 'Agregar al Proyecto' }}
+              {{ item.agregado ? '✓ Paquete Seleccionado' : 'Seleccionar este Paquete' }}
             </button>
           </div>
         </div>
@@ -122,9 +92,8 @@
       </div>
     </div>
 
-
     <!-- ---------------------------------------------------------------------
-         COLUMNA DERECHA: ASISTENTE VIRTUAL DE INVERSIÓN (CHAT STICKY)
+         COLUMNA DERECHA: ASISTENTE VIRTUAL DE INVERSIÓN
          --------------------------------------------------------------------- -->
     <div class="chat-container">
       
@@ -146,7 +115,7 @@
           <div class="msg-bubble">
             <p>{{ msg.texto }}</p>
 
-            <!-- Resumen y Formulario Final (Solo se renderiza si es mensaje de resumen) -->
+            <!-- Resumen y Formulario Final -->
             <div *ngIf="msg.esResumen" class="chat-summary-inside">
 
               <!-- Input de correo institucional -->
@@ -160,7 +129,7 @@
                 >
               </div>
 
-              <!-- Alerta de respaldo por CORS o Adblock -->
+              <!-- Alerta por CORS o Adblock -->
               <div *ngIf="errorRedDetectado" class="network-warning-box">
                 ⚠️ Envío directo bloqueado por el navegador (CORS o Adblock). Mostrando simulación de desarrollo local.
               </div>
@@ -169,10 +138,10 @@
                 Esquema de consultoría externa: exime a la institución de costos fijos de mantenimiento.
               </p>
 
-              <!-- Muestra del total acumulado -->
+              <!-- Muestra del total estimado en texto -->
               <div class="total-display">
                 <span class="total-label">Total Estimado:</span>
-                <span class="total-amount mono">{{ totalProyecto | currency:'MXN':'symbol':'1.0-0' }}</span>
+                <span class="total-amount mono">{{ totalProyectoTexto }}</span>
               </div>
 
               <!-- Botón de envío de propuesta -->
@@ -194,9 +163,8 @@
 
   </div>
 
-
   <!-- =========================================================================
-       MODAL / OVERLAY DE CONFIRMACIÓN (SIMULACIÓN LOCALHOST / EXITO)
+       MODAL / OVERLAY DE CONFIRMACIÓN
        ========================================================================= -->
   <div class="localhost-overlay" *ngIf="mostrarPantallaLocalhost">
     <div class="localhost-card">
@@ -219,10 +187,10 @@
 
         <code class="url-code">Gracias, nos pondremos en contacto</code>
 
-        <!-- Resumen del Payload procesado -->
+        <!-- Resumen del Payload -->
         <div class="payload-box">
           <p><strong>Correo del remitente:</strong> {{ correoUsuario }}</p>
-          <p><strong>Monto total mapeado:</strong> {{ totalProyecto | currency:'MXN':'symbol':'1.0-0' }}</p>
+          <p><strong>Monto total mapeado:</strong> {{ totalProyectoTexto }}</p>
           <p><strong>Status de comunicación:</strong> En proceso de ser contactada</p>
         </div>
       </div>

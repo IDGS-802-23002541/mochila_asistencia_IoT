@@ -5,14 +5,12 @@ import { DispositivosService } from '../../../services/dispositivos';
 import { Dispositivo } from '../../../interfaces/dispositivo';
 import { OrganizacionesService } from '../../../services/organizaciones';
 import { Organizacion } from '../../../interfaces/organizacion';
-import { Sidebar } from '../../../sidebar/sidebar';
 
 @Component({
   selector: 'app-editar-dispositivo',
   standalone: true,
   imports: [
-    FormsModule,
-    Sidebar
+    FormsModule
   ],
   templateUrl: './editar-dispositivo.html',
   styleUrl: './editar-dispositivo.css',
@@ -139,10 +137,7 @@ export class EditarDispositivo implements OnInit {
 
       next:(data)=>{
 
-        console.log(
-          'Dispositivo actualizado',
-          data
-        );
+        this.dispositivosService.limpiarCache();
 
         this.router.navigate([
           '/dispositivos'
