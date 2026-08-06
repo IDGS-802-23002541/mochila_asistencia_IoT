@@ -2,6 +2,21 @@
   padding: 28px 36px;
 }
 
+.btn-regresar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #16305c;
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+
+.btn-regresar:hover {
+  text-decoration: underline;
+}
+
 .section-title {
   font-size: 17px;
   font-weight: 700;

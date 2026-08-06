@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { OrganizacionesService } from '../../../services/organizaciones';
 import { Organizacion } from '../../../interfaces/organizacion';
 
 @Component({
   selector: 'app-organizacion-detalle',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './organizacion-detalle.html',
   styleUrl: './organizacion-detalle.css',
 })

@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DispositivosService } from '../../../services/dispositivos';
 import { Dispositivo } from '../../../interfaces/dispositivo';
+import { OrganizacionesService } from '../../../services/organizaciones';
+import { Organizacion } from '../../../interfaces/organizacion';
 
 @Component({
   selector: 'app-editar-dispositivo',
@@ -28,13 +30,18 @@ export class EditarDispositivo implements OnInit {
   guardando = false;
   error = '';
 
+  organizaciones: Organizacion[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private dispositivosService: DispositivosService
+    private dispositivosService: DispositivosService,
+    private organizacionesService: OrganizacionesService
   ) {}
 
   ngOnInit(): void {
+
+    this.cargarOrganizaciones();
 
     const id = Number(
       this.route.snapshot.paramMap.get('id')
@@ -50,6 +57,17 @@ export class EditarDispositivo implements OnInit {
 
     }
 
+  }
+
+  cargarOrganizaciones(): void {
+    this.organizacionesService.getAll().subscribe({
+      next: (datos) => {
+        this.organizaciones = datos;
+      },
+      error: () => {
+        this.organizaciones = [];
+      },
+    });
   }
 
 
@@ -86,6 +104,13 @@ export class EditarDispositivo implements OnInit {
 
     this.error = '';
 
+    if (!this.dispositivo.organizacionId) {
+
+      this.error = 'Selecciona una organización';
+      return;
+
+    }
+
     this.guardando = true;
 
 
@@ -112,10 +137,7 @@ export class EditarDispositivo implements OnInit {
 
       next:(data)=>{
 
-        console.log(
-          'Dispositivo actualizado',
-          data
-        );
+        this.dispositivosService.limpiarCache();
 
         this.router.navigate([
           '/dispositivos'

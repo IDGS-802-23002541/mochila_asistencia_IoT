@@ -41,14 +41,25 @@
         <div class="form-group">
 
           <label>
-            Organización ID
+            Organización
           </label>
 
           <div class="input-icon">
 
-            <input
-              type="number"
+            <select
               [(ngModel)]="dispositivo.organizacionId">
+
+              <option [ngValue]="0" disabled>
+                Selecciona una organización
+              </option>
+
+              @for (org of organizaciones; track org.id) {
+                <option [ngValue]="org.id">
+                  {{ org.nombre }}
+                </option>
+              }
+
+            </select>
 
           </div>
 

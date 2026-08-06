@@ -150,7 +150,6 @@ public class UsuariosController(CangureraDbContext db) : ControllerBase
         existing.Correo = usuario.Correo;
         existing.Rol = usuario.Rol;
         existing.Estado_Activo = usuario.Estado_Activo;
-        existing.FotoUrl = usuario.FotoUrl;
 
         // Solo se toca si mandaron una contraseña nueva; nunca se guarda en texto plano.
         if (!string.IsNullOrWhiteSpace(usuario.Contrasena_Hash))
