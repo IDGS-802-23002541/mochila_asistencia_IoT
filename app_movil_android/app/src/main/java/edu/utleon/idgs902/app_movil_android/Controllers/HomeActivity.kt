@@ -331,6 +331,7 @@ class HomeActivity : AppCompatActivity() {
             json_detenerR.toString()
         )
         val idRecorrido = sharedPreferences.getInt("ultimo_recorrido_id", 0)
+        val duracionFinal = txtTiempo.text.toString()
 
         corriendo = false
         handler.removeCallbacks(runnableCronometro)
@@ -345,7 +346,7 @@ class HomeActivity : AppCompatActivity() {
 
         val intent = Intent(this, MonitoreoActivity::class.java).apply {
             putExtra("RECORRIDO_ID", idRecorrido)
-            putExtra("EXTRA_DURACION", txtTiempo.text.toString())
+            putExtra("EXTRA_DURACION", duracionFinal)
         }
         startActivity(intent)
     }

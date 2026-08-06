@@ -8,13 +8,13 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import edu.utleon.idgs902.app_movil_android.Utils.EventoRecorridoResponse
 import edu.utleon.idgs902.app_movil_android.Utils.RecorridoDetalleResponse
 import edu.utleon.idgs902.app_movil_android.Utils.ResumenRecorridoResponse
 import edu.utleon.idgs902.app_movil_android.Utils.VisionGuardApiService
 import edu.utleon.idgs902.app_movil_android.R
 import edu.utleon.idgs902.app_movil_android.Utils.MqttConfig
 import edu.utleon.idgs902.app_movil_android.Utils.MqttHolder
-import edu.utleon.idgs902.app_movil_android.Utils.MqttManager
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -29,7 +29,6 @@ class MonitoreoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_monitoreo)
 
-        // Inicializar SharedPreferences (Asegúrate de usar el mismo nombre "VisionGuardPrefs")
         sharedPreferences = getSharedPreferences("VisionGuardPrefs", Context.MODE_PRIVATE)
         apiService = VisionGuardApiService.create()
         val mqtt = MqttHolder.mqttManager
@@ -62,13 +61,11 @@ class MonitoreoActivity : AppCompatActivity() {
             finish()
         }
 
-        // 🛠️ LOGICA ACTUALIZADA DE DESVINCULACIÓN
         btnDesvincular.setOnClickListener {
             val mac = sharedPreferences.getString("dispositivo_mac", "") ?: ""
 
             if (mac.isNotEmpty()) {
-
-                val jsonDesvincular  = JSONObject().apply{
+                val jsonDesvincular = JSONObject().apply {
                     put("accion", "desvincular")
                     put("macAddress", mac)
                 }
@@ -81,14 +78,11 @@ class MonitoreoActivity : AppCompatActivity() {
 
             Toast.makeText(this, "Dispositivo desvinculado con éxito", Toast.LENGTH_SHORT).show()
 
-            // 2. Crear el Intent para ir a DevicesActivity
             val intent = Intent(this, DevicesActivity::class.java).apply {
-                // Estas banderas limpian todo el historial de ventanas de atrás
-                // para evitar que el usuario regrese al monitoreo con el botón físico de Android
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
             startActivity(intent)
-            finish() // Cierra la pantalla actual
+            finish()
         }
     }
 
@@ -99,32 +93,56 @@ class MonitoreoActivity : AppCompatActivity() {
         txtCaidas: TextView,
         txtEventos: TextView
     ) {
-        apiService.obtenerDetalleRecorrido(id).enqueue(object : Callback<RecorridoDetalleResponse> {
-            override fun onResponse(call: Call<RecorridoDetalleResponse>, response: Response<RecorridoDetalleResponse>) {
+        // 1. Cargar Tiempo desde el endpoint de Resumen
+        apiService.obtenerResumenRecorrido(id).enqueue(object : Callback<ResumenRecorridoResponse> {
+            override fun onResponse(call: Call<ResumenRecorridoResponse>, response: Response<ResumenRecorridoResponse>) {
                 if (response.isSuccessful && response.body() != null) {
-                    val detalle = response.body()!!
-
-                    apiService.obtenerResumenRecorrido(id).enqueue(object : Callback<ResumenRecorridoResponse> {
-                        override fun onResponse(call: Call<ResumenRecorridoResponse>, resumenResponse: Response<ResumenRecorridoResponse>) {
-                            if (resumenResponse.isSuccessful && resumenResponse.body() != null) {
-                                val resumen = resumenResponse.body()!!
-                                txtEventos.text = detalle.totalEventos.toString()
-                                val minutosTotales = (resumen.duracionSegundos ?: 0.0) / 60.0
-                                txtTiempo.text = String.format("%.1f min", minutosTotales)
-                                txtObstaculos.text = detalle.totalEventos.toString()
-                                txtCaidas.text = "0"
-                            }
-                        }
-
-                        override fun onFailure(call: Call<ResumenRecorridoResponse>, t: Throwable) {
-                            Toast.makeText(this@MonitoreoActivity, "Error al calcular tiempos", Toast.LENGTH_SHORT).show()
-                        }
-                    })
+                    val resumen = response.body()!!
+                    val minutosTotales = (resumen.duracionSegundos ?: 0.0) / 60.0
+                    txtTiempo.text = String.format("%.1f min", minutosTotales)
+                } else {
+                    txtTiempo.text = "0.0 min"
                 }
             }
 
-            override fun onFailure(call: Call<RecorridoDetalleResponse>, t: Throwable) {
-                Toast.makeText(this@MonitoreoActivity, "Fallo al conectar con el servidor", Toast.LENGTH_SHORT).show()
+            override fun onFailure(call: Call<ResumenRecorridoResponse>, t: Throwable) {
+                txtTiempo.text = "0.0 min"
+            }
+        })
+
+        // 2. Cargar Lista de Eventos y clasificar (Obstáculos vs Caídas)
+        apiService.obtenerEventosRecorrido(id).enqueue(object : Callback<List<EventoRecorridoResponse>> {
+            override fun onResponse(call: Call<List<EventoRecorridoResponse>>, response: Response<List<EventoRecorridoResponse>>) {
+                if (response.isSuccessful && response.body() != null) {
+                    val listaEventos = response.body()!!
+
+                    var numCaidas = 0
+                    var numObstaculos = 0
+
+                    for (evento in listaEventos) {
+                        val tipo = evento.tipo.lowercase()
+                        if (tipo.contains("caida") || tipo.contains("caída")) {
+                            numCaidas++
+                        } else {
+                            numObstaculos++
+                        }
+                    }
+
+                    txtEventos.text = listaEventos.size.toString()
+                    txtObstaculos.text = numObstaculos.toString()
+                    txtCaidas.text = numCaidas.toString()
+                } else {
+                    txtEventos.text = "0"
+                    txtObstaculos.text = "0"
+                    txtCaidas.text = "0"
+                }
+            }
+
+            override fun onFailure(call: Call<List<EventoRecorridoResponse>>, t: Throwable) {
+                Toast.makeText(this@MonitoreoActivity, "Error al obtener eventos del recorrido", Toast.LENGTH_SHORT).show()
+                txtEventos.text = "0"
+                txtObstaculos.text = "0"
+                txtCaidas.text = "0"
             }
         })
     }
