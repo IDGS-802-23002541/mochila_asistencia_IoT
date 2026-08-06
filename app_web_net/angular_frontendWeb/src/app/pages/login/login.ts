@@ -12,7 +12,6 @@ import { AuthService } from '../../services/auth';
   styleUrl: './login.scss',
 })
 export class Login {
-
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private authService = inject(AuthService);
@@ -21,107 +20,45 @@ export class Login {
   errorMessage = '';
   showPassword = false;
 
-
   loginForm = this.fb.group({
-    correo: ['', [
-      Validators.required,
-      Validators.email
-    ]],
-
-    password: ['', [
-      Validators.required,
-      Validators.minLength(4)
-    ]]
+    correo: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(4)]],
   });
-
 
   get correo() {
     return this.loginForm.get('correo');
   }
 
-
   get password() {
     return this.loginForm.get('password');
   }
-
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
-
   onSubmit(): void {
-
     this.errorMessage = '';
 
-    if(this.loginForm.invalid){
+    if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
-
     this.loading = true;
-
 
     const correo = this.loginForm.value.correo ?? '';
     const contrasena = this.loginForm.value.password ?? '';
 
-
-    this.authService.login(
-      correo,
-      contrasena
-    )
-    .subscribe({
-
-      next:(respuesta)=>{
-
-
-        console.log(
-          'Usuario autenticado:',
-          respuesta
-        );
-
-
-        localStorage.setItem(
-          'usuario',
-          JSON.stringify(respuesta)
-        );
-
-
+    this.authService.login(correo, contrasena).subscribe({
+      next: () => {
         this.loading = false;
-
-
-        this.router.navigate([
-          '/inicio'
-        ]);
-
-
+        this.router.navigate(['/inicio']);
       },
-
-
-      error:(error)=>{
-
-
-        console.error(
-          'Error login:',
-          error
-        );
-
-
+      error: (error) => {
         this.loading = false;
-
-
-        this.errorMessage =
-          error.error?.error ??
-          'Correo o contraseña incorrectos';
-
-
-      }
-
-
+        this.errorMessage = error.error?.error ?? 'Correo o contraseña incorrectos';
+      },
     });
-
-
   }
-
 }
