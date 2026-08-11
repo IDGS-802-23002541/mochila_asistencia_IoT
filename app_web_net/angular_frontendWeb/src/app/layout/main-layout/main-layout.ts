@@ -12,7 +12,7 @@ interface NavItem {
   label: string;
   titulo: string;
   route: string;
-  icon: 'inicio' | 'dispositivos' | 'organizaciones' | 'mapa' | 'materia-prima' | 'proveedores' | 'productos' | 'graficas';
+  icon: 'inicio' | 'dispositivos' | 'organizaciones' | 'mapa' | 'materia-prima' | 'proveedores' | 'productos' | 'graficas' | 'compras';
   children?: string[];
 }
 
@@ -38,11 +38,27 @@ export class MainLayout {
   { label: 'Análisis', titulo: 'ANÁLISIS', route: '/graficas', icon: 'graficas' },
 ];
 
+ navItemsClientes: NavItem[] = [
+  { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
+  { label: 'Mis Productos', titulo: 'MIS PRODUCTOS', route: '/mis-productos', icon: 'productos' },
+  { label: 'Mis Compras', titulo: 'MIS COMPRAS', route: '/mis-compras', icon: 'compras' }
+];
+
   private extraTitles: Record<string, string> = {
     '/ajustes': 'AJUSTES',
   };
 
   constructor() {
+    const rol = this.sesionService.obtenerRol();
+
+    if (rol === 'admin') {
+      this.navItems = this.navItems;
+    }
+
+    if (rol === 'usuario') {
+      this.navItems = this.navItemsClientes;
+    }
+
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => this.actualizarTitulo(e.urlAfterRedirects));

@@ -19,6 +19,18 @@ export class SesionService {
     this._sesion.set(respuesta);
   }
 
+  obtenerUsuario(): any | null {
+    const usuario = localStorage.getItem('usuario');
+
+    return usuario
+      ? JSON.parse(usuario)
+      : null;
+  }
+
+  obtenerRol(): string | null {
+    return this.obtenerUsuario()?.rol ?? null;
+  }
+
   cerrarSesion(): void {
     localStorage.removeItem(SESSION_KEY);
     this._sesion.set(null);

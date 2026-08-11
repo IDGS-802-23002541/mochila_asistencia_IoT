@@ -39,9 +39,14 @@ import { MateriaPrimaNuevo } from './pages/materiaprima/materiaprima-nuevo/mater
 import { MateriaPrimaDetalle } from './pages/materiaprima/materiaprima-detalle/materiaprima-detalle';
 import { MateriaPrimaEditar } from './pages/materiaprima/materiaprima-editar/materiaprima-editar';
 
+// Rutas cliente
+import { MisProductos } from './pages/cliente/productos/productos';
+import { MisCompras } from './pages/cliente/compras/compras';
+
 // Proteccion rutas
 import { authGuard } from './guards/auth.guard';
 import { loginGuard } from './guards/login-guard';
+import { rolGuard } from './guards/rol-guard';
 
 export const routes: Routes = [
   {
@@ -69,21 +74,24 @@ export const routes: Routes = [
       },
       {
         path: 'inicio',
-        component: Inicio
+        component: Inicio,
       },
 
       // Analítica
       {
         path: 'analitica/mapa-calor',
         component: Graficas,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'graficas/dashboard',
         component: Graficas,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'graficas',
         component: Graficas,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'ajustes',
@@ -95,90 +103,120 @@ export const routes: Routes = [
       {
         path: 'dispositivos',
         component: ListDispositivo,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'dispositivos/nuevo',
         component: NuevoDispositivo,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'dispositivos/detalle/:id',
         component: DispositivoDetalle,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'dispositivos/:id/editar',
         component: EditarDispositivo,
+        canActivate: [rolGuard(['admin'])]
       },
 
       // Organizaciones
       {
         path: 'organizaciones',
         component: OrganizacionesList,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'organizaciones/nuevo',
         component: OrganizacionNuevo,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'organizaciones/detalle/:id',
         component: OrganizacionDetalle,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'organizaciones/:id/editar',
         component: OrganizacionEditar,
+        canActivate: [rolGuard(['admin'])]
       },
 
       // Productos
       {
         path: 'productos',
         component: ProductoList,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'productos/nuevo',
         component: ProductoNuevo,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'productos/detalle/:id',
         component: ProductoDetalle,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'productos/:id/editar',
         component: ProductoEditar,
+        canActivate: [rolGuard(['admin'])]
       },
 
       // Proveedores
       {
         path: 'proveedores',
         component: ProveedorList,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'proveedores/nuevo',
         component: ProveedorNuevo,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'proveedores/detalle/:id',
         component: ProveedorDetalle,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'proveedores/:id/editar',
         component: ProveedorEditar,
+        canActivate: [rolGuard(['admin'])]
       },
 
       // Materia prima
       {
         path: 'materiaprima',
         component: MateriaPrimaList,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'materiaprima/nuevo',
-        component: MateriaPrimaNuevo,
+        component: MateriaPrimaNuevo,canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'materiaprima/detalle/:id',
         component: MateriaPrimaDetalle,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'materiaprima/:id/editar',
         component: MateriaPrimaEditar,
+        canActivate: [rolGuard(['admin'])]
+      },
+      // Rutas usuario
+      {
+        path: 'mis-productos',
+        component: MisProductos,
+        canActivate: [rolGuard(['usuario'])]
+      },
+      {
+        path: 'mis-compras',
+        component: MisCompras,
+        canActivate: [rolGuard(['usuario'])]
       },
     ],
   },
