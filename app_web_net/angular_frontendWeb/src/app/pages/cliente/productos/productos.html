@@ -1,1 +1,100 @@
-<p>productos works!</p>
+<div class="page-body">
+  <button class="btn-regresar" (click)="regresar()">← Volver a mis compras</button>
+
+  @if (cargando) {
+    <div class="estado-mensaje">
+      <div class="spinner"></div>
+      Cargando producto...
+    </div>
+  } @else if (error) {
+    <div class="estado-mensaje error">
+      <span class="estado-icono">!</span>
+      <div>
+        <p class="estado-titulo">No se pudo cargar el producto</p>
+        <p class="estado-texto">Verifica tu conexión e inténtalo de nuevo.</p>
+      </div>
+    </div>
+  } @else if (producto) {
+    <div class="producto-card">
+      <div class="producto-header">
+        <div class="producto-avatar">
+          {{ producto.nombre.charAt(0) }}
+        </div>
+        <div class="producto-header-info">
+          <h2 class="producto-nombre">{{ producto.nombre }}</h2>
+          <p class="producto-precio">{{ formatearMoneda(producto.precio) }}</p>
+        </div>
+        <span class="producto-badge">Paquete</span>
+      </div>
+
+      @if (producto.descripcion) {
+        <p class="producto-descripcion">{{ producto.descripcion }}</p>
+      }
+
+      <div class="producto-seccion">
+        <p class="producto-seccion-titulo">Contenido del paquete</p>
+
+        <div class="contenido-lista">
+          <div class="contenido-item">
+            <span class="contenido-icono">🎒</span>
+            <span class="contenido-nombre">
+              {{ producto.incluyeMochila ? 'Mochila incluida' : 'Sin mochila' }}
+            </span>
+            <span class="contenido-cantidad">
+              {{ producto.incluyeMochila ? 'x1' : '' }}
+            </span>
+          </div>
+
+          @for (item of producto.contenido; track item.idItem) {
+            <div class="contenido-item">
+              <span class="contenido-icono">🧺</span>
+              <span class="contenido-nombre">{{ item.nombreItem }}</span>
+              <span class="contenido-cantidad">x{{ item.cantidad }}</span>
+            </div>
+          } @empty {
+            @if (!producto.incluyeMochila) {
+              <p class="contenido-vacio">Este paquete no incluye productos adicionales.</p>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="producto-seccion">
+        <p class="producto-seccion-titulo">Guías y manuales</p>
+
+        @if (errorDescarga) {
+          <div class="descarga-error">{{ errorDescarga }}</div>
+        }
+
+        @if (producto.documentos.length === 0) {
+          <p class="contenido-vacio">Este paquete no tiene guías ni manuales disponibles.</p>
+        } @else {
+          <div class="documentos-lista">
+            @for (doc of producto.documentos; track doc.idProductoDocumento) {
+              <div class="documento-item">
+                <span class="documento-icono">📄</span>
+                <div class="documento-info">
+                  <p class="documento-nombre">{{ doc.nombreArchivo }}</p>
+                  @if (doc.descripcion) {
+                    <p class="documento-descripcion">{{ doc.descripcion }}</p>
+                  }
+                </div>
+                <button
+                  class="btn-descargar"
+                  (click)="descargarManual(doc.idProductoDocumento, doc.nombreArchivo)"
+                  [disabled]="descargandoId === doc.idProductoDocumento"
+                >
+                  {{
+                    descargandoId === doc.idProductoDocumento
+                      ? 'Descargando...'
+                      : '⬇ Descargar'
+                  }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

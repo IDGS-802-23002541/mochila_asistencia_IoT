@@ -40,12 +40,12 @@ export class MainLayout {
 
  navItemsClientes: NavItem[] = [
   { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
-  { label: 'Mis Productos', titulo: 'MIS PRODUCTOS', route: '/mis-productos', icon: 'productos' },
   { label: 'Mis Compras', titulo: 'MIS COMPRAS', route: '/mis-compras', icon: 'compras' }
 ];
 
   private extraTitles: Record<string, string> = {
     '/ajustes': 'AJUSTES',
+    '/mis-productos': 'MIS PRODUCTOS',
   };
 
   constructor() {

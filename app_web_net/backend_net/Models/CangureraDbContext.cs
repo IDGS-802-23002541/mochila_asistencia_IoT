@@ -28,6 +28,8 @@ public class CangureraDbContext : DbContext
     public DbSet<MateriaPrima> MateriasPrimas { get; set; }
     public DbSet<Proveedor> Proveedores { get; set; }
     public DbSet<ProductoMateriaPrima> ProductoMateriaPrima { get; set; }
+    public DbSet<ProductoContenido> ProductosContenido { get; set; }
+    public DbSet<ProductoDocumento> ProductosDocumento { get; set; }
 
 	public CangureraDbContext(DbContextOptions<CangureraDbContext> options)
 		: base(options)
@@ -45,5 +47,24 @@ public class CangureraDbContext : DbContext
 
 		// Nuevo: llave compuesta para tabla intermedia
         mb.Entity<ProductoMateriaPrima>().HasKey(pm => new { pm.IdProducto, pm.IdMateriaPrima });
+
+        // Paquete -> granulos de contenido (extras) y sus documentos
+        mb.Entity<ProductoContenido>()
+            .HasOne(pc => pc.Producto)
+            .WithMany(p => p.Contenido)
+            .HasForeignKey(pc => pc.IdProducto)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        mb.Entity<ProductoContenido>()
+            .HasOne(pc => pc.Item)
+            .WithMany()
+            .HasForeignKey(pc => pc.IdItem)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        mb.Entity<ProductoDocumento>()
+            .HasOne(pd => pd.Producto)
+            .WithMany(p => p.Documentos)
+            .HasForeignKey(pd => pd.IdProducto)
+            .OnDelete(DeleteBehavior.Cascade);
 	}
 }

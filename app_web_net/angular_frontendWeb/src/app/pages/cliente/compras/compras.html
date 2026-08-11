@@ -1,1 +1,71 @@
-<p>compras works!</p>
+<div class="page-body">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Mis compras</h2>
+      <p class="section-subtitulo">Historial de adquisiciones de tu organización</p>
+    </div>
+  </div>
+
+  @if (cargando) {
+    <div class="estado-mensaje">
+      <div class="spinner"></div>
+      Cargando tus compras...
+    </div>
+  } @else if (error) {
+    <div class="estado-mensaje error">
+      <span class="estado-icono">!</span>
+      <div>
+        <p class="estado-titulo">No se pudieron cargar tus compras</p>
+        <p class="estado-texto">Verifica tu conexión e inténtalo de nuevo.</p>
+      </div>
+      <button (click)="cargarCompras()">Reintentar</button>
+    </div>
+  } @else if (ventas.length === 0) {
+    <div class="estado-mensaje vacio">
+      <span class="estado-icono">🛍</span>
+      <div>
+        <p class="estado-titulo">Aún no tienes compras</p>
+        <p class="estado-texto">Cuando tu organización adquiera un paquete, aparecerá aquí.</p>
+      </div>
+    </div>
+  } @else {
+    <div class="compras-grid">
+      @for (venta of ventas; track venta.idVenta) {
+        <div class="compra-card">
+          <div class="compra-card-header">
+            <div>
+              <p class="compra-fecha">{{ formatearFecha(venta.fechaVenta) }}</p>
+              <p class="compra-numero">Compra #{{ venta.idVenta }}</p>
+            </div>
+            <div class="compra-total">
+              <p class="compra-total-label">Total</p>
+              <p class="compra-total-monto">{{ formatearMoneda(venta.total) }}</p>
+            </div>
+          </div>
+
+          <div class="compra-items">
+            @for (detalle of venta.detalles; track detalle.idDetalleVenta) {
+              <div class="compra-item">
+                <div class="compra-item-avatar">
+                  {{ (detalle.producto?.nombre ?? 'P').charAt(0) }}
+                </div>
+                <div class="compra-item-info">
+                  <p class="compra-item-nombre">{{ detalle.producto?.nombre ?? 'Producto' }}</p>
+                  <p class="compra-item-det">
+                    Cantidad: {{ detalle.cantidad }} · {{ formatearMoneda(detalle.precioUnitario) }} c/u
+                  </p>
+                </div>
+                <button
+                  class="btn-ver-producto"
+                  [routerLink]="['/mis-productos', detalle.idProducto]"
+                >
+                  Ver producto
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

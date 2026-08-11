@@ -8,14 +8,21 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ProductosService } from '../../../services/producto';
 import { MateriaPrimaService } from '../../../services/materia-prima';
-import { MateriaPrima, ProductoCreateDto } from '../../../interfaces/producto';
+import {
+  MateriaPrima,
+  ProductoCreateDto,
+  ProductoResumen,
+  ContenidoDetalle,
+  DocumentoArchivo,
+} from '../../../interfaces/producto';
 
 @Component({
   selector: 'app-producto-editar',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './producto-editar.html',
   styleUrl: './producto-editar.css',
 })
@@ -31,6 +38,21 @@ export class ProductoEditar implements OnInit {
 
   materiasPrimas: MateriaPrima[] = [];
   cargandoMaterias = false;
+
+  // Paquete: extras y guias/manuales
+  productos: ProductoResumen[] = [];
+  contenido: ContenidoDetalle[] = [];
+  documentos: DocumentoArchivo[] = [];
+
+  extraIdItem = '';
+  extraCantidad = 1;
+  agregandoExtra = false;
+  errorExtra = '';
+
+  archivoSeleccionado: File | null = null;
+  subiendoDocumento = false;
+  errorDocumento = '';
+  descripcionDocumento = '';
 
   constructor(
     private fb: FormBuilder,
@@ -50,10 +72,12 @@ export class ProductoEditar implements OnInit {
       margenGanancia: [20, [Validators.min(0), Validators.max(100)]],
       descripcion: [''],
       activo: [true],
+      incluyeMochila: [true],
       receta: this.fb.array([], Validators.required),
     });
 
     this.cargarMateriasPrimas();
+    this.cargarProductos();
 
     if (!this.registroId) {
       this.error = true;
@@ -62,6 +86,15 @@ export class ProductoEditar implements OnInit {
     }
 
     this.cargarProducto();
+  }
+
+  cargarProductos(): void {
+    this.productosService.getAll().subscribe({
+      next: (datos) => {
+        this.productos = datos.filter((p) => p.activo);
+      },
+      error: () => {},
+    });
   }
 
   cargarMateriasPrimas(): void {
@@ -90,7 +123,11 @@ export class ProductoEditar implements OnInit {
           margenGanancia: data.margenGanancia,
           descripcion: data.descripcion,
           activo: data.activo,
+          incluyeMochila: data.incluyeMochila,
         });
+
+        this.contenido = data.contenido ?? [];
+        this.documentos = data.documentos ?? [];
 
         this.receta.clear();
         for (const item of data.receta) {
@@ -147,6 +184,116 @@ export class ProductoEditar implements OnInit {
     return this.materiasPrimas.find((m) => m.idMateriaPrima === +idMateriaPrima)?.nombre ?? '';
   }
 
+  // ---- Extras del paquete ----
+  productoNombre(idItem: number): string {
+    return this.productos.find((p) => p.idProducto === idItem)?.nombre ?? '';
+  }
+
+  productosDisponiblesExtras(): ProductoResumen[] {
+    const usados = this.contenido.map((c) => c.idItem);
+    usados.push(this.registroId);
+    return this.productos.filter((p) => !usados.includes(p.idProducto));
+  }
+
+  agregarExtra(): void {
+    this.errorExtra = '';
+    const idItem = Number(this.extraIdItem);
+    const cantidad = Number(this.extraCantidad);
+
+    if (!idItem || cantidad < 1) {
+      this.errorExtra = 'Selecciona un producto extra y una cantidad válida.';
+      return;
+    }
+
+    this.agregandoExtra = true;
+
+    this.productosService
+      .agregarContenido(this.registroId, { idItem, cantidad })
+      .subscribe({
+        next: () => {
+          this.extraIdItem = '';
+          this.extraCantidad = 1;
+          this.agregandoExtra = false;
+          this.cargarProducto();
+        },
+        error: (err) => {
+          this.agregandoExtra = false;
+          this.errorExtra = err?.error?.error || 'No se pudo agregar el extra.';
+        },
+      });
+  }
+
+  quitarExtra(idContenido: number): void {
+    this.productosService
+      .eliminarContenido(this.registroId, idContenido)
+      .subscribe({
+        next: () => this.cargarProducto(),
+        error: (err) => {
+          this.errorExtra = err?.error?.error || 'No se pudo quitar el extra.';
+        },
+      });
+  }
+
+  // ---- Guias y manuales ----
+  onArchivoSeleccionado(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.archivoSeleccionado = input.files?.length ? input.files[0] : null;
+  }
+
+  subirDocumento(): void {
+    this.errorDocumento = '';
+
+    if (!this.archivoSeleccionado) {
+      this.errorDocumento = 'Selecciona un archivo primero.';
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const resultado = String(reader.result ?? '').split(',')[1] ?? '';
+
+      this.subiendoDocumento = true;
+
+      this.productosService
+        .agregarDocumento(this.registroId, {
+          nombreArchivo: this.archivoSeleccionado?.name ?? 'documento',
+          tipoContenido: this.archivoSeleccionado?.type || 'application/octet-stream',
+          descripcion: this.descripcionDocumento || null,
+          contenidoBase64: resultado,
+        })
+        .subscribe({
+          next: () => {
+            this.subiendoDocumento = false;
+            this.archivoSeleccionado = null;
+            this.descripcionDocumento = '';
+            this.cargarProducto();
+          },
+          error: (err) => {
+            this.subiendoDocumento = false;
+            this.errorDocumento =
+              err?.error?.error || 'No se pudo subir la guía o manual.';
+          },
+        });
+    };
+
+    reader.onerror = () => {
+      this.errorDocumento = 'No se pudo leer el archivo.';
+    };
+
+    reader.readAsDataURL(this.archivoSeleccionado);
+  }
+
+  quitarDocumento(idDocumento: number): void {
+    this.productosService.eliminarDocumento(idDocumento).subscribe({
+      next: () => this.cargarProducto(),
+      error: (err) => {
+        this.errorDocumento =
+          err?.error?.error || 'No se pudo eliminar la guía o manual.';
+      },
+    });
+  }
+
   guardar(): void {
     this.errorGuardar = '';
     this.guardadoExitoso = false;
@@ -165,6 +312,7 @@ export class ProductoEditar implements OnInit {
       stock: Number(valores.stock) || 0,
       margenGanancia: Number(valores.margenGanancia) || 0,
       activo: valores.activo,
+      incluyeMochila: valores.incluyeMochila,
       fotoUrl: null,
       receta: valores.receta.map((r: { idMateriaPrima: string; cantidad: number }) => ({
         idMateriaPrima: Number(r.idMateriaPrima),

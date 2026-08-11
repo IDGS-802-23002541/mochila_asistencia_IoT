@@ -106,6 +106,129 @@
         </button>
       </div>
 
+      <p class="form-seccion-titulo">Paquete</p>
+
+      <div class="form-grid">
+        <div class="form-field toggle-field">
+          <label>Incluye mochila</label>
+          <label class="switch">
+            <input type="checkbox" formControlName="incluyeMochila" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-texto">
+            {{ f['incluyeMochila'].value ? 'Sí' : 'No' }}
+          </span>
+        </div>
+      </div>
+
+      @if (errorExtra) {
+        <div class="alerta-error">{{ errorExtra }}</div>
+      }
+
+      <div class="paquete-seccion">
+        <p class="form-seccion-titulo">Extras del paquete</p>
+
+        <div class="paquete-filas">
+          @for (item of contenido; track item.idProductoContenido) {
+            <div class="paquete-fila">
+              <span class="paquete-item-nombre">🧺 {{ item.nombreItem }}</span>
+              <span class="paquete-item-cant">x{{ item.cantidad }}</span>
+              <button
+                type="button"
+                class="btn-quitar-receta"
+                title="Quitar extra"
+                (click)="quitarExtra(item.idProductoContenido)"
+              >
+                🗑
+              </button>
+            </div>
+          } @empty {
+            <p class="receta-hint">Este paquete no tiene extras.</p>
+          }
+        </div>
+
+        <div class="paquete-agregar">
+          <select [(ngModel)]="extraIdItem">
+            <option value="" disabled>Selecciona un producto extra</option>
+            @for (p of productosDisponiblesExtras(); track p.idProducto) {
+              <option [value]="p.idProducto">{{ p.nombre }}</option>
+            }
+          </select>
+          <input
+            type="number"
+            min="1"
+            step="1"
+            [(ngModel)]="extraCantidad"
+            placeholder="Cantidad"
+          />
+          <button
+            type="button"
+            class="btn-agregar-receta"
+            (click)="agregarExtra()"
+            [disabled]="agregandoExtra"
+          >
+            {{ agregandoExtra ? 'Agregando...' : '+ Agregar extra' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="paquete-seccion">
+        <p class="form-seccion-titulo">Guías y manuales</p>
+
+        @if (errorDocumento) {
+          <div class="alerta-error">{{ errorDocumento }}</div>
+        }
+
+        <div class="paquete-filas">
+          @for (doc of documentos; track doc.idProductoDocumento) {
+            <div class="paquete-fila">
+              <span class="paquete-item-nombre">📄 {{ doc.nombreArchivo }}</span>
+              <span class="paquete-item-cant" title="{{ doc.descripcion ?? '' }}">
+                {{ doc.descripcion || 'Sin descripción' }}
+              </span>
+              <button
+                type="button"
+                class="btn-quitar-receta"
+                title="Eliminar guía/manual"
+                (click)="quitarDocumento(doc.idProductoDocumento)"
+              >
+                🗑
+              </button>
+            </div>
+          } @empty {
+            <p class="receta-hint">Aún no hay guías ni manuales para este paquete.</p>
+          }
+        </div>
+
+        <div class="paquete-agregar">
+          <input
+            type="text"
+            [(ngModel)]="descripcionDocumento"
+            placeholder="Descripción (opcional)"
+          />
+          <div class="archivo-input">
+            <label for="archivo-manual" class="btn-archivo">📎 Elegir archivo</label>
+            <input
+              id="archivo-manual"
+              type="file"
+              hidden
+              (change)="onArchivoSeleccionado($event)"
+            />
+            <span class="archivo-nombre">
+              {{ archivoSeleccionado ? archivoSeleccionado.name : 'Ningún archivo' }}
+            </span>
+          </div>
+          <button
+            type="button"
+            class="btn-agregar-receta"
+            (click)="subirDocumento()"
+            [disabled]="subiendoDocumento"
+          >
+            {{ subiendoDocumento ? 'Subiendo...' : '+ Subir guía/manual' }}
+          </button>
+        </div>
+      </div>
+
       <p class="form-seccion-titulo">Estado</p>
 
       <div class="form-grid">

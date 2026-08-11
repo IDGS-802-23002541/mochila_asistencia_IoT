@@ -32,6 +32,8 @@ namespace CangureraInteligente.DTOs
 
         public string? FotoUrl { get; set; }
 
+        public bool IncluyeMochila { get; set; } = true;
+
         [Required]
         [MinLength(1, ErrorMessage = "El producto debe tener al menos una materia prima en su receta.")]
         public List<RecetaItemDto> Receta { get; set; } = new();
@@ -54,6 +56,9 @@ namespace CangureraInteligente.DTOs
         public decimal MargenGanancia { get; set; }
         public bool Activo { get; set; }
         public string? FotoUrl { get; set; }
+        public bool IncluyeMochila { get; set; }
+        public List<ContenidoDetalleDto> Contenido { get; set; } = new();
+        public List<DocumentoDto> Documentos { get; set; } = new();
         public List<RecetaDetalleItemDto> Receta { get; set; } = new();
     }
 

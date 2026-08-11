@@ -27,5 +27,11 @@ public class Producto
     public bool Activo { get; set; } = true;
     public string? FotoUrl { get; set; }
 
+    public bool IncluyeMochila { get; set; } = true;
+
     public ICollection<ProductoMateriaPrima> MateriasPrimas { get; set; }
+
+    public ICollection<ProductoContenido>? Contenido { get; set; }
+
+    public ICollection<ProductoDocumento>? Documentos { get; set; }
 }

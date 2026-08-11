@@ -207,9 +207,9 @@ export const routes: Routes = [
         component: MateriaPrimaEditar,
         canActivate: [rolGuard(['admin'])]
       },
-      // Rutas usuario
+      // Rutas cliente
       {
-        path: 'mis-productos',
+        path: 'mis-productos/:id',
         component: MisProductos,
         canActivate: [rolGuard(['usuario'])]
       },

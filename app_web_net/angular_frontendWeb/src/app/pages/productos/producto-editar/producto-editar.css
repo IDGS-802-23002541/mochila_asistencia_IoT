@@ -306,3 +306,145 @@
 .btn-agregar-receta:hover {
   background: #dcefe9;
 }
+
+/* --- Paquete: extras y guias/manuales --- */
+
+.paquete-seccion {
+  margin-bottom: 8px;
+}
+
+.paquete-seccion > .form-seccion-titulo {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.paquete-filas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.paquete-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #f7f9fb;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+}
+
+.paquete-item-nombre {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1c3a57;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paquete-item-cant {
+  font-size: 12px;
+  color: #8993a4;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+
+.paquete-item-cant + .btn-quitar-receta {
+  margin-top: 0;
+  align-self: center;
+}
+
+.paquete-agregar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.paquete-agregar .btn-agregar-receta {
+  align-self: auto;
+}
+
+.paquete-agregar select,
+.paquete-agregar input,
+.archivo-nombre {
+  padding: 9px 12px;
+  border: 1px solid #dfe3ea;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1c3a57;
+  background: #fbfcfe;
+}
+
+.paquete-agregar select {
+  min-width: 200px;
+}
+
+.paquete-agregar input[type='number'] {
+  width: 100px;
+}
+
+.paquete-agregar input[type='text'] {
+  flex: 1;
+  min-width: 180px;
+}
+
+.archivo-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-archivo {
+  background: #eaf5f2;
+  color: #17a583;
+  border: 1px solid #cfe3de;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-archivo:hover {
+  background: #dcefe9;
+}
+
+.archivo-nombre {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #8993a4;
+  background: #f7f9fb;
+}
+
+/* Responsive: controles de paquete apilados en pantallas estrechas */
+@media (max-width: 640px) {
+  .paquete-agregar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .paquete-agregar select,
+  .paquete-agregar input,
+  .paquete-agregar .btn-agregar-receta {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .archivo-input {
+    justify-content: space-between;
+  }
+}
