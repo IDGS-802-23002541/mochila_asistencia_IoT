@@ -1,0 +1,37 @@
+<section class="faq" id="faq">
+  <header class="faq__header">
+    <span class="faq__eyebrow"><span class="faq__eyebrow-line"></span>Preguntas frecuentes</span>
+    <h2 class="faq__title">Resolvemos tus dudas antes de empezar</h2>
+    <p class="faq__subtitle">
+      Todo lo que necesitas saber sobre el proceso de cotización, entregables y acompañamiento de
+      nuestros proyectos de consultoría.
+    </p>
+  </header>
+
+  <div class="faq__list">
+    @for (item of items; track item.id) {
+      <div class="faq__item" [class.faq__item--open]="isOpen(item.id)">
+        <button
+          class="faq__question"
+          type="button"
+          [attr.aria-expanded]="isOpen(item.id)"
+          [attr.aria-controls]="'faq-answer-' + item.id"
+          (click)="toggle(item.id)"
+        >
+          <span class="faq__question-text">{{ item.question }}</span>
+          <span class="faq__icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+
+        <div class="faq__answer" [id]="'faq-answer-' + item.id" [attr.aria-hidden]="!isOpen(item.id)">
+          <div class="faq__answer-inner">
+            <p>{{ item.answer }}</p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</section>
