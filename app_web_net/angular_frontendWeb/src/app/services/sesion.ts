@@ -31,6 +31,10 @@ export class SesionService {
     return this.obtenerUsuario()?.rol ?? null;
   }
 
+  obtenerNombre(): string | null {
+    return this.obtenerUsuario()?.nombre ?? null;
+  }
+
   cerrarSesion(): void {
     localStorage.removeItem(SESSION_KEY);
     this._sesion.set(null);

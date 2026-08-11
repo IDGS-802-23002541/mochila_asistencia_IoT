@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SesionService } from '../../services/sesion';
 
 @Component({
   selector: 'app-inicio',
@@ -10,6 +11,8 @@ import { CommonModule } from '@angular/common';
 })
 export class Inicio {
 
-  usuario = 'UTL';
+  private sesionService = inject(SesionService);
+
+  usuario = this.sesionService.obtenerNombre() ?? 'Usuario';
 
 }
