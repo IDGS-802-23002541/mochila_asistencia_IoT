@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductosService } from '../../../services/producto';
+import { ComentariosService } from '../../../services/comentarios';
+import { SesionService } from '../../../services/sesion';
 import { ProductoPublico } from '../../../interfaces/producto';
+import { CrearComentarioDto } from '../../../interfaces/comentario';
 
 @Component({
   selector: 'app-productos',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './productos.html',
   styleUrl: './productos.css',
 })
@@ -16,6 +20,17 @@ export class MisProductos implements OnInit {
   producto: ProductoPublico | null = null;
   descargandoId: number | null = null;
   errorDescarga = '';
+
+  // Variables para el modal de opinión
+  mostrarModalOpinion: boolean = false;
+  nombreCliente: string = '';
+  correoCliente: string = '';
+  opinionTexto: string = '';
+  enviandoOpinion: boolean = false;
+  errorModal: string = '';
+
+  private comentariosService = inject(ComentariosService);
+  private sesionService = inject(SesionService);
 
   constructor(
     private route: ActivatedRoute,
@@ -92,4 +107,57 @@ export class MisProductos implements OnInit {
   regresar(): void {
     this.router.navigate(['/mis-compras']);
   }
+
+  // Métodos para el modal de opinión
+  abrirModalOpinion(): void {
+    const usuario = this.sesionService.obtenerUsuario();
+    if (usuario) {
+      this.nombreCliente = usuario.nombre || usuario.nombreCliente || '';
+      this.correoCliente = usuario.correo || usuario.correoCliente || '';
+    }
+    this.opinionTexto = '';
+    this.errorModal = '';
+    this.mostrarModalOpinion = true;
+  }
+
+  cerrarModalOpinion(): void {
+    this.mostrarModalOpinion = false;
+  }
+
+  enviarOpinion(): void {
+  if (!this.nombreCliente.trim() || !this.correoCliente.trim() || !this.opinionTexto.trim()) {
+    this.errorModal = 'Por favor completa todos los campos.';
+    return;
+  }
+
+  if (!this.producto) return;
+
+  this.enviandoOpinion = true;
+  this.errorModal = '';
+
+  const dto: CrearComentarioDto = {
+    nombreCliente: this.nombreCliente.trim(),
+    correoCliente: this.correoCliente.trim(),
+    mensaje: `[Opinión - Paquete: ${this.producto.nombre}] ${this.opinionTexto.trim()}`
+  };
+
+  this.comentariosService.crear(dto).subscribe({
+    next: () => {
+      this.enviandoOpinion = false;
+      this.cerrarModalOpinion();
+      alert('¡Gracias por tu opinión! Se ha publicado con éxito.');
+    },
+    error: (err) => {
+      console.error('Error al enviar opinión:', err);
+
+      if (err.status === 0) {
+        this.errorModal = 'No se pudo conectar con el servidor. Verifica que el Backend esté corriendo en http://localhost:5103.';
+      } else {
+        this.errorModal = `Error (${err.status}): ${err.error?.mensaje || 'Error al procesar la solicitud.'}`;
+      }
+
+      this.enviandoOpinion = false;
+    }
+  });
+}
 }

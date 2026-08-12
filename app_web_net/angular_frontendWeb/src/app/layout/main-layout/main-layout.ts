@@ -12,7 +12,7 @@ interface NavItem {
   label: string;
   titulo: string;
   route: string;
-  icon: 'inicio' | 'dispositivos' | 'organizaciones' | 'mapa' | 'materia-prima' | 'proveedores' | 'productos' | 'graficas' | 'compras';
+  icon: 'inicio' | 'dispositivos' | 'organizaciones' | 'mapa' | 'materia-prima' | 'proveedores' | 'productos' | 'graficas' | 'compras' | 'comentarios';
   children?: string[];
 }
 
@@ -28,20 +28,21 @@ export class MainLayout {
   layout = inject(LayoutService);
   sesionService = inject(SesionService);
 
- navItems: NavItem[] = [
-  { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
-  { label: 'Dispositivos', titulo: 'DISPOSITIVOS', route: '/dispositivos', icon: 'dispositivos' },
-  { label: 'Organizaciones', titulo: 'ORGANIZACIONES', route: '/organizaciones', icon: 'organizaciones' },
-  { label: 'Materia Prima', titulo: 'MATERIA PRIMA', route: '/materiaprima', icon: 'materia-prima' },
-  { label: 'Proveedores', titulo: 'PROVEEDORES', route: '/proveedores', icon: 'proveedores' },
-  { label: 'Productos', titulo: 'PRODUCTOS', route: '/productos', icon: 'productos' },
-  { label: 'Análisis', titulo: 'ANÁLISIS', route: '/graficas', icon: 'graficas' },
-];
+  navItems: NavItem[] = [
+    { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
+    { label: 'Dispositivos', titulo: 'DISPOSITIVOS', route: '/dispositivos', icon: 'dispositivos' },
+    { label: 'Organizaciones', titulo: 'ORGANIZACIONES', route: '/organizaciones', icon: 'organizaciones' },
+    { label: 'Materia Prima', titulo: 'MATERIA PRIMA', route: '/materiaprima', icon: 'materia-prima' },
+    { label: 'Proveedores', titulo: 'PROVEEDORES', route: '/proveedores', icon: 'proveedores' },
+    { label: 'Productos', titulo: 'PRODUCTOS', route: '/productos', icon: 'productos' },
+    { label: 'Análisis', titulo: 'ANÁLISIS', route: '/graficas', icon: 'graficas' },
+    { label: 'Comentarios', titulo: 'COMENTARIOS', route: '/comentarios', icon: 'comentarios' },
+  ];
 
- navItemsClientes: NavItem[] = [
-  { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
-  { label: 'Mis Compras', titulo: 'MIS COMPRAS', route: '/mis-compras', icon: 'compras' }
-];
+  navItemsClientes: NavItem[] = [
+    { label: 'Inicio', titulo: 'INICIO', route: '/inicio', icon: 'inicio' },
+    { label: 'Mis Compras', titulo: 'MIS COMPRAS', route: '/mis-compras', icon: 'compras' }
+  ];
 
   private extraTitles: Record<string, string> = {
     '/ajustes': 'AJUSTES',

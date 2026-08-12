@@ -28,6 +28,7 @@ public class CangureraDbContext : DbContext
     public DbSet<MateriaPrima> MateriasPrimas { get; set; }
     public DbSet<Proveedor> Proveedores { get; set; }
     public DbSet<ProductoMateriaPrima> ProductoMateriaPrima { get; set; }
+    public DbSet<Comentario> Comentarios { get; set; }
     public DbSet<ProductoContenido> ProductosContenido { get; set; }
     public DbSet<ProductoDocumento> ProductosDocumento { get; set; }
 

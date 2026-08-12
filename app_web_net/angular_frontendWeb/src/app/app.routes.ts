@@ -39,6 +39,9 @@ import { MateriaPrimaNuevo } from './pages/materiaprima/materiaprima-nuevo/mater
 import { MateriaPrimaDetalle } from './pages/materiaprima/materiaprima-detalle/materiaprima-detalle';
 import { MateriaPrimaEditar } from './pages/materiaprima/materiaprima-editar/materiaprima-editar';
 
+// Comentarios
+import { ComentariosListComponent } from './pages/comentarios/comentarios-list/comentarios-list';
+
 // Rutas cliente
 import { MisProductos } from './pages/cliente/productos/productos';
 import { MisCompras } from './pages/cliente/compras/compras';
@@ -195,7 +198,8 @@ export const routes: Routes = [
       },
       {
         path: 'materiaprima/nuevo',
-        component: MateriaPrimaNuevo,canActivate: [rolGuard(['admin'])]
+        component: MateriaPrimaNuevo,
+        canActivate: [rolGuard(['admin'])]
       },
       {
         path: 'materiaprima/detalle/:id',
@@ -207,6 +211,14 @@ export const routes: Routes = [
         component: MateriaPrimaEditar,
         canActivate: [rolGuard(['admin'])]
       },
+
+      // Comentarios
+      {
+        path: 'comentarios',
+        component: ComentariosListComponent,
+        canActivate: [rolGuard(['admin'])]
+      },
+
       // Rutas cliente
       {
         path: 'mis-productos/:id',

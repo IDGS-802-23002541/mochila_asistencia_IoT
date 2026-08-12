@@ -24,7 +24,12 @@
           <h2 class="producto-nombre">{{ producto.nombre }}</h2>
           <p class="producto-precio">{{ formatearMoneda(producto.precio) }}</p>
         </div>
-        <span class="producto-badge">Paquete</span>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <span class="producto-badge">Paquete</span>
+          <button class="btn-nuevo" (click)="abrirModalOpinion()">
+            ⭐ Dejar opinión
+          </button>
+        </div>
       </div>
 
       @if (producto.descripcion) {
@@ -98,3 +103,47 @@
     </div>
   }
 </div>
+
+<!-- Modal para Dejar Opinión del Producto -->
+@if (mostrarModalOpinion) {
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Opina sobre {{ producto?.nombre }}</h3>
+        <button class="modal-cerrar" (click)="cerrarModalOpinion()">&times;</button>
+      </div>
+
+      <div class="modal-cuerpo">
+        <div class="campo">
+          <span>Tu Nombre</span>
+          <input type="text" [(ngModel)]="nombreCliente" placeholder="Ingresa tu nombre..." />
+        </div>
+
+        <div class="campo">
+          <span>Tu Correo</span>
+          <input type="email" [(ngModel)]="correoCliente" placeholder="ejemplo@correo.com" />
+        </div>
+
+        <div class="campo">
+          <span>Comentario / Opinión</span>
+          <textarea
+            [(ngModel)]="opinionTexto"
+            placeholder="¿Qué te pareció el paquete adquirido? Comparte tu experiencia..."
+            rows="4"
+          ></textarea>
+        </div>
+
+        @if (errorModal) {
+          <p class="modal-error">{{ errorModal }}</p>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancelar" (click)="cerrarModalOpinion()">Cancelar</button>
+        <button class="btn-guardar" [disabled]="enviandoOpinion" (click)="enviarOpinion()">
+          {{ enviandoOpinion ? 'Enviando...' : 'Publicar Opinión' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

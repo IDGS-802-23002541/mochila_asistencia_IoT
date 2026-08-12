@@ -1,0 +1,117 @@
+<div class="page-body">
+  <div class="section-header">
+    <h2 class="section-title">Gestión de Comentarios</h2>
+  </div>
+
+  <!-- Estado: Cargando -->
+  @if (cargando) {
+    <div class="estado-mensaje">
+      <div class="spinner"></div>
+      <div>
+        <p class="estado-titulo">Cargando comentarios...</p>
+        <p class="estado-texto">Por favor espera un momento.</p>
+      </div>
+    </div>
+  }
+
+  <!-- Tabla de Comentarios -->
+  @if (!cargando) {
+    @if (comentarios.length === 0) {
+      <div class="estado-mensaje vacio">
+        <div class="estado-icono">💬</div>
+        <div>
+          <p class="estado-titulo">Sin comentarios</p>
+          <p class="estado-texto">Aún no hay comentarios registrados en la plataforma.</p>
+        </div>
+      </div>
+    } @else {
+      <div class="tabla-container">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Correo</th>
+              <th>Mensaje</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of comentarios; track item.idComentario) {
+              <tr>
+                <td>
+                  <span class="avatar">
+                    {{ obtenerInicial(item.nombreCliente) }}
+                  </span>
+                  <strong>{{ item.nombreCliente || 'Anónimo' }}</strong>
+                </td>
+                <td>{{ item.correoCliente }}</td>
+                <td>{{ item.mensaje }}</td>
+                <td>{{ item.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-pendiente': item.estado === 'Pendiente',
+                    'badge-revision': item.estado === 'EnRevision',
+                    'badge-atendido': item.estado === 'Atendido'
+                  }">
+                    {{ item.estado }}
+                  </span>
+                </td>
+                <td class="acciones">
+                  <button class="btn-accion" (click)="abrirDetalle(item)">
+                    Atender
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
+
+<!-- Modal para actualizar estado y respuesta -->
+@if (comentarioSeleccionado) {
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Atender Comentario</h3>
+        <button class="modal-cerrar" (click)="cerrarDetalle()">&times;</button>
+      </div>
+
+      <div class="modal-cuerpo">
+        <p class="modal-titulo-item">
+          <strong>Cliente:</strong> {{ comentarioSeleccionado.nombreCliente }}
+        </p>
+
+        <div class="campo">
+          <span>Mensaje del Cliente</span>
+          <textarea [value]="comentarioSeleccionado.mensaje" readonly rows="3"></textarea>
+        </div>
+
+        <div class="campo">
+          <span>Nuevo Estado</span>
+          <select [(ngModel)]="nuevoEstado">
+            <option value="Pendiente">Pendiente</option>
+            <option value="EnRevision">En Revisión</option>
+            <option value="Atendido">Atendido</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <span>Respuesta del Administrador</span>
+          <textarea [(ngModel)]="respuestaTexto" placeholder="Escribe una respuesta para el cliente..." rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancelar" (click)="cerrarDetalle()">Cancelar</button>
+        <button class="btn-guardar" (click)="guardarSeguimiento()">
+          Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+}
