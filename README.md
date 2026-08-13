@@ -1,4 +1,4 @@
-# 🎒 Vision Guard
+# 👁️ Vision Guard
 
 > Sistema IoT portátil de asistencia y diagnóstico de accesibilidad para personas con discapacidad visual.
 
